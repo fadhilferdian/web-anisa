@@ -1,0 +1,833 @@
+<!DOCTYPE html>
+<html lang="id" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anisa Maulidya - Dosen Manajemen & Pendidikan Islam</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        tosca: {
+                            50: '#f0fdfa',
+                            100: '#ccfbf1',
+                            200: '#99f6e4',
+                            300: '#5eead4',
+                            400: '#2dd4bf',
+                            500: '#14b8a6', 
+                            600: '#0d9488',
+                            700: '#0f766e',
+                            800: '#115e59',
+                            900: '#134e4a',
+                            950: '#042f2e',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Poppins', 'sans-serif'],
+                        arabic: ['Amiri', 'serif'],
+                    },
+                    animation: {
+                        'blob': 'blob 7s infinite',
+                        'float': 'float 6s ease-in-out infinite',
+                    },
+                    keyframes: {
+                        blob: {
+                            '0%': { transform: 'translate(0px, 0px) scale(1)' },
+                            '33%': { transform: 'translate(30px, -50px) scale(1.1)' },
+                            '66%': { transform: 'translate(-20px, 20px) scale(0.9)' },
+                            '100%': { transform: 'translate(0px, 0px) scale(1)' },
+                        },
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(-10px)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .glass-nav {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(20, 184, 166, 0.1);
+        }
+        .pattern-dots {
+            background-image: radial-gradient(#cbd5e1 1px, transparent 1px);
+            background-size: 24px 24px;
+        }
+        .text-gradient {
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-image: linear-gradient(to right, #0d9488, #14b8a6, #2dd4bf);
+        }
+    </style>
+</head>
+<body class="font-sans text-gray-700 bg-gray-50 antialiased selection:bg-tosca-200 selection:text-tosca-900">
+
+    <!-- NAVBAR -->
+    <nav class="fixed w-full z-50 glass-nav transition-all duration-300 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-20 items-center">
+                <div class="flex items-center gap-3">
+                    <img class="h-10 w-10 rounded-full border border-tosca-200 object-cover" src="https://blogger.googleusercontent.com/img/a/AVvXsEhgb3y5k3haYLAH5f6g04o0cIxB3CoFgQEMO9cpD4A-zfIooEsUDs-E0wjb5ziYeOOj0C8EovjJFmKEna-TSMVqPLe3lVGrISzl1FI7tVdOWhXS3GImbFTr73MjCnxtuiIOvTYgq0UCF_O3ptjf8i4WLdWlHrbfOFRyqFjCrShO0jfwCZflOdszqr-n19aK" alt="Logo">
+                    <div class="flex flex-col">
+                        <span class="font-bold text-lg text-gray-800 leading-tight">Anisa Maulidya</span>
+                        <span class="text-[11px] uppercase tracking-wider text-tosca-600 font-semibold">Dosen Manajemen & PAI</span>
+                    </div>
+                </div>
+
+                <div class="hidden md:flex space-x-8 text-sm font-medium">
+                    <a href="#home" class="text-gray-600 hover:text-tosca-600 transition">Beranda</a>
+                    <a href="#books" class="text-gray-600 hover:text-tosca-600 transition">Karya Tulis</a>
+                    <a href="#materials" class="text-gray-600 hover:text-tosca-600 transition">Materi</a>
+                    <a href="#quizzes" class="text-gray-600 hover:text-tosca-600 transition">Kuis</a>
+                    <a href="#students" class="text-gray-600 hover:text-tosca-600 transition">Pustaka</a>
+                    <a href="#contact" class="px-5 py-2 bg-tosca-600 text-white rounded-full hover:bg-tosca-700 transition shadow-md shadow-tosca-200">Kontak</a>
+                </div>
+
+                <div class="md:hidden flex items-center">
+                    <button id="mobile-menu-button" class="text-gray-600 hover:text-tosca-600 focus:outline-none p-2">
+                        <i class="fas fa-bars text-xl"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile Menu -->
+        <div id="mobile-menu" class="hidden md:hidden bg-white border-t border-gray-100 shadow-xl absolute w-full left-0 top-20">
+            <a href="#home" class="block px-6 py-4 text-sm font-medium text-gray-700 hover:bg-tosca-50">Beranda</a>
+            <a href="#books" class="block px-6 py-4 text-sm font-medium text-gray-700 hover:bg-tosca-50">Karya Tulis</a>
+            <a href="#materials" class="block px-6 py-4 text-sm font-medium text-gray-700 hover:bg-tosca-50">Materi Ajar</a>
+            <a href="#quizzes" class="block px-6 py-4 text-sm font-medium text-gray-700 hover:bg-tosca-50">Kuis Interaktif</a>
+            <a href="#students" class="block px-6 py-4 text-sm font-medium text-gray-700 hover:bg-tosca-50">Pustaka Mahasiswi</a>
+            <a href="#contact" class="block px-6 py-4 text-sm font-bold text-tosca-700 hover:bg-tosca-50">Kontak Saya</a>
+        </div>
+    </nav>
+
+    <!-- HERO SECTION (REDESIGNED) -->
+    <header id="home" class="relative pt-32 pb-32 lg:pt-48 lg:pb-48 bg-gradient-to-b from-white via-tosca-50 to-gray-50 overflow-hidden">
+        <!-- Background Decorations (Floating Blobs) -->
+        <div class="absolute top-0 left-1/2 transform -translate-x-1/2 w-full h-full z-0 pointer-events-none">
+            <div class="absolute top-20 left-10 w-72 h-72 bg-tosca-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob"></div>
+            <div class="absolute top-20 right-10 w-72 h-72 bg-purple-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob animation-delay-2000"></div>
+            <div class="absolute -bottom-8 left-1/2 transform -translate-x-1/2 w-72 h-72 bg-pink-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob animation-delay-4000"></div>
+        </div>
+
+        <div class="max-w-5xl mx-auto px-4 text-center relative z-10">
+            <!-- Badge -->
+            <div class="animate-float">
+                <div class="inline-flex items-center gap-2 py-1.5 px-4 rounded-full bg-white border border-tosca-200 text-tosca-700 text-xs font-bold tracking-widest uppercase mb-8 shadow-sm hover:shadow-md transition duration-300">
+                    <span class="w-2 h-2 rounded-full bg-tosca-500 animate-pulse"></span>
+                    Ruang Literasi Digital
+                </div>
+            </div>
+            
+            <!-- Main Heading with Gradient -->
+            <h1 class="text-5xl md:text-7xl font-extrabold text-gray-900 leading-tight mb-6 tracking-tight">
+                Anisa <span class="text-transparent bg-clip-text bg-gradient-to-r from-tosca-600 to-teal-500">Maulidya</span>
+            </h1>
+            
+            <!-- Subheading -->
+            <p class="text-xl md:text-2xl text-gray-500 font-light italic mb-10">
+                "Mendampingi Perjalananmu Menuntut Ilmu"
+            </p>
+            
+            <!-- About Text Box (Glassmorphism) -->
+            <div class="max-w-3xl mx-auto bg-white/60 backdrop-blur-md border border-white/50 rounded-3xl p-8 shadow-lg mb-12 hover:shadow-xl hover:bg-white/80 transition duration-300">
+                <p class="text-gray-700 leading-relaxed text-lg mb-4">
+                    Assalamualaikum! Saya hadir untuk menjembatani <span class="font-bold text-tosca-700 bg-tosca-50 px-2 py-0.5 rounded-lg">Pendidikan Islam</span> dengan inovasi <span class="font-bold text-tosca-700 bg-tosca-50 px-2 py-0.5 rounded-lg">Teknologi Digital</span>.
+                </p>
+                <p class="text-gray-600 leading-relaxed">
+                    Website ini adalah <strong>laboratorium belajar mandiri</strong> Anda. Akses e-book, materi kuliah, dan kuis interaktif kapan saja untuk memperdalam wawasan keislaman dengan cara yang relevan, seru, dan bermakna.
+                </p>
+            </div>
+
+            <!-- Buttons -->
+            <div class="flex flex-col sm:flex-row justify-center gap-4">
+                <a href="#books" class="group bg-tosca-600 text-white px-8 py-4 rounded-full font-bold shadow-lg shadow-tosca-200 hover:bg-tosca-700 hover:shadow-tosca-300 hover:-translate-y-1 transition-all duration-300 flex items-center justify-center gap-2">
+                    <i class="fas fa-book-open group-hover:rotate-12 transition"></i> Lihat Karya
+                </a>
+                <a href="#contact" class="group bg-white text-gray-700 border border-gray-200 px-8 py-4 rounded-full font-bold hover:border-tosca-300 hover:bg-tosca-50 hover:text-tosca-700 hover:-translate-y-1 transition-all duration-300 flex items-center justify-center gap-2">
+                    <i class="fas fa-envelope group-hover:-rotate-12 transition"></i> Hubungi Saya
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- STATISTIK (LATAR PUTIH & AKSES GRATIS) -->
+    <div class="relative z-20 -mt-20 px-4">
+        <div class="max-w-6xl mx-auto bg-white rounded-3xl shadow-xl border border-gray-100 p-8 md:p-10 transform hover:scale-[1.01] transition duration-500">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-8 text-center" id="counter-section">
+                <!-- Item 1 -->
+                <div class="space-y-2 group">
+                    <div class="w-14 h-14 bg-tosca-50 rounded-2xl flex items-center justify-center text-tosca-600 mx-auto mb-3 group-hover:bg-tosca-600 group-hover:text-white transition-colors duration-300">
+                        <i class="fas fa-calendar-alt text-2xl"></i>
+                    </div>
+                    <div class="text-3xl md:text-4xl font-extrabold text-gray-800 font-mono"><span class="counter" data-target="3">0</span>+</div>
+                    <div class="text-xs md:text-sm text-gray-500 font-bold uppercase tracking-wider">Tahun Mengajar</div>
+                </div>
+                
+                <!-- Item 2 -->
+                <div class="space-y-2 group">
+                    <div class="w-14 h-14 bg-tosca-50 rounded-2xl flex items-center justify-center text-tosca-600 mx-auto mb-3 group-hover:bg-tosca-600 group-hover:text-white transition-colors duration-300">
+                        <i class="fas fa-user-graduate text-2xl"></i>
+                    </div>
+                    <div class="text-3xl md:text-4xl font-extrabold text-gray-800 font-mono"><span class="counter" data-target="300">0</span>+</div>
+                    <div class="text-xs md:text-sm text-gray-500 font-bold uppercase tracking-wider">Mahasiswi</div>
+                </div>
+
+                <!-- Item 3 -->
+                <div class="space-y-2 group">
+                    <div class="w-14 h-14 bg-tosca-50 rounded-2xl flex items-center justify-center text-tosca-600 mx-auto mb-3 group-hover:bg-tosca-600 group-hover:text-white transition-colors duration-300">
+                        <i class="fas fa-file-invoice text-2xl"></i>
+                    </div>
+                    <div class="text-3xl md:text-4xl font-extrabold text-gray-800 font-mono"><span class="counter" data-target="50">0</span>+</div>
+                    <div class="text-xs md:text-sm text-gray-500 font-bold uppercase tracking-wider">Materi Ajar</div>
+                </div>
+
+                <!-- Item 4 (Akses Gratis) -->
+                <div class="space-y-2 group">
+                    <div class="w-14 h-14 bg-tosca-50 rounded-2xl flex items-center justify-center text-tosca-600 mx-auto mb-3 group-hover:bg-tosca-600 group-hover:text-white transition-colors duration-300">
+                        <i class="fas fa-unlock-alt text-2xl"></i>
+                    </div>
+                    <div class="text-3xl md:text-4xl font-extrabold text-gray-800 font-mono">100%</div>
+                    <div class="text-xs md:text-sm text-gray-500 font-bold uppercase tracking-wider">Akses Gratis</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- KOLEKSI BUKU -->
+    <section id="books" class="py-24 px-4 bg-gray-50">
+        <div class="max-w-7xl mx-auto">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl font-bold text-gray-900">Koleksi Karya Tulis</h2>
+                <div class="w-16 h-1 bg-tosca-500 mx-auto mt-4 rounded-full"></div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+                <!-- Buku 1 -->
+                <div class="bg-white rounded-xl shadow-md border border-gray-100 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col h-full group">
+                    <div class="h-64 bg-gray-100 p-4 flex items-center justify-center overflow-hidden rounded-t-xl relative">
+                        <div class="absolute inset-0 bg-tosca-900 opacity-0 group-hover:opacity-10 transition duration-300"></div>
+                        <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhUMVXWIsBAnLM0SZ_cJaHKDGXuDWLprAN3xfdONQtnT6b2d2v7ZyUMnd5pXp9sHSoGm7_oG-WxX0vvKjDsUcbQipfixTLdmz23MyZSLY-9xjL4l64if4b0vK9q6ram7TR8zq5iAcxcGUxONpIIgbo1PysiCnDdx-jgRhDbl9tJ1XVv4Cb_V7vK-Z9bPWLX/s320/Ebook%20Manajemen%20Waktu_20260121_001240_0000.jpg" alt="Manajemen Waktu" class="h-full w-full object-contain shadow-sm transform group-hover:scale-105 transition duration-500">
+                    </div>
+                    <div class="p-5 flex flex-col flex-grow">
+                        <div class="flex justify-between items-center text-xs text-gray-400 mb-2 font-medium">
+                            <span><i class="far fa-calendar-alt mr-1"></i> 2024</span>
+                            <span><i class="far fa-file-alt mr-1"></i> 120 Hal</span>
+                        </div>
+                        <h3 class="text-lg font-bold text-gray-900 mb-2 leading-tight group-hover:text-tosca-600 transition">Manajemen Waktu Ala Gen Z</h3>
+                        <p class="text-sm text-gray-500 mb-4 line-clamp-2">Strategi produktivitas Islami.</p>
+                        <div class="mt-auto pt-4 border-t border-gray-100">
+                            <a href="#" class="block w-full text-center text-sm font-bold text-tosca-600 hover:text-tosca-700 transition">Lihat Detail &rarr;</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Buku 2 -->
+                <div class="bg-white rounded-xl shadow-md border border-gray-100 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col h-full group">
+                    <div class="h-64 bg-gray-100 p-4 flex items-center justify-center overflow-hidden rounded-t-xl relative">
+                        <div class="absolute inset-0 bg-tosca-900 opacity-0 group-hover:opacity-10 transition duration-300"></div>
+                        <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEiLLk9YWsSKqR86JX20AW-GKvHA4j9T5-j0nqdp9pxS3Afy51gjSf2X49MjaYxZPlw7F2InUhhYWTnMyDKXL_XGeEIPdh-lO1KwurmgPypUwMlDWE5Vosc2Yl-LRh8kdDxW31dF9oq3MUjARPym8vwyfc87R0P1GjZOCYQIe-6Biy8NxWvTjXPGsnm6l9Rz/s320/Tafsir%20Surah%20Luqman_20260121_001335_0000.jpg" alt="Tafsir Luqman" class="h-full w-full object-contain shadow-sm transform group-hover:scale-105 transition duration-500">
+                    </div>
+                    <div class="p-5 flex flex-col flex-grow">
+                        <div class="flex justify-between items-center text-xs text-gray-400 mb-2 font-medium">
+                            <span><i class="far fa-calendar-alt mr-1"></i> 2023</span>
+                            <span><i class="far fa-file-alt mr-1"></i> 98 Hal</span>
+                        </div>
+                        <h3 class="text-lg font-bold text-gray-900 mb-2 leading-tight group-hover:text-tosca-600 transition">Ringkasan Tafsir Surah Luqman</h3>
+                        <p class="text-sm text-gray-500 mb-4 line-clamp-2">Pendidikan anak dalam Islam.</p>
+                        <div class="mt-auto pt-4 border-t border-gray-100">
+                            <a href="#" class="block w-full text-center text-sm font-bold text-tosca-600 hover:text-tosca-700 transition">Lihat Detail &rarr;</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Buku 3 -->
+                <div class="bg-white rounded-xl shadow-md border border-gray-100 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col h-full group">
+                    <div class="h-64 bg-gray-100 p-4 flex items-center justify-center overflow-hidden rounded-t-xl relative">
+                        <div class="absolute inset-0 bg-tosca-900 opacity-0 group-hover:opacity-10 transition duration-300"></div>
+                        <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEjg1vUG-bfDXPepyWXJwgmwT5_C0pU7DS-xDy7t0V5zQuR-Bb814vQRWlMB_WpGiY3Q0hKQxGbm6OQYH3fs7K7h1s6MQdxz_RM9jckzJPz1zbqmFWOiZ57wy9lnonfKpiPzXShL33SNk99p99o9Gxl_R2WHe7cgRSHn1uUQVzCq3ulac8aZ6tAeLwBEiSow/s320/Manajemen%20Keuangan_20260121_001432_0000.jpg" alt="Manajemen Keuangan" class="h-full w-full object-contain shadow-sm transform group-hover:scale-105 transition duration-500">
+                    </div>
+                    <div class="p-5 flex flex-col flex-grow">
+                        <div class="flex justify-between items-center text-xs text-gray-400 mb-2 font-medium">
+                            <span><i class="far fa-calendar-alt mr-1"></i> 2023</span>
+                            <span><i class="far fa-file-alt mr-1"></i> 150 Hal</span>
+                        </div>
+                        <h3 class="text-lg font-bold text-gray-900 mb-2 leading-tight group-hover:text-tosca-600 transition">Manajemen Keuangan Islami</h3>
+                        <p class="text-sm text-gray-500 mb-4 line-clamp-2">Kelola harta sesuai syariah.</p>
+                        <div class="mt-auto pt-4 border-t border-gray-100">
+                            <a href="#" class="block w-full text-center text-sm font-bold text-tosca-600 hover:text-tosca-700 transition">Lihat Detail &rarr;</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Buku 4 -->
+                <div class="bg-white rounded-xl shadow-md border border-gray-100 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col h-full group">
+                    <div class="h-64 bg-gray-100 p-4 flex items-center justify-center overflow-hidden rounded-t-xl relative">
+                        <div class="absolute inset-0 bg-tosca-900 opacity-0 group-hover:opacity-10 transition duration-300"></div>
+                        <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEj86NINtLwLV0sHPLw0pX_I2DmGBZs_AjK24leRJlhbnS96MmK6FZ8EWnung8FqKjAIhnqQJOgLe4i5c8-_qDsokquRHPAmME5DwgOlc0vJXJID-_NTlh-uFtugB8J-DN-nviDs0AhK399M1qpnAQ7CJ1d7A_9jg2QSSa11wyMtlSum85kHVHT0TR13u-uh/s320/ANALISIS%20TAFSIR%20SURAH%20ALI%20IMRAN%20AYAT%20137-175_20260121_001745_0000.jpg" alt="Tafsir Ali Imran" class="h-full w-full object-contain shadow-sm transform group-hover:scale-105 transition duration-500">
+                    </div>
+                    <div class="p-5 flex flex-col flex-grow">
+                        <div class="flex justify-between items-center text-xs text-gray-400 mb-2 font-medium">
+                            <span><i class="far fa-calendar-alt mr-1"></i> 2022</span>
+                            <span><i class="far fa-file-alt mr-1"></i> 200 Hal</span>
+                        </div>
+                        <h3 class="text-lg font-bold text-gray-900 mb-2 leading-tight group-hover:text-tosca-600 transition">Tafsir Surah Ali Imran</h3>
+                        <p class="text-sm text-gray-500 mb-4 line-clamp-2">Analisis ayat 137-175.</p>
+                        <div class="mt-auto pt-4 border-t border-gray-100">
+                            <a href="#" class="block w-full text-center text-sm font-bold text-tosca-600 hover:text-tosca-700 transition">Lihat Detail &rarr;</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- MATERI AJAR -->
+    <section id="materials" class="py-20 px-4 bg-white">
+        <div class="max-w-6xl mx-auto">
+            <div class="text-center mb-12">
+                <span class="text-tosca-600 font-semibold tracking-wider uppercase text-xs">E-Learning</span>
+                <h2 class="text-3xl font-bold text-gray-900 mt-2">Materi Pembelajaran</h2>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <!-- Materi 1: Tafsir Tarbawi -->
+                <div class="relative bg-white border border-gray-100 rounded-2xl p-8 shadow-lg hover:shadow-2xl transition duration-300 overflow-hidden group">
+                    <div class="absolute top-0 right-0 w-32 h-32 bg-tosca-50 rounded-bl-full -mr-10 -mt-10 z-0"></div>
+                    <div class="relative z-10">
+                        <div class="flex items-center gap-4 mb-6">
+                            <div class="w-14 h-14 bg-tosca-100 text-tosca-600 rounded-xl flex items-center justify-center text-2xl group-hover:bg-tosca-600 group-hover:text-white transition-colors duration-300">
+                                <i class="fas fa-book-open"></i>
+                            </div>
+                            <h3 class="text-2xl font-bold text-gray-800">Tafsir Tarbawi</h3>
+                        </div>
+                        
+                        <div class="space-y-3">
+                            <a href="https://gemini.google.com/share/59d93a61af91" target="_blank" class="flex items-start gap-3 p-3 rounded-lg hover:bg-tosca-50 transition border border-transparent hover:border-tosca-100 group/link">
+                                <i class="fas fa-link text-tosca-400 mt-1 group-hover/link:text-tosca-600"></i>
+                                <div>
+                                    <h4 class="font-semibold text-gray-700 group-hover/link:text-tosca-700">Tujuan Pendidikan Islam</h4>
+                                    <p class="text-xs text-gray-500 mt-1">Konsep dasar dan arah pendidikan dalam Al-Qur'an.</p>
+                                </div>
+                            </a>
+                            <a href="https://gemini.google.com/share/88b1040bf074" target="_blank" class="flex items-start gap-3 p-3 rounded-lg hover:bg-tosca-50 transition border border-transparent hover:border-tosca-100 group/link">
+                                <i class="fas fa-link text-tosca-400 mt-1 group-hover/link:text-tosca-600"></i>
+                                <div>
+                                    <h4 class="font-semibold text-gray-700 group-hover/link:text-tosca-700">Manfaat & Keutamaan Ilmu</h4>
+                                    <p class="text-xs text-gray-500 mt-1">Kemuliaan bagi para penuntut ilmu pengetahuan.</p>
+                                </div>
+                            </a>
+                            <a href="https://gemini.google.com/share/cd4c0d7bc301" target="_blank" class="flex items-start gap-3 p-3 rounded-lg hover:bg-tosca-50 transition border border-transparent hover:border-tosca-100 group/link">
+                                <i class="fas fa-link text-tosca-400 mt-1 group-hover/link:text-tosca-600"></i>
+                                <div>
+                                    <h4 class="font-semibold text-gray-700 group-hover/link:text-tosca-700">Kurikulum Pendidikan Islam</h4>
+                                    <p class="text-xs text-gray-500 mt-1">Prinsip dasar penyusunan kurikulum dalam Islam.</p>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Materi 2: Self Development -->
+                <div class="relative bg-white border border-gray-100 rounded-2xl p-8 shadow-lg hover:shadow-2xl transition duration-300 overflow-hidden group">
+                    <div class="absolute top-0 right-0 w-32 h-32 bg-orange-50 rounded-bl-full -mr-10 -mt-10 z-0"></div>
+                    <div class="relative z-10">
+                        <div class="flex items-center gap-4 mb-6">
+                            <div class="w-14 h-14 bg-orange-100 text-orange-600 rounded-xl flex items-center justify-center text-2xl group-hover:bg-orange-600 group-hover:text-white transition-colors duration-300">
+                                <i class="fas fa-lightbulb"></i>
+                            </div>
+                            <h3 class="text-2xl font-bold text-gray-800">Self Development</h3>
+                        </div>
+                        
+                        <div class="space-y-2">
+                            <a href="https://drive.google.com/file/d/17ozOiukFt0hCe7mqB7h-nryzBkdEgl06/view?usp=drive_link" target="_blank" class="flex items-center gap-3 p-3 rounded-lg hover:bg-orange-50 transition group/link">
+                                <i class="fas fa-file-pdf text-orange-400 group-hover/link:text-orange-600"></i>
+                                <span class="text-sm font-medium text-gray-700 group-hover/link:text-orange-800">Strategi Mengelola Waktu & Tugas</span>
+                            </a>
+                            <a href="https://drive.google.com/file/d/1IDnuTOEYGR44R6y_f9psPaAyHbSaZa73/view?usp=drive_link" target="_blank" class="flex items-center gap-3 p-3 rounded-lg hover:bg-orange-50 transition group/link">
+                                <i class="fas fa-file-pdf text-orange-400 group-hover/link:text-orange-600"></i>
+                                <span class="text-sm font-medium text-gray-700 group-hover/link:text-orange-800">Manajemen Stres Akademik</span>
+                            </a>
+                            <a href="https://drive.google.com/file/d/1Rlbs496yKmUigle4xfLO7YNhpHtLi_w2/view?usp=drive_link" target="_blank" class="flex items-center gap-3 p-3 rounded-lg hover:bg-orange-50 transition group/link">
+                                <i class="fas fa-file-pdf text-orange-400 group-hover/link:text-orange-600"></i>
+                                <span class="text-sm font-medium text-gray-700 group-hover/link:text-orange-800">Strategi Efektif UTS</span>
+                            </a>
+                            <a href="https://drive.google.com/file/d/1ZabxIKLmuDBGr0aEw2JH5cfiZ4MDS8e-/view?usp=drive_link" target="_blank" class="flex items-center gap-3 p-3 rounded-lg hover:bg-orange-50 transition group/link">
+                                <i class="fas fa-file-pdf text-orange-400 group-hover/link:text-orange-600"></i>
+                                <span class="text-sm font-medium text-gray-700 group-hover/link:text-orange-800">Pengenalan Penelitian Ilmiah</span>
+                            </a>
+                            <a href="https://drive.google.com/file/d/1n0IekT21jbT21noO85GPyWl76Kc-HcNH/view?usp=drive_link" target="_blank" class="flex items-center gap-3 p-3 rounded-lg hover:bg-orange-50 transition group/link">
+                                <i class="fas fa-file-pdf text-orange-400 group-hover/link:text-orange-600"></i>
+                                <span class="text-sm font-medium text-gray-700 group-hover/link:text-orange-800">Menulis KTI Metode IMRaD</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- KUIS INTERAKTIF (NEW DESIGN) -->
+    <section id="quizzes" class="py-20 px-4 bg-gray-50 relative overflow-hidden">
+        <!-- Background shapes -->
+        <div class="absolute top-0 right-0 -mt-20 -mr-20 w-80 h-80 bg-tosca-100 rounded-full blur-3xl opacity-50"></div>
+        <div class="absolute bottom-0 left-0 -mb-20 -ml-20 w-80 h-80 bg-blue-50 rounded-full blur-3xl opacity-50"></div>
+
+        <div class="max-w-6xl mx-auto relative z-10">
+            <div class="text-center mb-16">
+                 <span class="inline-block py-1 px-3 rounded-full bg-white border border-tosca-200 text-tosca-600 text-xs font-bold tracking-wider uppercase mb-3 shadow-sm">
+                    Challenge
+                </span>
+                <h2 class="text-3xl font-bold text-gray-900 mb-2">Zona Kuis Interaktif</h2>
+                <p class="text-gray-500 max-w-xl mx-auto">Uji wawasan keislamanmu dengan cara yang seru dan menyenangkan.</p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <!-- Kuis 1: Update dengan 3 Link -->
+                <div class="group relative bg-white rounded-3xl p-8 shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 border border-gray-100 overflow-hidden flex flex-col h-full">
+                    <div class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-tosca-100 to-transparent rounded-bl-full opacity-50 group-hover:scale-110 transition-transform duration-500"></div>
+                    
+                    <div class="relative z-10 flex flex-col items-center text-center h-full w-full">
+                        <div class="w-20 h-20 bg-tosca-50 rounded-2xl flex items-center justify-center text-3xl text-tosca-600 mb-6 group-hover:bg-tosca-600 group-hover:text-white transition-all duration-300 shadow-sm group-hover:shadow-tosca-200">
+                            <i class="fas fa-kaaba"></i>
+                        </div>
+                        
+                        <h3 class="text-xl font-bold text-gray-800 mb-1 group-hover:text-tosca-600 transition-colors">Kuis Tauhid</h3>
+                        <p class="text-xs text-gray-400 font-medium mb-6 uppercase tracking-wider">Silsilah Ta'lim Lughah Arabiyyah</p>
+                        
+                        <div class="w-full space-y-3 mt-auto">
+                            <a href="https://gemini.google.com/share/6e8baca2ba76" target="_blank" class="flex items-center justify-between w-full py-2.5 px-4 bg-gray-50 rounded-xl text-gray-700 hover:bg-tosca-600 hover:text-white transition-all duration-300 group/link border border-gray-100">
+                                <span class="text-xs font-bold bg-white text-tosca-600 w-6 h-6 flex items-center justify-center rounded-full mr-2 group-hover/link:text-tosca-700">1</span>
+                                <span class="font-arabic text-sm text-right flex-1" dir="rtl">شهادة أن لا إله إلا الله...</span>
+                            </a>
+                            <a href="https://gemini.google.com/share/6640a4e29782" target="_blank" class="flex items-center justify-between w-full py-2.5 px-4 bg-gray-50 rounded-xl text-gray-700 hover:bg-tosca-600 hover:text-white transition-all duration-300 group/link border border-gray-100">
+                                <span class="text-xs font-bold bg-white text-tosca-600 w-6 h-6 flex items-center justify-center rounded-full mr-2 group-hover/link:text-tosca-700">2</span>
+                                <span class="font-arabic text-sm text-right flex-1" dir="rtl">الإسلام والأديان الأخرى</span>
+                            </a>
+                            <a href="https://gemini.google.com/share/db43d7dfcc13" target="_blank" class="flex items-center justify-between w-full py-2.5 px-4 bg-gray-50 rounded-xl text-gray-700 hover:bg-tosca-600 hover:text-white transition-all duration-300 group/link border border-gray-100">
+                                <span class="text-xs font-bold bg-white text-tosca-600 w-6 h-6 flex items-center justify-center rounded-full mr-2 group-hover/link:text-tosca-700">3</span>
+                                <span class="font-arabic text-sm text-right flex-1" dir="rtl">التَّبَرُّك</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                 <!-- Kuis 2 -->
+                <a href="#" class="group relative bg-white rounded-3xl p-8 shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 border border-gray-100 overflow-hidden">
+                    <div class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-teal-100 to-transparent rounded-bl-full opacity-50 group-hover:scale-110 transition-transform duration-500"></div>
+                    
+                    <div class="relative z-10 flex flex-col items-center text-center h-full">
+                         <div class="w-20 h-20 bg-teal-50 rounded-2xl flex items-center justify-center text-3xl text-teal-600 mb-6 group-hover:bg-teal-600 group-hover:text-white transition-all duration-300 shadow-sm group-hover:shadow-teal-200">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        
+                        <h3 class="text-xl font-bold text-gray-800 mb-3 group-hover:text-teal-600 transition-colors">Kisah Para Sahabat</h3>
+                        <p class="text-gray-500 text-sm mb-8 leading-relaxed">Kenali lebih dekat perjuangan dan keteladanan para pahlawan Islam.</p>
+                        
+                        <div class="mt-auto">
+                            <span class="inline-flex items-center justify-center px-6 py-2.5 rounded-full bg-teal-50 text-teal-700 font-bold text-sm group-hover:bg-teal-600 group-hover:text-white transition-all duration-300">
+                                Mulai Kuis <i class="fas fa-play ml-2 text-xs"></i>
+                            </span>
+                        </div>
+                    </div>
+                </a>
+
+                 <!-- Kuis 3 -->
+                <a href="#" class="group relative bg-white rounded-3xl p-8 shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 border border-gray-100 overflow-hidden">
+                    <div class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-cyan-100 to-transparent rounded-bl-full opacity-50 group-hover:scale-110 transition-transform duration-500"></div>
+                    
+                    <div class="relative z-10 flex flex-col items-center text-center h-full">
+                         <div class="w-20 h-20 bg-cyan-50 rounded-2xl flex items-center justify-center text-3xl text-cyan-600 mb-6 group-hover:bg-cyan-600 group-hover:text-white transition-all duration-300 shadow-sm group-hover:shadow-cyan-200">
+                            <i class="fas fa-history"></i>
+                        </div>
+                        
+                        <h3 class="text-xl font-bold text-gray-800 mb-3 group-hover:text-cyan-600 transition-colors">Siroh Nabawiyah</h3>
+                        <p class="text-gray-500 text-sm mb-8 leading-relaxed">Jelajahi sejarah hidup Rasulullah SAW dan petik hikmahnya.</p>
+                        
+                        <div class="mt-auto">
+                            <span class="inline-flex items-center justify-center px-6 py-2.5 rounded-full bg-cyan-50 text-cyan-700 font-bold text-sm group-hover:bg-cyan-600 group-hover:text-white transition-all duration-300">
+                                Mulai Kuis <i class="fas fa-play ml-2 text-xs"></i>
+                            </span>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- PUSTAKA MAHASISWI -->
+    <section id="students" class="py-24 px-4 bg-gradient-to-b from-white to-tosca-50 relative overflow-hidden">
+        <!-- Decorative background elements -->
+        <div class="absolute top-0 left-0 w-full h-full overflow-hidden z-0 pointer-events-none">
+            <div class="absolute -top-24 -left-24 w-96 h-96 bg-tosca-100 rounded-full blur-3xl opacity-40"></div>
+            <div class="absolute bottom-0 right-0 w-96 h-96 bg-blue-100 rounded-full blur-3xl opacity-40"></div>
+        </div>
+        
+        <div class="max-w-7xl mx-auto relative z-10">
+            <div class="text-center mb-16">
+                <span class="inline-block py-1 px-3 rounded-full bg-white border border-tosca-200 text-tosca-600 text-xs font-bold tracking-wider uppercase mb-3 shadow-sm">
+                    Karya Mahasiswi
+                </span>
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Pustaka Mahasiswi</h2>
+                <p class="text-gray-600 max-w-2xl mx-auto">
+                    Menjelajahi kisah inspiratif para Sahabat Nabi melalui karya kreatif berbentuk flipbook digital yang dibuat oleh mahasiswi berbakat.
+                </p>
+            </div>
+
+            <!-- Grid Card Design -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                
+                <!-- Item 1 -->
+                <div class="group bg-white rounded-2xl p-1 shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-2">
+                    <div class="bg-white rounded-xl p-6 h-full flex flex-col relative overflow-hidden border border-gray-100">
+                        <div class="absolute top-0 right-0 w-24 h-24 bg-gradient-to-bl from-tosca-100 to-transparent rounded-bl-full opacity-60 group-hover:scale-110 transition-transform duration-500"></div>
+                        <div class="flex items-center gap-4 mb-5 relative z-10">
+                            <div class="w-12 h-12 rounded-full bg-tosca-50 flex items-center justify-center text-tosca-600 group-hover:bg-tosca-500 group-hover:text-white transition-colors duration-300 shadow-sm">
+                                <i class="fas fa-book-open text-lg"></i>
+                            </div>
+                            <div>
+                                <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Flipbook</span>
+                                <h3 class="text-lg font-bold text-gray-800 leading-tight group-hover:text-tosca-600 transition-colors">Tsumamah bin Utsal</h3>
+                            </div>
+                        </div>
+                        <p class="text-sm text-gray-500 mb-6 pl-1">
+                            Karya oleh: <span class="font-semibold text-gray-800">Agustin</span>
+                        </p>
+                        <div class="mt-auto">
+                            <a href="https://heyzine.com/flip-book/ff0c97711d.html" target="_blank" class="flex items-center justify-center w-full py-2.5 bg-gray-50 text-tosca-700 text-sm font-bold rounded-lg group-hover:bg-tosca-600 group-hover:text-white transition-all duration-300">
+                                Baca Sekarang <i class="fas fa-arrow-right ml-2 text-xs"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Item 2 -->
+                <div class="group bg-white rounded-2xl p-1 shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-2">
+                    <div class="bg-white rounded-xl p-6 h-full flex flex-col relative overflow-hidden border border-gray-100">
+                        <div class="absolute top-0 right-0 w-24 h-24 bg-gradient-to-bl from-tosca-100 to-transparent rounded-bl-full opacity-60 group-hover:scale-110 transition-transform duration-500"></div>
+                        <div class="flex items-center gap-4 mb-5 relative z-10">
+                            <div class="w-12 h-12 rounded-full bg-tosca-50 flex items-center justify-center text-tosca-600 group-hover:bg-tosca-500 group-hover:text-white transition-colors duration-300 shadow-sm">
+                                <i class="fas fa-book-open text-lg"></i>
+                            </div>
+                            <div>
+                                <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Flipbook</span>
+                                <h3 class="text-lg font-bold text-gray-800 leading-tight group-hover:text-tosca-600 transition-colors">Abu Ubaidah</h3>
+                            </div>
+                        </div>
+                        <p class="text-sm text-gray-500 mb-6 pl-1">
+                            Karya oleh: <span class="font-semibold text-gray-800">Ainun Mardiyah</span>
+                        </p>
+                        <div class="mt-auto">
+                            <a href="https://heyzine.com/flip-book/8d6ea5631e.html" target="_blank" class="flex items-center justify-center w-full py-2.5 bg-gray-50 text-tosca-700 text-sm font-bold rounded-lg group-hover:bg-tosca-600 group-hover:text-white transition-all duration-300">
+                                Baca Sekarang <i class="fas fa-arrow-right ml-2 text-xs"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Item 3 -->
+                <div class="group bg-white rounded-2xl p-1 shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-2">
+                    <div class="bg-white rounded-xl p-6 h-full flex flex-col relative overflow-hidden border border-gray-100">
+                        <div class="absolute top-0 right-0 w-24 h-24 bg-gradient-to-bl from-tosca-100 to-transparent rounded-bl-full opacity-60 group-hover:scale-110 transition-transform duration-500"></div>
+                        <div class="flex items-center gap-4 mb-5 relative z-10">
+                            <div class="w-12 h-12 rounded-full bg-tosca-50 flex items-center justify-center text-tosca-600 group-hover:bg-tosca-500 group-hover:text-white transition-colors duration-300 shadow-sm">
+                                <i class="fas fa-book-open text-lg"></i>
+                            </div>
+                            <div>
+                                <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Flipbook</span>
+                                <h3 class="text-lg font-bold text-gray-800 leading-tight group-hover:text-tosca-600 transition-colors">Amr bin Jamuh</h3>
+                            </div>
+                        </div>
+                        <p class="text-sm text-gray-500 mb-6 pl-1">
+                            Karya oleh: <span class="font-semibold text-gray-800">Fatimah Az-Zahra</span>
+                        </p>
+                        <div class="mt-auto">
+                            <a href="https://heyzine.com/flip-book/63bf42371b.html" target="_blank" class="flex items-center justify-center w-full py-2.5 bg-gray-50 text-tosca-700 text-sm font-bold rounded-lg group-hover:bg-tosca-600 group-hover:text-white transition-all duration-300">
+                                Baca Sekarang <i class="fas fa-arrow-right ml-2 text-xs"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Item 4 -->
+                <div class="group bg-white rounded-2xl p-1 shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-2">
+                    <div class="bg-white rounded-xl p-6 h-full flex flex-col relative overflow-hidden border border-gray-100">
+                        <div class="absolute top-0 right-0 w-24 h-24 bg-gradient-to-bl from-tosca-100 to-transparent rounded-bl-full opacity-60 group-hover:scale-110 transition-transform duration-500"></div>
+                        <div class="flex items-center gap-4 mb-5 relative z-10">
+                            <div class="w-12 h-12 rounded-full bg-tosca-50 flex items-center justify-center text-tosca-600 group-hover:bg-tosca-500 group-hover:text-white transition-colors duration-300 shadow-sm">
+                                <i class="fas fa-book-open text-lg"></i>
+                            </div>
+                            <div>
+                                <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Flipbook</span>
+                                <h3 class="text-lg font-bold text-gray-800 leading-tight group-hover:text-tosca-600 transition-colors">Salman Al-Farisi</h3>
+                            </div>
+                        </div>
+                        <p class="text-sm text-gray-500 mb-6 pl-1">
+                            Karya oleh: <span class="font-semibold text-gray-800">Ghina Andini</span>
+                        </p>
+                        <div class="mt-auto">
+                            <a href="https://heyzine.com/flip-book/d15887b79c.html" target="_blank" class="flex items-center justify-center w-full py-2.5 bg-gray-50 text-tosca-700 text-sm font-bold rounded-lg group-hover:bg-tosca-600 group-hover:text-white transition-all duration-300">
+                                Baca Sekarang <i class="fas fa-arrow-right ml-2 text-xs"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Item 5 -->
+                <div class="group bg-white rounded-2xl p-1 shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-2">
+                    <div class="bg-white rounded-xl p-6 h-full flex flex-col relative overflow-hidden border border-gray-100">
+                        <div class="absolute top-0 right-0 w-24 h-24 bg-gradient-to-bl from-tosca-100 to-transparent rounded-bl-full opacity-60 group-hover:scale-110 transition-transform duration-500"></div>
+                        <div class="flex items-center gap-4 mb-5 relative z-10">
+                            <div class="w-12 h-12 rounded-full bg-tosca-50 flex items-center justify-center text-tosca-600 group-hover:bg-tosca-500 group-hover:text-white transition-colors duration-300 shadow-sm">
+                                <i class="fas fa-book-open text-lg"></i>
+                            </div>
+                            <div>
+                                <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Flipbook</span>
+                                <h3 class="text-lg font-bold text-gray-800 leading-tight group-hover:text-tosca-600 transition-colors">Ikrimah bin Abu Jahl</h3>
+                            </div>
+                        </div>
+                        <p class="text-sm text-gray-500 mb-6 pl-1">
+                            Karya oleh: <span class="font-semibold text-gray-800">Intan Maulidia</span>
+                        </p>
+                        <div class="mt-auto">
+                            <a href="https://heyzine.com/flip-book/77bf889885.html" target="_blank" class="flex items-center justify-center w-full py-2.5 bg-gray-50 text-tosca-700 text-sm font-bold rounded-lg group-hover:bg-tosca-600 group-hover:text-white transition-all duration-300">
+                                Baca Sekarang <i class="fas fa-arrow-right ml-2 text-xs"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Item 6 -->
+                <div class="group bg-white rounded-2xl p-1 shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-2">
+                    <div class="bg-white rounded-xl p-6 h-full flex flex-col relative overflow-hidden border border-gray-100">
+                        <div class="absolute top-0 right-0 w-24 h-24 bg-gradient-to-bl from-tosca-100 to-transparent rounded-bl-full opacity-60 group-hover:scale-110 transition-transform duration-500"></div>
+                        <div class="flex items-center gap-4 mb-5 relative z-10">
+                            <div class="w-12 h-12 rounded-full bg-tosca-50 flex items-center justify-center text-tosca-600 group-hover:bg-tosca-500 group-hover:text-white transition-colors duration-300 shadow-sm">
+                                <i class="fas fa-book-open text-lg"></i>
+                            </div>
+                            <div>
+                                <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Flipbook</span>
+                                <h3 class="text-lg font-bold text-gray-800 leading-tight group-hover:text-tosca-600 transition-colors">Abdullah bin Mas'ud</h3>
+                            </div>
+                        </div>
+                        <p class="text-sm text-gray-500 mb-6 pl-1">
+                            Karya oleh: <span class="font-semibold text-gray-800">Khairani Ulfa</span>
+                        </p>
+                        <div class="mt-auto">
+                            <a href="https://heyzine.com/flip-book/34201d4cf6.html" target="_blank" class="flex items-center justify-center w-full py-2.5 bg-gray-50 text-tosca-700 text-sm font-bold rounded-lg group-hover:bg-tosca-600 group-hover:text-white transition-all duration-300">
+                                Baca Sekarang <i class="fas fa-arrow-right ml-2 text-xs"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Item 7 -->
+                <div class="group bg-white rounded-2xl p-1 shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-2">
+                    <div class="bg-white rounded-xl p-6 h-full flex flex-col relative overflow-hidden border border-gray-100">
+                        <div class="absolute top-0 right-0 w-24 h-24 bg-gradient-to-bl from-tosca-100 to-transparent rounded-bl-full opacity-60 group-hover:scale-110 transition-transform duration-500"></div>
+                        <div class="flex items-center gap-4 mb-5 relative z-10">
+                            <div class="w-12 h-12 rounded-full bg-tosca-50 flex items-center justify-center text-tosca-600 group-hover:bg-tosca-500 group-hover:text-white transition-colors duration-300 shadow-sm">
+                                <i class="fas fa-book-open text-lg"></i>
+                            </div>
+                            <div>
+                                <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Flipbook</span>
+                                <h3 class="text-lg font-bold text-gray-800 leading-tight group-hover:text-tosca-600 transition-colors">Sa'id bin Amir</h3>
+                            </div>
+                        </div>
+                        <p class="text-sm text-gray-500 mb-6 pl-1">
+                            Karya oleh: <span class="font-semibold text-gray-800">Latifatuz Zahra</span>
+                        </p>
+                        <div class="mt-auto">
+                            <a href="https://heyzine.com/flip-book/63e34c66c9.html" target="_blank" class="flex items-center justify-center w-full py-2.5 bg-gray-50 text-tosca-700 text-sm font-bold rounded-lg group-hover:bg-tosca-600 group-hover:text-white transition-all duration-300">
+                                Baca Sekarang <i class="fas fa-arrow-right ml-2 text-xs"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Item 8 -->
+                <div class="group bg-white rounded-2xl p-1 shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-2">
+                    <div class="bg-white rounded-xl p-6 h-full flex flex-col relative overflow-hidden border border-gray-100">
+                        <div class="absolute top-0 right-0 w-24 h-24 bg-gradient-to-bl from-tosca-100 to-transparent rounded-bl-full opacity-60 group-hover:scale-110 transition-transform duration-500"></div>
+                        <div class="flex items-center gap-4 mb-5 relative z-10">
+                            <div class="w-12 h-12 rounded-full bg-tosca-50 flex items-center justify-center text-tosca-600 group-hover:bg-tosca-500 group-hover:text-white transition-colors duration-300 shadow-sm">
+                                <i class="fas fa-book-open text-lg"></i>
+                            </div>
+                            <div>
+                                <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Flipbook</span>
+                                <h3 class="text-lg font-bold text-gray-800 leading-tight group-hover:text-tosca-600 transition-colors">Thufail bin Amr</h3>
+                            </div>
+                        </div>
+                        <p class="text-sm text-gray-500 mb-6 pl-1">
+                            Karya oleh: <span class="font-semibold text-gray-800">Mufidah Zahro</span>
+                        </p>
+                        <div class="mt-auto">
+                            <a href="https://heyzine.com/flip-book/9ff49f4fab.html" target="_blank" class="flex items-center justify-center w-full py-2.5 bg-gray-50 text-tosca-700 text-sm font-bold rounded-lg group-hover:bg-tosca-600 group-hover:text-white transition-all duration-300">
+                                Baca Sekarang <i class="fas fa-arrow-right ml-2 text-xs"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Item 9 -->
+                <div class="group bg-white rounded-2xl p-1 shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-2">
+                    <div class="bg-white rounded-xl p-6 h-full flex flex-col relative overflow-hidden border border-gray-100">
+                        <div class="absolute top-0 right-0 w-24 h-24 bg-gradient-to-bl from-tosca-100 to-transparent rounded-bl-full opacity-60 group-hover:scale-110 transition-transform duration-500"></div>
+                        <div class="flex items-center gap-4 mb-5 relative z-10">
+                            <div class="w-12 h-12 rounded-full bg-tosca-50 flex items-center justify-center text-tosca-600 group-hover:bg-tosca-500 group-hover:text-white transition-colors duration-300 shadow-sm">
+                                <i class="fas fa-book-open text-lg"></i>
+                            </div>
+                            <div>
+                                <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Flipbook</span>
+                                <h3 class="text-lg font-bold text-gray-800 leading-tight group-hover:text-tosca-600 transition-colors">Umair bin Wahb</h3>
+                            </div>
+                        </div>
+                        <p class="text-sm text-gray-500 mb-6 pl-1">
+                            Karya oleh: <span class="font-semibold text-gray-800">Putri Junita</span>
+                        </p>
+                        <div class="mt-auto">
+                            <a href="https://heyzine.com/flip-book/f44c0619a1.html" target="_blank" class="flex items-center justify-center w-full py-2.5 bg-gray-50 text-tosca-700 text-sm font-bold rounded-lg group-hover:bg-tosca-600 group-hover:text-white transition-all duration-300">
+                                Baca Sekarang <i class="fas fa-arrow-right ml-2 text-xs"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECTION CALL TO ACTION & HADIS -->
+    <section class="bg-tosca-600 py-16 text-white relative overflow-hidden">
+        <div class="absolute inset-0 opacity-10 pattern-dots"></div>
+        <div class="max-w-4xl mx-auto px-6 text-center relative z-10">
+            <!-- Hadis -->
+            <div class="mb-10">
+                <p class="font-arabic text-3xl md:text-4xl mb-4 leading-loose tracking-wide">خَيْرُ النَّاسِ أَنْفَعُهُمْ لِلنَّاسِ</p>
+                <p class="text-lg italic font-medium opacity-90">"Sebaik-baik manusia adalah yang paling bermanfaat bagi manusia lainnya."</p>
+                <p class="text-xs text-tosca-200 mt-2 uppercase tracking-widest">(HR. Ahmad, Ath-Thabrani, Ad-Daruquthni)</p>
+            </div>
+
+            <div class="mt-8">
+                <a href="#" class="inline-block bg-white text-tosca-700 font-bold text-lg px-8 py-3 rounded-full shadow-lg hover:bg-gray-100 transition transform hover:-translate-y-1">
+                    <i class="fas fa-users mr-2"></i> Bergabung di Kelas Saya
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer id="contact" class="bg-tosca-950 text-white pt-16 pb-8 border-t border-tosca-900">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-12 mb-12">
+                <!-- Kolom 1 -->
+                <div>
+                    <div class="flex items-center gap-3 mb-4">
+                        <img class="h-10 w-10 rounded-full border border-tosca-700" src="https://blogger.googleusercontent.com/img/a/AVvXsEhgb3y5k3haYLAH5f6g04o0cIxB3CoFgQEMO9cpD4A-zfIooEsUDs-E0wjb5ziYeOOj0C8EovjJFmKEna-TSMVqPLe3lVGrISzl1FI7tVdOWhXS3GImbFTr73MjCnxtuiIOvTYgq0UCF_O3ptjf8i4WLdWlHrbfOFRyqFjCrShO0jfwCZflOdszqr-n19aK" alt="Logo">
+                        <span class="font-bold text-lg">Anisa Maulidya</span>
+                    </div>
+                    <p class="text-gray-400 text-sm leading-relaxed">
+                        Berbagi ilmu dan inspirasi dalam Manajemen & Pendidikan Islam.
+                    </p>
+                </div>
+
+                <!-- Kolom 2 -->
+                <div>
+                    <h4 class="font-bold text-base mb-4 text-white uppercase tracking-wider">Menu</h4>
+                    <ul class="space-y-2 text-gray-400 text-sm">
+                        <li><a href="#home" class="hover:text-tosca-300 transition">Beranda</a></li>
+                        <li><a href="#books" class="hover:text-tosca-300 transition">Karya Tulis</a></li>
+                        <li><a href="#materials" class="hover:text-tosca-300 transition">Materi & Kuis</a></li>
+                    </ul>
+                </div>
+
+                <!-- Kolom 3 -->
+                <div>
+                    <h4 class="font-bold text-base mb-4 text-white uppercase tracking-wider">Kontak</h4>
+                    <ul class="space-y-3 text-gray-400 text-sm">
+                        <li>
+                            <a href="mailto:anisalidya13@gmail.com" class="flex items-center gap-3 hover:text-white transition">
+                                <i class="fas fa-envelope w-5"></i> anisalidya13@gmail.com
+                            </a>
+                        </li>
+                        <li>
+                            <a href="https://instagram.com/anisa.ldya" target="_blank" class="flex items-center gap-3 hover:text-white transition">
+                                <i class="fab fa-instagram w-5"></i> @anisa.ldya
+                            </a>
+                        </li>
+                        <li>
+                            <a href="https://wa.me/6282363688125" target="_blank" class="flex items-center gap-3 hover:text-white transition">
+                                <i class="fab fa-whatsapp w-5"></i> 082363688125
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="border-t border-tosca-900 pt-8 text-center">
+                <p class="text-xs text-gray-600">&copy; 2026 Anisa Maulidya. All Rights Reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Script Javascript -->
+    <script>
+        // Mobile Menu
+        const btn = document.getElementById('mobile-menu-button');
+        const menu = document.getElementById('mobile-menu');
+
+        btn.addEventListener('click', () => {
+            menu.classList.toggle('hidden');
+        });
+
+        // Counter Animation
+        const counters = document.querySelectorAll('.counter');
+        const speed = 200;
+
+        const animateCounters = () => {
+            counters.forEach(counter => {
+                const updateCount = () => {
+                    const target = +counter.getAttribute('data-target');
+                    const count = +counter.innerText;
+                    const inc = target / speed;
+                    if (count < target) {
+                        counter.innerText = Math.ceil(count + inc);
+                        setTimeout(updateCount, 40);
+                    } else {
+                        counter.innerText = target;
+                    }
+                };
+                updateCount();
+            });
+        }
+
+        let observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    animateCounters();
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.5 });
+
+        observer.observe(document.getElementById('counter-section'));
+    </script>
+</body>
+</html>
