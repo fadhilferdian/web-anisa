@@ -1,0 +1,1713 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Primary Meta Tags -->
+    <title>Portal Keaktifan Mahasiswi - Anisa Maulidya</title>
+    <meta name="title" content="Portal Keaktifan Mahasiswi - Anisa Maulidya">
+    <meta name="description" content="Portal Rekapitulasi Nilai & Bintang Keaktifan Mahasiswi oleh Dosen Anisa Maulidya. Mengelola keaktifan 16 sesi pertemuan untuk 5 kelas perkuliahan.">
+    <meta name="keywords" content="Portal Keaktifan Mahasiswi, Anisa Maulidya, Nilai Keaktifan, Rekap Perkuliahan, Tafsir PAI, Sirah KPI, Sirah PBA, Sharaf IL, Tauhid PAI">
+    <meta name="author" content="Anisa Maulidya">
+    <meta name="robots" content="index, follow">
+    <meta name="theme-color" content="#00b894">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="../assets/logo-anisa.ico">
+
+    <!-- Open Graph / Facebook / WhatsApp / Telegram -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Portal Keaktifan Mahasiswi - Anisa Maulidya">
+    <meta property="og:description" content="Portal Rekapitulasi Nilai & Bintang Keaktifan Mahasiswi oleh Dosen Anisa Maulidya. Mengelola keaktifan 16 sesi pertemuan untuk 5 kelas perkuliahan.">
+    <meta property="og:image" content="../assets/icon.png">
+    <meta property="og:image:alt" content="Logo Portal Keaktifan Mahasiswi Anisa Maulidya">
+    <meta property="og:site_name" content="Portal Keaktifan Mahasiswi">
+    <meta property="og:locale" content="id_ID">
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Portal Keaktifan Mahasiswi - Anisa Maulidya">
+    <meta name="twitter:description" content="Portal Rekapitulasi Nilai & Bintang Keaktifan Mahasiswi oleh Dosen Anisa Maulidya. Mengelola keaktifan 16 sesi pertemuan untuk 5 kelas perkuliahan.">
+    <meta name="twitter:image" content="../assets/icon.png">
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Vue 3 CDN -->
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <!-- FontAwesome CDN for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <!-- Google Fonts: Plus Jakarta Sans & Amiri for Arabic text -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400;1,600&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'sans-serif'],
+                        arabic: ['Amiri', 'serif'],
+                    },
+                    colors: {
+                        tosca: {
+                            50: '#edfbf8',
+                            100: '#d1f6ee',
+                            200: '#a7edd2',
+                            300: '#6fdec7',
+                            400: '#23cca8', // Bright Tosca Highlight
+                            500: '#00b894', // Cerah Vibrant Tosca Utama
+                            600: '#00967a',
+                            700: '#007863',
+                            800: '#005f50',
+                            900: '#004a3f',
+                            950: '#002c26',
+                        },
+                        amber: {
+                            300: '#fde047',
+                            400: '#fbbf24',
+                            500: '#f59e0b',
+                            600: '#d97706',
+                        }
+                    },
+                    boxShadow: {
+                        'tosca-glow': '0 10px 25px -5px rgba(0, 184, 148, 0.3)',
+                        'star-glow': '0 0 15px rgba(251, 191, 36, 0.5)',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        [v-cloak] { display: none !important; }
+        
+        /* Smooth Star Pop Animation */
+        .star-pop {
+            animation: pop 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        @keyframes pop {
+            0% { transform: scale(0.6) rotate(-10deg); opacity: 0.6; }
+            50% { transform: scale(1.3) rotate(5deg); }
+            100% { transform: scale(1) rotate(0deg); opacity: 1; }
+        }
+
+        /* Clean Card Shadow & Borders */
+        .clean-card {
+            background-color: #ffffff;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02), 0 1px 2px rgba(0, 0, 0, 0.03);
+            transition: all 0.2s ease-in-out;
+        }
+        .clean-card:hover {
+            box-shadow: 0 4px 12px rgba(0, 137, 123, 0.08);
+            border-color: #b2dfdb;
+        }
+
+        /* Custom Scrollbar Styling */
+        .custom-scrollbar::-webkit-scrollbar {
+            height: 8px;
+            width: 8px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f5f9;
+            border-radius: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #00897b;
+            border-radius: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #00695c;
+        }
+
+        @media print {
+            .no-print { display: none !important; }
+            .print-only { display: block !important; }
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans min-h-screen flex flex-col antialiased selection:bg-teal-100 selection:text-teal-900">
+
+    <div id="app" v-cloak class="flex-1 flex flex-col min-h-screen">
+        
+        <!-- HEADER NAVBAR -->
+        <header class="bg-tosca-900 text-white shadow-md sticky top-0 z-30 no-print border-b border-tosca-800">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5">
+                <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+                    
+                    <!-- Branding & Dosen Info -->
+                    <div class="flex items-center space-x-3.5">
+                        <img 
+                            src="../assets/icon.png" 
+                            alt="Logo Portal Keaktifan" 
+                            class="w-12 h-12 object-contain rounded-full bg-white p-0.5 shadow-sm border-[0.5px] border-amber-300/50">
+                        <div>
+                            <div class="flex flex-wrap items-center gap-2">
+                                <h1 class="font-extrabold text-xl leading-tight tracking-wide text-white">Anisa Maulidya</h1>
+                                <span class="text-xs bg-tosca-800 text-amber-300 border border-tosca-600 px-3 py-0.5 rounded-full font-bold shadow-sm flex items-center gap-1.5">
+                                    <i class="fa-solid fa-star text-amber-300"></i>
+                                    <span>Portal Keaktifan Mahasiswi</span>
+                                </span>
+                            </div>
+                            <p class="text-xs text-tosca-100 font-medium tracking-wide italic mt-0.5">"{{ tagline }}"</p>
+                        </div>
+                    </div>
+
+                    <!-- Reset, Export & Backend Buttons for Dosen -->
+                    <div class="flex items-center gap-2 flex-wrap sm:flex-nowrap">
+                        <button 
+                            @click="showBackendModal = true"
+                            :class="{
+                                'bg-emerald-950/80 text-emerald-300 border-emerald-500/50 hover:bg-emerald-900': syncStatus === 'synced',
+                                'bg-amber-950/80 text-amber-300 border-amber-500/50 hover:bg-amber-900': syncStatus === 'syncing',
+                                'bg-slate-800 text-slate-300 border-slate-700 hover:bg-slate-700': syncStatus === 'offline',
+                                'bg-rose-950/80 text-rose-300 border-rose-500/50 hover:bg-rose-900': syncStatus === 'error'
+                            }"
+                            class="px-3 py-2 rounded-xl text-xs border font-semibold flex items-center gap-1.5 transition shadow-sm cursor-pointer"
+                            title="Pengaturan Google Spreadsheet Backend">
+                            <i class="fa-solid fa-table text-emerald-400" v-if="syncStatus === 'synced'"></i>
+                            <i class="fa-solid fa-spinner fa-spin text-amber-400" v-else-if="syncStatus === 'syncing'"></i>
+                            <i class="fa-solid fa-cloud-slash text-slate-400" v-else-if="syncStatus === 'offline'"></i>
+                            <i class="fa-solid fa-triangle-exclamation text-rose-400" v-else></i>
+                            <span class="font-bold">
+                                <span v-if="syncStatus === 'synced'">Spreadsheet</span>
+                                <span v-else-if="syncStatus === 'syncing'">Menyimpan...</span>
+                                <span v-else-if="syncStatus === 'offline'">Spreadsheet (Offline)</span>
+                                <span v-else>Sync Error</span>
+                            </span>
+                        </button>
+                        <button 
+                            @click="showExportModal = true"
+                            title="Ekspor Data Keaktifan" 
+                            class="bg-tosca-800 hover:bg-tosca-700 text-white p-2.5 rounded-xl text-xs border border-tosca-600 transition-all flex items-center gap-1.5 px-3.5 shadow-sm">
+                            <i class="fa-solid fa-download text-amber-300"></i>
+                            <span class="font-semibold hidden sm:inline">Ekspor</span>
+                        </button>
+                        <button 
+                            @click="confirmResetData"
+                            title="Reset Data ke Default" 
+                            class="bg-tosca-950 hover:bg-rose-800 text-tosca-200 hover:text-white p-2.5 rounded-xl text-xs border border-tosca-700 transition shadow-sm flex items-center gap-1.5 px-3">
+                            <i class="fa-solid fa-rotate-left"></i>
+                            <span class="hidden sm:inline font-semibold">Reset</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- MAIN CONTENT AREA -->
+        <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+
+            <!-- MANAJEMEN KEAKTIFAN DOSEN -->
+            <div class="space-y-6">
+
+                <!-- COURSE SELECTOR TABS & DISPLAY VIEW SWITCHES -->
+                <div class="clean-card rounded-2xl p-4 space-y-4">
+                    <!-- Tabs Mata Kuliah (Centered, Icons Removed) -->
+                    <div class="flex flex-wrap justify-center gap-2">
+                        <button 
+                            v-for="course in courses" 
+                            :key="course.id"
+                            @click="activeCourseId = course.id"
+                            :class="activeCourseId === course.id ? 'bg-tosca-700 text-white shadow-sm ring-2 ring-tosca-500 font-bold' : 'bg-slate-100 text-slate-700 hover:bg-tosca-50 border border-slate-200'"
+                            class="px-4 py-2.5 rounded-xl text-xs sm:text-sm transition-all flex items-center gap-2.5 text-center group">
+                            <div class="text-center leading-tight">
+                                <div class="font-extrabold">{{ course.name }}</div>
+                                <div class="text-[11px] opacity-90 font-mono" :class="activeCourseId === course.id ? 'text-amber-300' : 'text-tosca-700 font-bold'">Kelas {{ course.kelas }}</div>
+                            </div>
+                            <span 
+                                :class="activeCourseId === course.id ? 'bg-tosca-950 text-amber-300 border border-amber-300/40' : 'bg-tosca-100 text-tosca-800 font-bold'"
+                                class="text-[11px] px-2 py-0.5 rounded-full ml-1">
+                                {{ getStudentCount(course.id) }} Mhs
+                            </span>
+                        </button>
+                    </div>
+
+                    <!-- Display View Switches (Centered) -->
+                    <div class="flex justify-center border-t border-slate-100 pt-3">
+                        <div class="flex items-center justify-center gap-1 bg-slate-100 p-1 rounded-xl border border-slate-200 flex-wrap">
+                            <button 
+                                @click="dosenViewMode = 'pertemuan'" 
+                                :class="dosenViewMode === 'pertemuan' ? 'bg-white text-tosca-900 shadow font-extrabold border border-slate-200' : 'text-slate-600 font-medium hover:text-slate-900'"
+                                class="px-4 py-2 rounded-lg text-xs transition flex items-center gap-1.5">
+                                <i class="fa-solid fa-list-check text-tosca-600"></i>
+                                <span>Per Pertemuan</span>
+                            </button>
+                            <button 
+                                @click="dosenViewMode = 'matrix'" 
+                                :class="dosenViewMode === 'matrix' ? 'bg-white text-tosca-900 shadow font-extrabold border border-slate-200' : 'text-slate-600 font-medium hover:text-slate-900'"
+                                class="px-4 py-2 rounded-lg text-xs transition flex items-center gap-1.5">
+                                <i class="fa-solid fa-table text-tosca-600"></i>
+                                <span>Matriks 16 Pertemuan</span>
+                            </button>
+                            <button 
+                                @click="dosenViewMode = 'ranking'" 
+                                :class="dosenViewMode === 'ranking' ? 'bg-white text-tosca-900 shadow font-extrabold border border-slate-200' : 'text-slate-600 font-medium hover:text-slate-900'"
+                                class="px-4 py-2 rounded-lg text-xs transition flex items-center gap-1.5">
+                                <i class="fa-solid fa-trophy text-amber-500"></i>
+                                <span>Rangking & Rekap</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- VIEW MODE A: INPUT PER PERTEMUAN -->
+                <div v-if="dosenViewMode === 'pertemuan'" class="space-y-5">
+                    
+                    <!-- Pertemuan Selector Slider / Buttons -->
+                    <div class="clean-card p-4 rounded-2xl">
+                        <div class="flex items-center justify-between mb-3">
+                            <div class="flex items-center gap-2">
+                                <span class="w-3 h-3 rounded-full bg-tosca-600 inline-block"></span>
+                                <h2 class="font-extrabold text-slate-900 text-sm sm:text-base">Pilih Sesi Pertemuan Kuliah (1 - 16)</h2>
+                            </div>
+                            <span class="text-xs font-bold text-tosca-900 bg-tosca-50 px-3 py-1 rounded-full border border-tosca-200">
+                                Terpilih: Sesi Ke-{{ activeMeeting }}
+                            </span>
+                        </div>
+
+                        <!-- 16 Meeting Badges -->
+                        <div class="grid grid-cols-4 sm:grid-cols-8 md:grid-cols-16 gap-1.5">
+                            <button 
+                                v-for="m in 16" 
+                                :key="m"
+                                @click="activeMeeting = m"
+                                :class="activeMeeting === m ? 'bg-amber-400 text-slate-950 font-black shadow ring-2 ring-amber-500 scale-102' : 'bg-white text-slate-700 hover:bg-tosca-50 font-bold border border-slate-200'"
+                                class="py-2 rounded-xl text-xs transition-all flex flex-col items-center justify-center">
+                                <span class="text-[9px] uppercase tracking-tight text-slate-500">Sesi</span>
+                                <span class="text-sm font-black">{{ m }}</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Filter Bar & Quick Actions -->
+                    <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 clean-card p-3.5 rounded-2xl">
+                        
+                        <!-- Search Box -->
+                        <div class="relative flex-1">
+                            <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+                            <input 
+                                v-model="searchQuery" 
+                                type="text" 
+                                placeholder="Cari Nama Mahasiswi / NIM..." 
+                                class="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-tosca-600 focus:bg-white transition">
+                        </div>
+
+                        <!-- Quick Action & Student Add Button -->
+                        <div class="flex items-center gap-2">
+                            <button 
+                                @click="openAddStudentModal" 
+                                class="bg-tosca-700 hover:bg-tosca-800 text-white px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-2 transition shadow-sm">
+                                <i class="fa-solid fa-user-plus text-amber-300"></i>
+                                <span>Tambah Mahasiswi</span>
+                            </button>
+                            <button 
+                                @click="giveBulkStars" 
+                                class="bg-amber-400 hover:bg-amber-500 text-slate-950 px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-2 transition shadow-sm">
+                                <i class="fa-solid fa-wand-magic-sparkles text-amber-900"></i>
+                                <span>+1 Bintang Masal</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- LIST MAHASISWI CARDS FOR CURRENT MEETING -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <div 
+                            v-for="student in filteredStudents" 
+                            :key="student.id"
+                            class="clean-card rounded-2xl p-4 flex flex-col justify-between group">
+                            
+                            <div>
+                                <!-- Top Bar in Card -->
+                                <div class="flex items-start justify-between gap-2 mb-2">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-10 h-10 rounded-xl bg-tosca-100 text-tosca-900 font-extrabold text-xs flex items-center justify-center border border-tosca-200">
+                                            {{ getInitials(student.name) }}
+                                        </div>
+                                        <div>
+                                            <h3 class="font-bold text-slate-900 text-sm leading-snug group-hover:text-tosca-700 transition">
+                                                {{ student.name }}
+                                            </h3>
+                                            <span class="text-xs text-slate-500 font-mono">NIM: {{ student.nim }}</span>
+                                        </div>
+                                    </div>
+
+                                    <!-- Student Action Button -->
+                                    <button 
+                                        @click="openEditStudentModal(student)"
+                                        class="text-slate-400 hover:text-tosca-700 p-1.5 rounded-lg transition text-xs hover:bg-slate-100">
+                                        <i class="fa-solid fa-pen-to-square"></i>
+                                    </button>
+                                </div>
+
+                                <!-- Meeting Star Interactive Control -->
+                                <div class="bg-slate-50 rounded-xl p-3 my-3 border border-slate-200 flex items-center justify-between">
+                                    <div>
+                                        <div class="text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1">
+                                            Bintang Sesi {{ activeMeeting }}
+                                        </div>
+                                        <div class="flex items-center gap-1">
+                                            <!-- Interactive Stars -->
+                                            <button 
+                                                v-for="s in 5" 
+                                                :key="s"
+                                                @click="setStars(student.id, activeMeeting, s === getMeetingStars(student.id, activeMeeting) ? s - 1 : s)"
+                                                class="text-xl transition transform active:scale-125 hover:scale-110 focus:outline-none"
+                                                :class="s <= getMeetingStars(student.id, activeMeeting) ? 'text-amber-400 star-pop' : 'text-slate-300 hover:text-amber-200'">
+                                                <i class="fa-solid fa-star"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <!-- Star Count Display & Fast Buttons -->
+                                    <div class="flex items-center gap-1.5">
+                                        <button 
+                                            @click="changeStars(student.id, activeMeeting, -1)" 
+                                            class="w-8 h-8 rounded-lg bg-white border border-slate-300 text-slate-700 hover:bg-rose-50 hover:text-rose-600 font-extrabold text-xs flex items-center justify-center transition shadow-sm">
+                                            -1
+                                        </button>
+                                        <span class="font-black text-amber-600 text-base min-w-[24px] text-center">
+                                            {{ getMeetingStars(student.id, activeMeeting) }}
+                                        </span>
+                                        <button 
+                                            @click="changeStars(student.id, activeMeeting, 1)" 
+                                            class="w-8 h-8 rounded-lg bg-white border border-slate-300 text-slate-900 hover:bg-tosca-100 hover:text-tosca-900 font-extrabold text-xs flex items-center justify-center transition shadow-sm">
+                                            +1
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- Optional Note for this session -->
+                                <div class="mt-2">
+                                    <input 
+                                        :value="getMeetingNote(student.id, activeMeeting)" 
+                                        @input="e => setMeetingNote(student.id, activeMeeting, e.target.value)"
+                                        type="text" 
+                                        placeholder="Catatan keaktifan (opsional)..." 
+                                        class="w-full text-xs px-3 py-1.5 bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-tosca-600 text-slate-800 transition">
+                                </div>
+                            </div>
+
+                            <!-- Total Stars Badge at Bottom -->
+                            <div class="mt-3 pt-2.5 border-t border-slate-100 flex items-center justify-between text-xs">
+                                <span class="text-slate-500 font-medium">Total Bintang Kelas:</span>
+                                <div class="flex items-center gap-1 bg-amber-100 text-amber-900 px-3 py-1 rounded-full font-extrabold border border-amber-200">
+                                    <i class="fa-solid fa-star text-amber-500"></i>
+                                    <span>{{ getTotalStars(student.id, activeCourseId) }} Bintang</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Empty state if search fails -->
+                    <div v-if="filteredStudents.length === 0" class="clean-card rounded-2xl p-10 text-center">
+                        <i class="fa-solid fa-user-slash text-3xl text-slate-400 mb-2"></i>
+                        <h3 class="font-bold text-slate-700">Tidak ada mahasiswi ditemukan</h3>
+                        <p class="text-xs text-slate-500 mt-1">Coba kata kunci lain atau tambah mahasiswi baru.</p>
+                    </div>
+                </div>
+
+                <!-- VIEW MODE B: MATRIX 16 PERTEMUAN TABLE -->
+                <div v-if="dosenViewMode === 'matrix'" class="clean-card rounded-2xl overflow-hidden">
+                    <div class="p-4 border-b border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-slate-50">
+                        <div>
+                            <h2 class="font-extrabold text-slate-900 text-base">Matriks Bintang Keaktifan (Pertemuan 1 - 16)</h2>
+                            <p class="text-xs text-slate-600">Klik pada angka untuk +1 Bintang, klik kanan untuk -1 Bintang.</p>
+                        </div>
+                        <div class="relative w-full sm:w-64">
+                            <input 
+                                v-model="searchQuery" 
+                                type="text" 
+                                placeholder="Filter mahasiswi..." 
+                                class="w-full px-3 py-1.5 bg-white border border-slate-300 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-tosca-600">
+                        </div>
+                    </div>
+
+                    <div class="overflow-x-auto custom-scrollbar">
+                        <table class="w-full text-left text-xs border-collapse">
+                            <thead>
+                                <tr class="bg-tosca-800 text-white font-bold text-xs uppercase tracking-wider">
+                                    <th class="p-3 sticky left-0 bg-tosca-800 z-10 min-w-[200px] border-r border-tosca-700">Nama Mahasiswi</th>
+                                    <th v-for="m in 16" :key="m" class="p-2 text-center min-w-[42px] border-r border-tosca-700">P{{ m }}</th>
+                                    <th class="p-3 text-center bg-amber-400 text-slate-950 min-w-[80px] font-black">Total</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-200 bg-white">
+                                <tr v-for="student in filteredStudents" :key="student.id" class="hover:bg-teal-50/50 transition">
+                                    <td class="p-3 font-semibold text-slate-800 sticky left-0 bg-white shadow-sm z-10 border-r border-slate-200">
+                                        <div class="font-bold text-slate-900">{{ student.name }}</div>
+                                        <div class="text-[11px] text-slate-500 font-mono">NIM: {{ student.nim }}</div>
+                                    </td>
+                                    <td 
+                                        v-for="m in 16" 
+                                        :key="m" 
+                                        class="p-1 text-center border-r border-slate-100 hover:bg-amber-100 cursor-pointer"
+                                        @click="changeStars(student.id, m, 1)"
+                                        @contextmenu.prevent="changeStars(student.id, m, -1)"
+                                        :title="'Klik kiri +1, Klik kanan -1\nPertemuan ' + m">
+                                        <span 
+                                            :class="getMeetingStars(student.id, m) > 0 ? 'bg-amber-100 text-amber-900 font-black border-amber-300' : 'text-slate-300 bg-slate-50 border-transparent'"
+                                            class="w-7 h-7 rounded-lg inline-flex items-center justify-center border text-xs transition">
+                                            {{ getMeetingStars(student.id, m) || '-' }}
+                                        </span>
+                                    </td>
+                                    <td class="p-3 text-center font-black text-amber-700 bg-amber-50 text-sm">
+                                        {{ getTotalStars(student.id, activeCourseId) }} ⭐
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- VIEW MODE C: RANKING & REKAPITULASI -->
+                <div v-if="dosenViewMode === 'ranking'" class="space-y-6">
+                    
+                    <!-- Stats Overview Bar -->
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        <div class="clean-card p-4 rounded-2xl flex items-center gap-4">
+                            <div class="w-12 h-12 rounded-xl bg-tosca-600 text-white flex items-center justify-center text-xl shadow-sm">
+                                <i class="fa-solid fa-users"></i>
+                            </div>
+                            <div>
+                                <div class="text-xs text-slate-500 font-semibold">Total Mahasiswi</div>
+                                <div class="text-xl font-black text-slate-900">{{ currentCourseStudents.length }} Orang</div>
+                            </div>
+                        </div>
+
+                        <div class="clean-card p-4 rounded-2xl flex items-center gap-4">
+                            <div class="w-12 h-12 rounded-xl bg-amber-400 text-slate-950 flex items-center justify-center text-xl shadow-sm">
+                                <i class="fa-solid fa-star"></i>
+                            </div>
+                            <div>
+                                <div class="text-xs text-slate-500 font-semibold">Total Bintang Terbagi</div>
+                                <div class="text-xl font-black text-amber-600">{{ totalStarsInCourse }} Bintang</div>
+                            </div>
+                        </div>
+
+                        <div class="clean-card p-4 rounded-2xl flex items-center gap-4">
+                            <div class="w-12 h-12 rounded-xl bg-tosca-800 text-white flex items-center justify-center text-xl shadow-sm">
+                                <i class="fa-solid fa-chart-line"></i>
+                            </div>
+                            <div>
+                                <div class="text-xs text-slate-500 font-semibold">Rata-Rata / Mhs</div>
+                                <div class="text-xl font-black text-tosca-800">{{ averageStarsPerStudent }} Bintang</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Ranking Table -->
+                    <div class="clean-card rounded-2xl overflow-hidden">
+                        <div class="p-4 border-b border-slate-200 bg-slate-50">
+                            <h2 class="font-extrabold text-slate-900 text-base">Peringkat Keaktifan Mahasiswi</h2>
+                            <p class="text-xs text-slate-600">Urutan mahasiswi berdasarkan akumulasi bintang terbanyak pada {{ getActiveCourseName() }}.</p>
+                        </div>
+
+                        <div class="divide-y divide-slate-100 bg-white">
+                            <div 
+                                v-for="(student, rank) in rankedStudents" 
+                                :key="student.id"
+                                class="p-4 flex items-center justify-between hover:bg-slate-50 transition">
+                                
+                                <div class="flex items-center gap-4">
+                                    <!-- Rank Badge -->
+                                    <div 
+                                        :class="getRankBadgeClass(rank)"
+                                        class="w-10 h-10 rounded-xl flex items-center justify-center font-black text-sm shadow-sm">
+                                        <i v-if="rank === 0" class="fa-solid fa-crown text-slate-950"></i>
+                                        <span v-else>#{{ rank + 1 }}</span>
+                                    </div>
+
+                                    <div>
+                                        <div class="font-bold text-slate-900 text-sm flex items-center gap-2">
+                                            <span>{{ student.name }}</span>
+                                            <span v-if="rank === 0" class="text-[10px] bg-amber-100 text-amber-900 font-extrabold px-2 py-0.5 rounded-full border border-amber-300">
+                                                Mumtaz / Teraktif 🥇
+                                            </span>
+                                        </div>
+                                        <div class="text-xs text-slate-500 font-mono">NIM: {{ student.nim }}</div>
+                                    </div>
+                                </div>
+
+                                <div class="flex items-center gap-3">
+                                    <div class="text-right">
+                                        <div class="text-base font-black text-amber-600 flex items-center justify-end gap-1">
+                                            <span>{{ student.totalStars }}</span>
+                                            <i class="fa-solid fa-star text-amber-400"></i>
+                                        </div>
+                                        <div class="text-[11px] text-slate-500 font-medium">
+                                            {{ student.activeMeetingsCount }} Sesi Aktif
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </main>
+
+        <!-- FOOTER -->
+        <footer class="bg-tosca-950 text-tosca-200 text-xs py-6 border-t border-tosca-800 mt-auto no-print">
+            <div class="max-w-7xl mx-auto px-4 text-center space-y-2.5">
+                <div class="flex items-center justify-center gap-2">
+                    <img 
+                        src="../assets/icon.png" 
+                        alt="Logo Portal" 
+                        class="w-7 h-7 object-contain bg-white p-0.5 rounded-full border border-amber-300">
+                    <span class="font-bold text-white text-sm">Portal Keaktifan Mahasiswi</span>
+                </div>
+                <p class="font-medium text-slate-200">
+                    Dosen Pengampu: <span class="text-amber-300 font-bold">{{ dosenName }}</span>
+                </p>
+                <p class="text-tosca-300 italic text-[11px]">"{{ tagline }}"</p>
+                <p class="text-tosca-400 text-[11px] pt-1">5 Kelas (Tafsir PAI III, Sirah 1 KPI I, Sirah 2 PBA I, Sharaf IL, Tauhid PAI VII) &bull; 16 Pertemuan Perkuliahan</p>
+            </div>
+        </footer>
+
+        <!-- MODAL: TAMBAH / EDIT MAHASISWI -->
+        <div v-if="showStudentModal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+            <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-100 space-y-4">
+                <div class="flex items-center justify-between border-b pb-3 border-slate-100">
+                    <h3 class="font-bold text-slate-800 text-base">
+                        {{ editingStudentId ? 'Edit Data Mahasiswi' : 'Tambah Mahasiswi Baru' }}
+                    </h3>
+                    <button @click="closeStudentModal" class="text-slate-400 hover:text-slate-600 text-sm">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+
+                <div class="space-y-3">
+                    <div>
+                        <label class="text-xs font-semibold text-slate-600 block mb-1">Nama Lengkap Mahasiswi</label>
+                        <input 
+                            v-model="studentForm.name" 
+                            type="text" 
+                            placeholder="Contoh: Fatimah Az-Zahra" 
+                            class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-tosca-500">
+                    </div>
+                    <div>
+                        <label class="text-xs font-semibold text-slate-600 block mb-1">NIM / Nomor Induk</label>
+                        <input 
+                            v-model="studentForm.nim" 
+                            type="text" 
+                            placeholder="Contoh: 202610101" 
+                            class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-tosca-500">
+                    </div>
+                    <div>
+                        <label class="text-xs font-semibold text-slate-600 block mb-1">Pilih Kelas / Mata Kuliah</label>
+                        <div class="grid grid-cols-2 gap-2 mt-1">
+                            <label v-for="c in courses" :key="c.id" class="flex items-center gap-2 p-2 bg-slate-50 border border-slate-200 rounded-xl text-xs cursor-pointer hover:bg-tosca-50">
+                                <input type="checkbox" :value="c.id" v-model="studentForm.courses" class="rounded text-tosca-600 focus:ring-tosca-500">
+                                <span class="font-medium text-slate-700">{{ c.name }} <span class="text-tosca-700 font-bold">({{ c.kelas }})</span></span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-between pt-3 border-t border-slate-100">
+                    <button 
+                        v-if="editingStudentId"
+                        @click="deleteStudent(editingStudentId)"
+                        class="text-rose-600 hover:text-rose-800 text-xs font-bold px-3 py-2 rounded-xl hover:bg-rose-50">
+                        <i class="fa-solid fa-trash mr-1"></i> Hapus
+                    </button>
+                    <div class="flex gap-2 ml-auto">
+                        <button 
+                            @click="closeStudentModal" 
+                            class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-semibold">
+                            Batal
+                        </button>
+                        <button 
+                            @click="saveStudent" 
+                            class="px-4 py-2 bg-tosca-600 hover:bg-tosca-700 text-white rounded-xl text-xs font-bold shadow">
+                            Simpan
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- MODAL: EKSPOR REKAP -->
+        <div v-if="showExportModal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+            <div class="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-slate-100 space-y-4">
+                <div class="flex items-center justify-between border-b pb-3 border-slate-100">
+                    <h3 class="font-bold text-slate-800 text-base">Ekspor Data Nilai Keaktifan</h3>
+                    <button @click="showExportModal = false" class="text-slate-400 hover:text-slate-600 text-sm">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+
+                <p class="text-xs text-slate-500">
+                    Unduh rekapitulasi bintang keaktifan mahasiswi mata kuliah <strong>{{ getActiveCourseName() }}</strong> dalam format CSV/Excel.
+                </p>
+
+                <div class="p-4 bg-tosca-50/60 rounded-2xl border border-tosca-200 space-y-2">
+                    <div class="text-xs font-bold text-tosca-900">Ringkasan Data (Dosen: {{ dosenName }}):</div>
+                    <ul class="text-xs text-slate-600 space-y-1">
+                        <li>&bull; Total Mahasiswi: {{ currentCourseStudents.length }}</li>
+                        <li>&bull; Total Pertemuan: 16 Sessions</li>
+                        <li>&bull; Total Bintang Terbagi: {{ totalStarsInCourse }}</li>
+                    </ul>
+                </div>
+
+                <div class="flex justify-end gap-2 pt-2">
+                    <button 
+                        @click="showExportModal = false" 
+                        class="px-4 py-2 bg-slate-100 text-slate-700 rounded-xl text-xs font-semibold">
+                        Batal
+                    </button>
+                    <button 
+                        @click="downloadCSV" 
+                        class="px-4 py-2 bg-tosca-600 hover:bg-tosca-700 text-white rounded-xl text-xs font-bold flex items-center gap-2 shadow">
+                        <i class="fa-solid fa-file-csv text-amber-300"></i> Unduh File CSV
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- MODAL: GOOGLE SPREADSHEET BACKEND SETTINGS -->
+        <div v-if="showBackendModal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto custom-scrollbar">
+            <div class="bg-white rounded-3xl max-w-xl w-full p-6 shadow-2xl space-y-5 my-8">
+                <!-- Modal Title -->
+                <div class="flex items-center justify-between border-b border-slate-100 pb-4">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-2xl bg-emerald-100 text-emerald-600 flex items-center justify-center text-lg shadow-sm">
+                            <i class="fa-solid fa-file-excel"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-slate-800 text-base">Backend Google Spreadsheet</h3>
+                            <p class="text-xs text-slate-500">Hubungkan web portal ini ke Google Sheets via Apps Script</p>
+                        </div>
+                    </div>
+                    <button @click="showBackendModal = false" class="text-slate-400 hover:text-slate-600 transition text-lg">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+
+                <!-- Status Banner -->
+                <div :class="{
+                    'bg-emerald-50 border-emerald-200 text-emerald-900': syncStatus === 'synced',
+                    'bg-amber-50 border-amber-200 text-amber-900': syncStatus === 'syncing',
+                    'bg-slate-50 border-slate-200 text-slate-700': syncStatus === 'offline',
+                    'bg-rose-50 border-rose-200 text-rose-900': syncStatus === 'error'
+                }" class="p-4 rounded-2xl border flex items-start gap-3 text-xs">
+                    <i class="fa-solid fa-circle-check text-emerald-600 text-base mt-0.5" v-if="syncStatus === 'synced'"></i>
+                    <i class="fa-solid fa-spinner fa-spin text-amber-600 text-base mt-0.5" v-else-if="syncStatus === 'syncing'"></i>
+                    <i class="fa-solid fa-circle-info text-slate-500 text-base mt-0.5" v-else-if="syncStatus === 'offline'"></i>
+                    <i class="fa-solid fa-triangle-exclamation text-rose-600 text-base mt-0.5" v-else></i>
+                    
+                    <div class="flex-1 space-y-0.5">
+                        <div class="font-bold text-sm">
+                            <span v-if="syncStatus === 'synced'">Terhubung ke Google Spreadsheet!</span>
+                            <span v-else-if="syncStatus === 'syncing'">Sedang Menyinkronkan Data...</span>
+                            <span v-else-if="syncStatus === 'offline'">Mode Lokal (Belum Terhubung ke Spreadsheet)</span>
+                            <span v-else>Gagal Terhubung ke Apps Script</span>
+                        </div>
+                        <p class="leading-relaxed opacity-90">
+                            <span v-if="syncStatus === 'synced'">Setiap perubahan nilai bintang & catatan disinkronkan langsung ke Google Spreadsheet. Spreadsheet adalah sumber data utama (Source of Truth). Terakhir sinkron: {{ lastSyncedTime || 'Baru saja' }}.</span>
+                            <span v-else-if="syncStatus === 'syncing'">Mohon tunggu, data sedang dikirim ke backend Google Apps Script.</span>
+                            <span v-else-if="syncStatus === 'offline'">Data saat ini tersimpan aman di browser (localStorage). Masukkan Web App URL di bawah ini untuk tersambung ke Spreadsheet.</span>
+                            <span v-else>Periksa kembali URL Apps Script Anda dan pastikan izin Akses diatur ke "Siapa saja" (Anyone).</span>
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Form Web App URL -->
+                <div class="space-y-2">
+                    <label class="block text-xs font-bold text-slate-700">
+                        URL Aplikasi Web Apps Script (Web App URL)
+                    </label>
+                    <div class="flex gap-2">
+                        <input 
+                            v-model="gasUrlInput"
+                            type="url" 
+                            placeholder="https://script.google.com/macros/s/AKfycb.../exec"
+                            class="flex-1 px-3.5 py-2.5 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-tosca-500 focus:border-tosca-500 font-mono">
+                        <button 
+                            @click="saveGasUrl"
+                            class="px-4 py-2.5 bg-tosca-600 hover:bg-tosca-700 text-white rounded-xl text-xs font-bold transition shadow-sm">
+                            Simpan URL
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Action Buttons: Manual Sync & Ping -->
+                <div class="flex flex-wrap gap-2 pt-1 border-t border-slate-100">
+                    <button 
+                        @click="testGasConnection"
+                        :disabled="!gasUrl || isTestingConnection"
+                        class="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-semibold flex items-center gap-1.5 disabled:opacity-50">
+                        <i class="fa-solid fa-plug text-tosca-600" v-if="!isTestingConnection"></i>
+                        <i class="fa-solid fa-spinner fa-spin text-tosca-600" v-else></i>
+                        <span>Tes Koneksi</span>
+                    </button>
+
+                    <button 
+                        @click="loadFromGAS(true)"
+                        :disabled="!gasUrl || isSyncing"
+                        class="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-semibold flex items-center gap-1.5 disabled:opacity-50">
+                        <i class="fa-solid fa-cloud-arrow-down text-emerald-600"></i>
+                        <span>Tarik Data (Pull)</span>
+                    </button>
+
+                    <button 
+                        @click="saveToGAS(true)"
+                        :disabled="!gasUrl || isSyncing"
+                        class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-sm disabled:opacity-50 ml-auto">
+                        <i class="fa-solid fa-cloud-arrow-up text-amber-300"></i>
+                        <span>Kirim Data ke Sheets (Push)</span>
+                    </button>
+                </div>
+
+                <!-- Quick Setup Guide Accordion -->
+                <div class="border border-slate-200 rounded-2xl p-4 bg-slate-50/70 space-y-3">
+                    <div class="flex items-center justify-between">
+                        <div class="font-bold text-xs text-slate-800 flex items-center gap-2">
+                            <i class="fa-solid fa-lightbulb text-amber-500"></i>
+                            <span>Panduan 3 Langkah Memasang Apps Script:</span>
+                        </div>
+                        <button 
+                            @click="copyAppsScriptCode" 
+                            class="text-[11px] bg-white border border-slate-300 hover:border-tosca-500 text-tosca-800 font-bold px-2.5 py-1 rounded-lg flex items-center gap-1 transition shadow-2xs">
+                            <i class="fa-solid fa-copy text-amber-500"></i>
+                            <span>Salin Kode Backend</span>
+                        </button>
+                    </div>
+
+                    <ol class="text-[11.5px] text-slate-600 space-y-2 list-decimal list-inside leading-relaxed">
+                        <li>
+                            Buka Google Spreadsheet baru &gt; Menu <b>Ekstensi</b> &gt; <b>Apps Script</b>.
+                        </li>
+                        <li>
+                            Hapus isi <code>Code.gs</code>, tempelkan kode Apps Script (dari file <code>google_apps_script.gs</code> atau via tombol Salin di atas), lalu tekan <b>Simpan</b> (Ctrl+S).
+                        </li>
+                        <li>
+                            Klik <b>Terapkan (Deploy)</b> di kanan atas &gt; <b>Terapkan sebagai Aplikasi Web</b>:
+                            <div class="ml-4 mt-1 space-y-0.5 font-mono text-[10.5px] bg-white p-2 rounded-lg border border-slate-200">
+                                <div>&bull; Jalankan sebagai: <b>Saya (Me)</b></div>
+                                <div>&bull; Siapa yang memiliki akses: <b>Siapa saja (Anyone)</b></div>
+                            </div>
+                            Lalu salin <b>Web App URL</b> yang muncul dan tempelkan pada kolom di atas.
+                        </li>
+                    </ol>
+                </div>
+
+                <div class="flex justify-end pt-2">
+                    <button 
+                        @click="showBackendModal = false" 
+                        class="px-5 py-2.5 bg-slate-800 hover:bg-slate-900 text-white rounded-xl text-xs font-bold shadow-sm">
+                        Tutup
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- MODAL: CUSTOM ALERT DIALOG -->
+        <div v-if="customAlert.show" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+            <div class="bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl text-center space-y-4">
+                <div class="w-12 h-12 rounded-2xl bg-amber-100 text-amber-600 flex items-center justify-center mx-auto text-xl shadow-sm">
+                    <i class="fa-solid fa-circle-info"></i>
+                </div>
+                <h3 class="font-bold text-slate-800 text-base">{{ customAlert.title }}</h3>
+                <p class="text-xs text-slate-500 leading-relaxed">{{ customAlert.message }}</p>
+                
+                <div class="flex justify-center gap-2 pt-2">
+                    <button 
+                        v-if="customAlert.isConfirm" 
+                        @click="customAlert.onCancel" 
+                        class="px-4 py-2 bg-slate-100 text-slate-700 rounded-xl text-xs font-semibold">
+                        Batal
+                    </button>
+                    <button 
+                        @click="customAlert.onConfirm" 
+                        class="px-4 py-2 bg-tosca-600 hover:bg-tosca-700 text-white rounded-xl text-xs font-bold shadow">
+                        {{ customAlert.isConfirm ? 'Ya, Lanjutkan' : 'OK' }}
+                    </button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        const { createApp, ref, computed, onMounted, watch } = Vue;
+
+        createApp({
+            setup() {
+                const dosenName = ref('Anisa Maulidya');
+                const tagline = ref('Mendampingi Perjalananmu Menuntut Ilmu');
+
+                const dosenViewMode = ref('pertemuan'); // 'pertemuan' | 'matrix' | 'ranking'
+                const activeCourseId = ref('sharaf');
+                const activeMeeting = ref(1); // 1 - 16
+                const searchQuery = ref('');
+
+                const showStudentModal = ref(false);
+                const showExportModal = ref(false);
+                const showBackendModal = ref(false);
+                const editingStudentId = ref(null);
+                const studentForm = ref({ name: '', nim: '', courses: [] });
+
+                // Google Apps Script Backend States
+                const gasUrl = ref(localStorage.getItem('mahasiswi_gas_url') || '');
+                const gasUrlInput = ref(gasUrl.value);
+                const syncStatus = ref(gasUrl.value ? 'synced' : 'offline'); // 'synced' | 'syncing' | 'offline' | 'error'
+                const lastSyncedTime = ref(localStorage.getItem('mahasiswi_last_synced') || '');
+                const isSyncing = ref(false);
+                const isTestingConnection = ref(false);
+                let autoSyncTimer = null;
+
+                const customAlert = ref({
+                    show: false,
+                    title: '',
+                    message: '',
+                    isConfirm: false,
+                    onConfirm: () => {},
+                    onCancel: () => {}
+                });
+
+                const showAlert = (title, message) => {
+                    customAlert.value = {
+                        show: true,
+                        title,
+                        message,
+                        isConfirm: false,
+                        onConfirm: () => { customAlert.value.show = false; },
+                        onCancel: () => { customAlert.value.show = false; }
+                    };
+                };
+
+                const courses = [
+                    { id: 'tafsir', name: 'Tafsir Al-Qur\'an', kelas: 'PAI III', icon: 'fa-solid fa-book-quran' },
+                    { id: 'sirah1', name: 'Sirah Nabawiyah 1', kelas: 'KPI I', icon: 'fa-solid fa-kaaba' },
+                    { id: 'sirah2', name: 'Sirah Nabawiyah 2', kelas: 'PBA I', icon: 'fa-solid fa-monument' },
+                    { id: 'sharaf', name: 'Ilmu Sharaf', kelas: 'IL', icon: 'fa-solid fa-language' },
+                    { id: 'tauhid', name: 'Ilmu Tauhid', kelas: 'PAI VII', icon: 'fa-solid fa-sun' }
+                ];
+
+                const tauhidStudentsData = [
+                    { nim: "23303182", name: "Afini Rizkiya Afifah" },
+                    { nim: "23303183", name: "Agustin" },
+                    { nim: "23303184", name: "Ainayaa Nur Fadhillah" },
+                    { nim: "23303185", name: "Ainun Mardiyah" },
+                    { nim: "23303187", name: "Amelia Suciyanti" },
+                    { nim: "23303188", name: "Apserina Aqwa Hrp" },
+                    { nim: "23303189", name: "Devi Agustina" },
+                    { nim: "23303190", name: "Fannia Masrur Aini" },
+                    { nim: "23303191", name: "Fatimah Az-Zahra" },
+                    { nim: "23303192", name: "Filzah Auliya" },
+                    { nim: "23303194", name: "Halimah Tussakdiah" },
+                    { nim: "23303195", name: "Hanna Salsabila" },
+                    { nim: "23303196", name: "Haya Zahra" },
+                    { nim: "23303198", name: "Intan Maulidia Fajri" },
+                    { nim: "23303199", name: "Isma Liana" },
+                    { nim: "23303200", name: "Khairani Ulfa" },
+                    { nim: "23303201", name: "Latifatuz Zahra" },
+                    { nim: "23303202", name: "Liyyu Lathifa" },
+                    { nim: "23303203", name: "Maya Fadillah" },
+                    { nim: "23303204", name: "Meilenda Astuti" },
+                    { nim: "23303205", name: "Melja Safitri" },
+                    { nim: "23303206", name: "Mufidah Zahro" },
+                    { nim: "23303207", name: "Mutia Rahmah" },
+                    { nim: "23303208", name: "Nancy Pransiska" },
+                    { nim: "23303209", name: "Nur Fitriani" },
+                    { nim: "23303211", name: "Putri Junita" },
+                    { nim: "23303212", name: "Qonita" },
+                    { nim: "23303213", name: "Shiddiqa Saelan Mumpuni" },
+                    { nim: "23303214", name: "Shinta Amelia Khairani" },
+                    { nim: "23303215", name: "Shofiyyah" },
+                    { nim: "23303216", name: "Sindi Tifani" },
+                    { nim: "23303217", name: "Sumayyah Abizar" },
+                    { nim: "23303218", name: "Zahratumina" },
+                    { nim: "23303228", name: "Mutia Frawina" },
+                    { nim: "23303229", name: "Shinta Rohimah Simanjuntak" },
+                    { nim: "23303230", name: "Annisa Aulia Syahfitri" }
+                ];
+
+                const sharafStudentsData = [
+                    { nim: "266081040", name: "Ade Putri Al Azmi" },
+                    { nim: "266081041", name: "Ahzaura Khoiru Reza" },
+                    { nim: "266081042", name: "Aisha Muna Aufa" },
+                    { nim: "266081043", name: "Aisyah Ramadhani" },
+                    { nim: "266081044", name: "Anastasya Helmi Nasution" },
+                    { nim: "266081045", name: "Anil Hawa Safira" },
+                    { nim: "266081046", name: "Asiyah Sofiah" },
+                    { nim: "266081047", name: "Asti Rahana Harahap" },
+                    { nim: "266081048", name: "Cahaya Mutiara Diniah" },
+                    { nim: "266081049", name: "Humaira Rizki" },
+                    { nim: "266081050", name: "Kaila Luthfiani" },
+                    { nim: "266081051", name: "Louryma Nesya Putri" },
+                    { nim: "266081052", name: "Lubna Tabris" },
+                    { nim: "266081053", name: "Meilany Putri Nawawi" },
+                    { nim: "266081054", name: "Nabila Afifah Maiza" },
+                    { nim: "266081055", name: "Nada Mutia Pertiwi" },
+                    { nim: "266081056", name: "Nadhifa Zahrah" },
+                    { nim: "266081057", name: "Nadiyah Kholilah Cahputri" },
+                    { nim: "266081058", name: "Nashiha Al Madani Sitepu" },
+                    { nim: "266081059", name: "Nasywa Majidah" },
+                    { nim: "266081060", name: "Niswatur Rahma" },
+                    { nim: "266081061", name: "Nur Hurin Annabiha" },
+                    { nim: "266081062", name: "Rosna Yanti" },
+                    { nim: "266081063", name: "Salsabila Umairoh" },
+                    { nim: "266081064", name: "Saylan Niamy Ahmad" },
+                    { nim: "266081065", name: "Sulfani Deswila" },
+                    { nim: "266081066", name: "Valawa Nyak Alkhalifi" },
+                    { nim: "266081067", name: "Wilda Shulhana" },
+                    { nim: "266081068", name: "Yocy Rahmi Illahi" },
+                    { nim: "266081069", name: "Zahratul Azkia Fitri" },
+                    { nim: "266081070", name: "Zalfa Muthmainnah" }
+                ];
+
+                const sirah1StudentsData = [
+                    { nim: "26215537", name: "Aluna Syahgita" },
+                    { nim: "26215538", name: "Amelia Fitri" },
+                    { nim: "26215539", name: "Annisa 'Abidah Qororotul Iman" },
+                    { nim: "26215540", name: "Aqilla Salwa Ramadhani" },
+                    { nim: "26215541", name: "Asmaul Husna Arrahman" },
+                    { nim: "26215542", name: "Asyifa Dwi Kirana" },
+                    { nim: "26215543", name: "Athari Raihan" },
+                    { nim: "26215544", name: "Bida Siyah Siregar" },
+                    { nim: "26215545", name: "Dini Fazira" },
+                    { nim: "26215546", name: "Frezia Nayara Amelia Putri" },
+                    { nim: "26215547", name: "Fuji Lestari" },
+                    { nim: "26215548", name: "Indri Septia" },
+                    { nim: "26215549", name: "Kirana Aulia Putri Nasution" },
+                    { nim: "26215550", name: "Maidonatul Usnah" },
+                    { nim: "26215551", name: "Mugi Najla Mumpuni" },
+                    { nim: "26215552", name: "Nadhini Zahra" },
+                    { nim: "26215553", name: "Nailah Az Zahra" },
+                    { nim: "26215554", name: "Najwa Syifa Fuadah" },
+                    { nim: "26215555", name: "Naurah Zifa Azizah" },
+                    { nim: "26215556", name: "Nida' Syahidah" },
+                    { nim: "26215557", name: "Nurul Hidayah" },
+                    { nim: "26215558", name: "Nurul Thoybah" },
+                    { nim: "26215559", name: "Oryzae Sativa" },
+                    { nim: "26215560", name: "Puteri Delima Fathimah" },
+                    { nim: "26215561", name: "Qaisha Kumala Sari Nasution" },
+                    { nim: "26215562", name: "Ratu Balqis Zaskia" },
+                    { nim: "26215563", name: "Rizka Aulia Sirait" },
+                    { nim: "26215564", name: "Saira Ramadhani" },
+                    { nim: "26215565", name: "Salpida Hasnasyifa" },
+                    { nim: "26215566", name: "Shofa Ramadhani" },
+                    { nim: "26215567", name: "Sri Fadilah Hanum" },
+                    { nim: "26215568", name: "Suci Ramadhani Tanjung" },
+                    { nim: "26215569", name: "Sufura Nabilia Alidinah" },
+                    { nim: "26215570", name: "Suhaila Syafhah" },
+                    { nim: "26215571", name: "Ummu Salva Aisyah Kurniawan" }
+                ];
+
+                const sirah2StudentsData = [
+                    { nim: "261151393", name: "Adzkia Fathiyah Cahyu" },
+                    { nim: "261151394", name: "Alisya Mutiara Syahranny" },
+                    { nim: "261151395", name: "Aluna Gelcy Rumaisalwa" },
+                    { nim: "261151396", name: "Arsya Mulyana" },
+                    { nim: "261151397", name: "Audinar Maharani" },
+                    { nim: "261151398", name: "Berlianita Nasution" },
+                    { nim: "261151399", name: "Cut Syumaisah" },
+                    { nim: "261151400", name: "Devi Dayanti Siahaan" },
+                    { nim: "261151401", name: "Dini Hanifa Putri" },
+                    { nim: "261151402", name: "Dzakiyyah Az-Zahra" },
+                    { nim: "261151403", name: "Fatin Shidqiyah" },
+                    { nim: "261151404", name: "Fatma Fatimah Anamont" },
+                    { nim: "261151405", name: "Gita Nabilla" },
+                    { nim: "261151406", name: "Hanifatul Husna" },
+                    { nim: "261151407", name: "Khatamy Annisa" },
+                    { nim: "261151408", name: "Laras Herfita Loka" },
+                    { nim: "261151409", name: "Maidatil Fitri" },
+                    { nim: "261151410", name: "Maryam" },
+                    { nim: "261151411", name: "Miftahirrisqa" },
+                    { nim: "261151412", name: "Millati Hanifa" },
+                    { nim: "261151413", name: "Nabillah" },
+                    { nim: "261151414", name: "Nailah Syahda Fatin" },
+                    { nim: "261151415", name: "Nellayati Daulay" },
+                    { nim: "261151416", name: "Nur Azizah" },
+                    { nim: "261151417", name: "Nurul Asita" },
+                    { nim: "261151418", name: "Nurul Umayah" },
+                    { nim: "261151419", name: "Nyuwanda Agusti" },
+                    { nim: "261151420", name: "Putri Imam Diyaulhaq" },
+                    { nim: "261151421", name: "Reva Gadizha" },
+                    { nim: "261151422", name: "Salma Ramadhani" },
+                    { nim: "261151423", name: "Salsa Bila Harahap" },
+                    { nim: "261151424", name: "Sausan Elfaryana" },
+                    { nim: "261151425", name: "Silmi Uswatun Hasanah" },
+                    { nim: "261151426", name: "Suci Nurhidayah" },
+                    { nim: "261151427", name: "Uci Hardianti" },
+                    { nim: "261151428", name: "Wahyu Ningsih" },
+                    { nim: "261151429", name: "Wan Mutia Khuwailid Hasibuan" },
+                    { nim: "261151430", name: "Whenny Widya Rabono" }
+                ];
+
+                const tafsirStudentsData = [
+                    { nim: "25305331", name: "Alfiana Melin" },
+                    { nim: "25305332", name: "Aliatul Bariza" },
+                    { nim: "25305333", name: "Andriani" },
+                    { nim: "25305334", name: "Annisa Salsabila Suheidi" },
+                    { nim: "25305335", name: "Asma Nadia" },
+                    { nim: "25305336", name: "Bilqis Aghnia Fawaz" },
+                    { nim: "25305337", name: "Desi Wulandari" },
+                    { nim: "25305338", name: "Ejlin Salwa Khodijah" },
+                    { nim: "25305339", name: "Fauziah" },
+                    { nim: "25305340", name: "Fepy Padilah Ramadani" },
+                    { nim: "25305341", name: "Ferbi Nazwa Ghaniyah" },
+                    { nim: "25305342", name: "Ghina Mardiyah" },
+                    { nim: "25305343", name: "Hayaaul Hamidah Nasution" },
+                    { nim: "25305344", name: "Jamilatun Nazma" },
+                    { nim: "25305345", name: "Jihan Dillah Arkinanti" },
+                    { nim: "25305346", name: "Julianta Harahap" },
+                    { nim: "25305347", name: "Kasiani" },
+                    { nim: "25305348", name: "Khoirotun Nisa" },
+                    { nim: "25305349", name: "Luna Clarisya" },
+                    { nim: "25305350", name: "Munawwarah Afiah" },
+                    { nim: "25305351", name: "Nabila Noverinda Harahap" },
+                    { nim: "25305352", name: "Nadhiatun Nisa" },
+                    { nim: "25305353", name: "Najla Nashifah Dasta" },
+                    { nim: "25305354", name: "Najwa Helyana Yusri" },
+                    { nim: "25305355", name: "Neza Maizura" },
+                    { nim: "25305356", name: "Nur Fadhilah Putri" },
+                    { nim: "25305357", name: "Nur Hidayah" },
+                    { nim: "25305358", name: "Nurlaila Suhada" },
+                    { nim: "25305359", name: "Oktavia Pratama" },
+                    { nim: "25305360", name: "R Algisti Nesya Nazahra" },
+                    { nim: "25305363", name: "Siti Ikrimah Arbaiyah" },
+                    { nim: "25305364", name: "Syakira Salsa Az Zahra" },
+                    { nim: "25305365", name: "Syarifah Ulayya Ikhsani" },
+                    { nim: "25305366", name: "Syariifah Nabiilatul Muthmainnah" },
+                    { nim: "25305367", name: "Zahwa Muchlis" },
+                    { nim: "25305368", name: "Zhafira Keisha Amany" },
+                    { nim: "25305371", name: "Alya Nabila Simatupang" },
+                    { nim: "25305372", name: "Kayla Hani Fadhillah Harahap" },
+                    { nim: "25503361", name: "Raisyah Syahira Sirait" }
+                ];
+
+                const generateDefaultStudents = () => {
+                    const studentList = [];
+
+                    const addCourseData = (dataset, courseKey) => {
+                        dataset.forEach((item, idx) => {
+                            const id = `MHS-${courseKey.toUpperCase()}-${idx + 1}`;
+                            const stars = { tafsir: {}, sirah1: {}, sirah2: {}, sharaf: {}, tauhid: {} };
+                            const notes = { tafsir: {}, sirah1: {}, sirah2: {}, sharaf: {}, tauhid: {} };
+
+                            studentList.push({
+                                id, nim: item.nim, name: item.name,
+                                courses: [courseKey],
+                                stars, notes
+                            });
+                        });
+                    };
+
+                    addCourseData(tauhidStudentsData, 'tauhid');
+                    addCourseData(sharafStudentsData, 'sharaf');
+                    addCourseData(sirah1StudentsData, 'sirah1');
+                    addCourseData(sirah2StudentsData, 'sirah2');
+                    addCourseData(tafsirStudentsData, 'tafsir');
+
+                    return studentList;
+                };
+
+                const students = ref([]);
+
+                const loadData = () => {
+                    const saved = localStorage.getItem('mahasiswi_nilai_data_v11');
+                    if (saved) {
+                        try {
+                            students.value = JSON.parse(saved);
+                        } catch (e) {
+                            students.value = generateDefaultStudents();
+                        }
+                    } else {
+                        students.value = generateDefaultStudents();
+                    }
+                };
+
+                // Save GAS URL to Local Storage
+                const saveGasUrl = () => {
+                    gasUrl.value = gasUrlInput.value.trim();
+                    localStorage.setItem('mahasiswi_gas_url', gasUrl.value);
+                    if (!gasUrl.value) {
+                        syncStatus.value = 'offline';
+                        showAlert('Mode Lokal Aktivated', 'URL Google Apps Script telah dihapus. Portal berjalan dalam mode simpan lokal.');
+                    } else {
+                        testGasConnection();
+                    }
+                };
+
+                // Test Connection to Apps Script
+                const testGasConnection = async () => {
+                    if (!gasUrl.value) return;
+                    isTestingConnection.value = true;
+                    syncStatus.value = 'syncing';
+                    try {
+                        const pingUrl = gasUrl.value + (gasUrl.value.includes('?') ? '&' : '?') + 'action=ping';
+                        const res = await fetch(pingUrl);
+                        const json = await res.json();
+                        if (json && json.status === 'success') {
+                            syncStatus.value = 'synced';
+                            showAlert('Koneksi Berhasil! 🎉', 'Terhubung dengan Google Apps Script Backend. Memulai sinkronisasi data...');
+                            saveToGAS();
+                        } else {
+                            syncStatus.value = 'error';
+                            showAlert('Koneksi Gagal', json.message || 'Respon dari Apps Script tidak sesuai.');
+                        }
+                    } catch (err) {
+                        syncStatus.value = 'error';
+                        showAlert('Koneksi Gagal', 'Tidak dapat terhubung ke URL Apps Script. Pastikan Web App sudah di-deploy dengan akses "Siapa saja" (Anyone).');
+                    } finally {
+                        isTestingConnection.value = false;
+                    }
+                };
+
+                // Push Data to Google Spreadsheet
+                const saveToGAS = async (isManual = false) => {
+                    if (!gasUrl.value) {
+                        syncStatus.value = 'offline';
+                        return;
+                    }
+                    syncStatus.value = 'syncing';
+                    isSyncing.value = true;
+
+                    try {
+                        const payload = JSON.stringify({ students: students.value });
+                        const res = await fetch(gasUrl.value, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'text/plain;charset=utf-8'
+                            },
+                            body: payload
+                        });
+                        const json = await res.json();
+                        if (json && json.status === 'success') {
+                            syncStatus.value = 'synced';
+                            const now = new Date();
+                            lastSyncedTime.value = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+                            localStorage.setItem('mahasiswi_last_synced', lastSyncedTime.value);
+                            if (isManual) {
+                                showAlert('Sinkronisasi Berhasil!', 'Data keaktifan mahasiswi berhasil dikirim dan dirapikan di Google Spreadsheet.');
+                            }
+                        } else {
+                            syncStatus.value = 'error';
+                            if (isManual) showAlert('Gagal Menyimpan', json.message || 'Terjadi kesalahan pada Apps Script.');
+                        }
+                    } catch (err) {
+                        syncStatus.value = 'error';
+                        if (isManual) showAlert('Gagal Menyimpan', 'Terjadi kesalahan jaringan saat mengirim data ke Spreadsheet.');
+                    } finally {
+                        isSyncing.value = false;
+                    }
+                };
+
+                // Pull Data from Google Spreadsheet
+                const loadFromGAS = async (isManual = false) => {
+                    if (!gasUrl.value) {
+                        if (isManual) showAlert('Peringatan', 'Masukkan Web App URL terlebih dahulu.');
+                        return;
+                    }
+                    syncStatus.value = 'syncing';
+                    isSyncing.value = true;
+                    try {
+                        const loadUrl = gasUrl.value + (gasUrl.value.includes('?') ? '&' : '?') + 'action=load';
+                        const res = await fetch(loadUrl);
+                        const json = await res.json();
+                        if (json && json.status === 'success' && json.data && Array.isArray(json.data)) {
+                            students.value = json.data;
+                            syncStatus.value = 'synced';
+                            const now = new Date();
+                            lastSyncedTime.value = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+                            localStorage.setItem('mahasiswi_last_synced', lastSyncedTime.value);
+                            if (isManual) showAlert('Berhasil!', 'Data mahasiswi berhasil ditarik dari Google Spreadsheet.');
+                        } else if (json && json.status === 'empty') {
+                            if (isManual) showAlert('Informasi', 'Spreadsheet belum memiliki data tersimpan. Mengirimkan data lokal saat ini...');
+                            saveToGAS();
+                        } else {
+                            syncStatus.value = 'error';
+                            if (isManual) showAlert('Gagal', json.message || 'Gagal memuat data dari Spreadsheet.');
+                        }
+                    } catch (err) {
+                        syncStatus.value = 'error';
+                        if (isManual) showAlert('Gagal Jaringan', 'Gagal terhubung ke Google Apps Script.');
+                    } finally {
+                        isSyncing.value = false;
+                    }
+                };
+
+                // Debounced Auto-sync trigger (1.5s delay to keep UI ultra responsive)
+                const triggerAutoSync = () => {
+                    if (!gasUrl.value) return;
+                    if (autoSyncTimer) clearTimeout(autoSyncTimer);
+                    syncStatus.value = 'syncing';
+                    autoSyncTimer = setTimeout(() => {
+                        saveToGAS();
+                    }, 1500);
+                };
+
+                // Copy Google Apps Script backend code
+                const copyAppsScriptCode = () => {
+                    const code = `/**
+ * BACKEND GOOGLE APPS SCRIPT - PORTAL KEAKTIFAN MAHASISWI
+ */
+function doGet(e) {
+  var action = (e && e.parameter && e.parameter.action) ? e.parameter.action : 'load';
+  if (action === 'ping') return createJsonResponse({ status: 'success', message: 'Koneksi Berhasil!' });
+  try {
+    var ss = SpreadsheetApp.getActiveSpreadsheet();
+    var parsedStudents = parseCourseSheets(ss);
+    if (parsedStudents && parsedStudents.length > 0) {
+      return createJsonResponse({ status: 'success', message: 'Data dimuat dari Spreadsheet', data: parsedStudents });
+    }
+    var dbSheet = ss.getSheetByName('DB_JSON');
+    if (dbSheet) {
+      var jsonText = dbSheet.getRange('A1').getValue();
+      if (jsonText) return createJsonResponse({ status: 'success', message: 'Data dimuat dari DB_JSON', data: JSON.parse(jsonText) });
+    }
+    return createJsonResponse({ status: 'empty', data: null });
+  } catch (err) {
+    return createJsonResponse({ status: 'error', message: err.toString() });
+  }
+}
+
+function parseCourseSheets(ss) {
+  var courseMap = {
+    'tafsir': { name: 'Rekap Tafsir Al-Qur\'an' },
+    'sirah1': { name: 'Rekap Sirah Nabawiyah 1' },
+    'sirah2': { name: 'Rekap Sirah Nabawiyah 2' },
+    'sharaf': { name: 'Rekap Ilmu Sharaf' },
+    'tauhid': { name: 'Rekap Ilmu Tauhid' }
+  };
+  var existingNotes = {};
+  var dbSheet = ss.getSheetByName('DB_JSON');
+  if (dbSheet) {
+    try {
+      var jsonText = dbSheet.getRange('A1').getValue();
+      if (jsonText) {
+        var oldList = JSON.parse(jsonText);
+        if (Array.isArray(oldList)) {
+          oldList.forEach(function(s) { if (s.nim && s.notes) existingNotes[s.nim] = s.notes; });
+        }
+      }
+    } catch (e) {}
+  }
+  var studentMap = {};
+  Object.keys(courseMap).forEach(function(courseId) {
+    var config = courseMap[courseId];
+    var sheet = ss.getSheetByName(config.name);
+    if (!sheet) return;
+    var lastRow = sheet.getLastRow();
+    if (lastRow < 4) return;
+    var values = sheet.getRange(4, 1, lastRow - 3, 20).getValues();
+    values.forEach(function(row) {
+      var rawNim = String(row[1] || '').trim();
+      var nim = rawNim.replace(/^'/, '');
+      var name = String(row[2] || '').trim();
+      if (!nim && !name) return;
+      var key = nim || name;
+      if (!studentMap[key]) {
+        studentMap[key] = {
+          id: 'MHS-' + (nim ? nim : name.replace(/\\s+/g, '_')),
+          nim: nim, name: name, courses: [],
+          stars: { tafsir: {}, sirah1: {}, sirah2: {}, sharaf: {}, tauhid: {} },
+          notes: existingNotes[nim] || { tafsir: {}, sirah1: {}, sirah2: {}, sharaf: {}, tauhid: {} }
+        };
+      }
+      var student = studentMap[key];
+      if (student.courses.indexOf(courseId) === -1) student.courses.push(courseId);
+      if (!student.stars[courseId]) student.stars[courseId] = {};
+      for (var m = 1; m <= 16; m++) {
+        var val = Number(row[2 + m]);
+        if (!isNaN(val) && val > 0) student.stars[courseId][m] = val;
+      }
+    });
+  });
+  return Object.keys(studentMap).map(function(k) { return studentMap[k]; });
+}
+
+function doPost(e) {
+  try {
+    if (!e || !e.postData || !e.postData.contents) return createJsonResponse({ status: 'error', message: 'No payload' });
+    var payload = JSON.parse(e.postData.contents);
+    var studentsData = payload.students || payload;
+    var ss = SpreadsheetApp.getActiveSpreadsheet();
+    var dbSheet = ss.getSheetByName('DB_JSON') || ss.insertSheet('DB_JSON');
+    dbSheet.getRange('A1').setValue(JSON.stringify(studentsData));
+    if (Array.isArray(studentsData)) renderCourseSheets(ss, studentsData);
+    return createJsonResponse({ status: 'success', message: 'Tersimpan ke Spreadsheet!' });
+  } catch (err) {
+    return createJsonResponse({ status: 'error', message: err.toString() });
+  }
+}
+
+function createJsonResponse(obj) {
+  return ContentService.createTextOutput(JSON.stringify(obj)).setMimeType(ContentService.MimeType.JSON);
+}
+
+function renderCourseSheets(ss, students) {
+  var courseMap = {
+    'tafsir': { name: 'Rekap Tafsir Al-Qur\'an', label: 'Tafsir Al-Qur\'an (PAI III)' },
+    'sirah1': { name: 'Rekap Sirah Nabawiyah 1', label: 'Sirah Nabawiyah 1 (KPI I)' },
+    'sirah2': { name: 'Rekap Sirah Nabawiyah 2', label: 'Sirah Nabawiyah 2 (PBA I)' },
+    'sharaf': { name: 'Rekap Ilmu Sharaf', label: 'Ilmu Sharaf (IL)' },
+    'tauhid': { name: 'Rekap Ilmu Tauhid', label: 'Ilmu Tauhid (PAI VII)' }
+  };
+  Object.keys(courseMap).forEach(function(courseId) {
+    var config = courseMap[courseId];
+    var sheet = ss.getSheetByName(config.name) || ss.insertSheet(config.name);
+    sheet.clearContents();
+    var courseStudents = students.filter(function(s) { return s.courses && s.courses.indexOf(courseId) !== -1; });
+    sheet.getRange('A1').setValue('REKAPITULASI BINTANG KEAKTIFAN - ' + config.label.toUpperCase()).setFontWeight('bold').setFontSize(12).setFontColor('#004a3f');
+    var headers = ['No', 'NIM', 'Nama Mahasiswi'];
+    for (var m = 1; m <= 16; m++) headers.push('P' + m);
+    headers.push('Total Bintang');
+    sheet.getRange(3, 1, 1, headers.length).setValues([headers]).setBackground('#00897b').setFontColor('#ffffff').setFontWeight('bold').setHorizontalAlignment('center');
+    if (courseStudents.length > 0) {
+      var rows = [];
+      courseStudents.forEach(function(s, idx) {
+        var row = [(idx + 1), "'" + s.nim, s.name];
+        var total = 0;
+        for (var m = 1; m <= 16; m++) {
+          var stars = (s.stars && s.stars[courseId] && s.stars[courseId][m]) ? s.stars[courseId][m] : 0;
+          row.push(stars);
+          total += stars;
+        }
+        row.push(total);
+        rows.push(row);
+      });
+      sheet.getRange(4, 1, rows.length, headers.length).setValues(rows);
+      sheet.getRange(4, 1, rows.length, 3).setHorizontalAlignment('left');
+      sheet.getRange(4, 4, rows.length, 17).setHorizontalAlignment('center');
+      sheet.getRange(4, headers.length, rows.length, 1).setFontWeight('bold').setBackground('#edfbf8').setFontColor('#005f50');
+    }
+  });
+}`;
+                    navigator.clipboard.writeText(code);
+                    showAlert('Kode Disalin!', 'Kode Google Apps Script telah disalin. Buka Apps Script dan tempelkan kode tersebut.');
+                };
+
+                watch(students, (newVal) => {
+                    localStorage.setItem('mahasiswi_nilai_data_v11', JSON.stringify(newVal));
+                    triggerAutoSync();
+                }, { deep: true });
+
+                const currentCourseStudents = computed(() => {
+                    return students.value.filter(s => s.courses && s.courses.includes(activeCourseId.value));
+                });
+
+                const filteredStudents = computed(() => {
+                    if (!searchQuery.value) return currentCourseStudents.value;
+                    const q = searchQuery.value.toLowerCase();
+                    return currentCourseStudents.value.filter(s => 
+                        s.name.toLowerCase().includes(q) || s.nim.includes(q)
+                    );
+                });
+
+                const allStudentsList = computed(() => {
+                    return [...students.value].sort((a, b) => a.name.localeCompare(b.name));
+                });
+
+                const selectedStudent = computed(() => {
+                    return students.value.find(s => s.id === selectedStudentId.value) || null;
+                });
+
+                const rankedStudents = computed(() => {
+                    return currentCourseStudents.value.map(s => {
+                        const totalStars = getTotalStars(s.id, activeCourseId.value);
+                        let activeMeetingsCount = 0;
+                        for (let m = 1; m <= 16; m++) {
+                            if (getMeetingStars(s.id, m, activeCourseId.value) > 0) {
+                                activeMeetingsCount++;
+                            }
+                        }
+                        return {
+                            ...s,
+                            totalStars,
+                            activeMeetingsCount
+                        };
+                    }).sort((a, b) => b.totalStars - a.totalStars);
+                });
+
+                const totalStarsInCourse = computed(() => {
+                    return currentCourseStudents.value.reduce((acc, s) => acc + getTotalStars(s.id, activeCourseId.value), 0);
+                });
+
+                const averageStarsPerStudent = computed(() => {
+                    if (currentCourseStudents.value.length === 0) return 0;
+                    return (totalStarsInCourse.value / currentCourseStudents.value.length).toFixed(1);
+                });
+
+                const getMeetingStars = (studentId, meeting, courseId = activeCourseId.value) => {
+                    const student = students.value.find(s => s.id === studentId);
+                    if (!student || !student.stars || !student.stars[courseId]) return 0;
+                    return student.stars[courseId][meeting] || 0;
+                };
+
+                const setStars = (studentId, meeting, count) => {
+                    const student = students.value.find(s => s.id === studentId);
+                    if (student) {
+                        if (!student.stars) student.stars = {};
+                        if (!student.stars[activeCourseId.value]) {
+                            student.stars[activeCourseId.value] = {};
+                        }
+                        student.stars[activeCourseId.value][meeting] = Math.max(0, count);
+                    }
+                };
+
+                const changeStars = (studentId, meeting, delta) => {
+                    const current = getMeetingStars(studentId, meeting);
+                    setStars(studentId, meeting, current + delta);
+                };
+
+                const getMeetingNote = (studentId, meeting, courseId = activeCourseId.value) => {
+                    const student = students.value.find(s => s.id === studentId);
+                    if (!student || !student.notes || !student.notes[courseId]) return '';
+                    return student.notes[courseId][meeting] || '';
+                };
+
+                const setMeetingNote = (studentId, meeting, text) => {
+                    const student = students.value.find(s => s.id === studentId);
+                    if (student) {
+                        if (!student.notes) student.notes = {};
+                        if (!student.notes[activeCourseId.value]) {
+                            student.notes[activeCourseId.value] = {};
+                        }
+                        student.notes[activeCourseId.value][meeting] = text;
+                    }
+                };
+
+                const getTotalStars = (studentId, courseId) => {
+                    const student = students.value.find(s => s.id === studentId);
+                    if (!student || !student.stars || !student.stars[courseId]) return 0;
+                    return Object.values(student.stars[courseId]).reduce((a, b) => a + (b || 0), 0);
+                };
+
+                const getStudentAllCoursesTotalStars = (studentId) => {
+                    const student = students.value.find(s => s.id === studentId);
+                    if (!student || !student.courses) return 0;
+                    return student.courses.reduce((acc, cId) => acc + getTotalStars(studentId, cId), 0);
+                };
+
+                const getActiveMeetingsCountForStudent = (studentId, courseId) => {
+                    let count = 0;
+                    for (let m = 1; m <= 16; m++) {
+                        if (getMeetingStars(studentId, m, courseId) > 0) count++;
+                    }
+                    return count;
+                };
+
+                const getStudentCount = (courseId) => {
+                    return students.value.filter(s => s.courses && s.courses.includes(courseId)).length;
+                };
+
+                const getActiveCourseName = () => {
+                    const c = courses.find(item => item.id === activeCourseId.value);
+                    return c ? `${c.name} (${c.kelas})` : '';
+                };
+
+                const getCourseNameById = (id) => {
+                    const c = courses.find(item => item.id === id);
+                    return c ? `${c.name} (${c.kelas})` : '';
+                };
+
+                const getInitials = (name) => {
+                    if (!name) return 'M';
+                    const parts = name.split(' ');
+                    if (parts.length === 1) return parts[0].substring(0, 2).toUpperCase();
+                    return (parts[0][0] + parts[1][0]).toUpperCase();
+                };
+
+                const getRankBadgeClass = (rank) => {
+                    if (rank === 0) return 'bg-amber-400 text-amber-950 shadow-amber-300/50';
+                    if (rank === 1) return 'bg-slate-200 text-slate-800';
+                    if (rank === 2) return 'bg-amber-700 text-amber-100';
+                    return 'bg-tosca-100 text-tosca-900';
+                };
+
+                const giveBulkStars = () => {
+                    filteredStudents.value.forEach(s => {
+                        changeStars(s.id, activeMeeting.value, 1);
+                    });
+                    showAlert('Berhasil', `Memberikan +1 bintang masal untuk semua mahasiswi pada Pertemuan ${activeMeeting.value}.`);
+                };
+
+                const openAddStudentModal = () => {
+                    editingStudentId.value = null;
+                    studentForm.value = { name: '', nim: '', courses: [activeCourseId.value] };
+                    showStudentModal.value = true;
+                };
+
+                const openEditStudentModal = (student) => {
+                    editingStudentId.value = student.id;
+                    studentForm.value = { 
+                        name: student.name, 
+                        nim: student.nim, 
+                        courses: student.courses ? [...student.courses] : [activeCourseId.value] 
+                    };
+                    showStudentModal.value = true;
+                };
+
+                const closeStudentModal = () => {
+                    showStudentModal.value = false;
+                };
+
+                const saveStudent = () => {
+                    if (!studentForm.value.name.trim() || !studentForm.value.nim.trim()) {
+                        showAlert('Peringatan', 'Nama dan NIM wajib diisi.');
+                        return;
+                    }
+
+                    if (studentForm.value.courses.length === 0) {
+                        showAlert('Peringatan', 'Pilih minimal satu kelas/mata kuliah.');
+                        return;
+                    }
+
+                    if (editingStudentId.value) {
+                        const s = students.value.find(item => item.id === editingStudentId.value);
+                        if (s) {
+                            s.name = studentForm.value.name.trim();
+                            s.nim = studentForm.value.nim.trim();
+                            s.courses = [...studentForm.value.courses];
+                        }
+                    } else {
+                        const newId = `MHS-${Date.now()}`;
+                        const newStars = {};
+                        const newNotes = {};
+                        courses.forEach(c => {
+                            newStars[c.id] = {};
+                            newNotes[c.id] = {};
+                        });
+                        students.value.unshift({
+                            id: newId,
+                            name: studentForm.value.name.trim(),
+                            nim: studentForm.value.nim.trim(),
+                            courses: [...studentForm.value.courses],
+                            stars: newStars,
+                            notes: newNotes
+                        });
+                    }
+                    closeStudentModal();
+                };
+
+                const deleteStudent = (studentId) => {
+                    customAlert.value = {
+                        show: true,
+                        title: 'Hapus Mahasiswi',
+                        message: 'Apakah Anda yakin ingin menghapus mahasiswi ini dari daftar?',
+                        isConfirm: true,
+                        onConfirm: () => {
+                            students.value = students.value.filter(s => s.id !== studentId);
+                            closeStudentModal();
+                            customAlert.value.show = false;
+                        },
+                        onCancel: () => { customAlert.value.show = false; }
+                    };
+                };
+
+                const confirmResetData = () => {
+                    customAlert.value = {
+                        show: true,
+                        title: 'Reset Semua Data',
+                        message: 'Kembalikan data ke daftar mahasiswi default? Semua poin bintang tambahan akan dikembalikan ke awal.',
+                        isConfirm: true,
+                        onConfirm: () => {
+                            students.value = generateDefaultStudents();
+                            customAlert.value.show = false;
+                            showAlert('Berhasil', 'Data telah direset ke default.');
+                        },
+                        onCancel: () => { customAlert.value.show = false; }
+                    };
+                };
+
+                const downloadCSV = () => {
+                    const courseName = getActiveCourseName();
+                    let csvContent = "data:text/csv;charset=utf-8,";
+                    
+                    let headers = ["No", "NIM", "Nama Mahasiswi"];
+                    for (let m = 1; m <= 16; m++) {
+                        headers.push(`P${m}`);
+                    }
+                    headers.push("Total Bintang");
+                    csvContent += headers.join(",") + "\r\n";
+
+                    currentCourseStudents.value.forEach((s, idx) => {
+                        let row = [idx + 1, `"${s.nim}"`, `"${s.name}"`];
+                        for (let m = 1; m <= 16; m++) {
+                            row.push(getMeetingStars(s.id, m, activeCourseId.value));
+                        }
+                        row.push(getTotalStars(s.id, activeCourseId.value));
+                        csvContent += row.join(",") + "\r\n";
+                    });
+
+                    const encodedUri = encodeURI(csvContent);
+                    const link = document.createElement("a");
+                    link.setAttribute("href", encodedUri);
+                    link.setAttribute("download", `Rekap_Bintang_${courseName.replace(/[^a-zA-Z0-9]/g, '_')}.csv`);
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+
+                    showExportModal.value = false;
+                };
+
+                onMounted(() => {
+                    loadData();
+                    if (gasUrl.value) {
+                        loadFromGAS(false);
+                    }
+                });
+
+                return {
+                    dosenName,
+                    tagline,
+                    dosenViewMode,
+                    activeCourseId,
+                    activeMeeting,
+                    searchQuery,
+                    showStudentModal,
+                    showExportModal,
+                    showBackendModal,
+                    editingStudentId,
+                    studentForm,
+                    customAlert,
+                    gasUrl,
+                    gasUrlInput,
+                    syncStatus,
+                    lastSyncedTime,
+                    isSyncing,
+                    isTestingConnection,
+                    saveGasUrl,
+                    testGasConnection,
+                    saveToGAS,
+                    loadFromGAS,
+                    copyAppsScriptCode,
+                    courses,
+                    students,
+                    currentCourseStudents,
+                    filteredStudents,
+                    rankedStudents,
+                    totalStarsInCourse,
+                    averageStarsPerStudent,
+                    getMeetingStars,
+                    setStars,
+                    changeStars,
+                    getMeetingNote,
+                    setMeetingNote,
+                    getTotalStars,
+                    getStudentCount,
+                    getActiveCourseName,
+                    getCourseNameById,
+                    getInitials,
+                    getRankBadgeClass,
+                    giveBulkStars,
+                    openAddStudentModal,
+                    openEditStudentModal,
+                    closeStudentModal,
+                    saveStudent,
+                    deleteStudent,
+                    confirmResetData,
+                    downloadCSV
+                };
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>
