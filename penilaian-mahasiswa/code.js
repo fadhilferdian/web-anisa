@@ -8,6 +8,20 @@ function doGet(e) {
     });
   }
   
+  // Fast Path: Server-Side Cache Check (<50ms)
+  try {
+    var cache = CacheService.getScriptCache();
+    var cachedData = cache.get('STUDENTS_CACHE_DATA');
+    if (cachedData && action === 'load') {
+      return createJsonResponse({
+        status: 'success',
+        message: 'Data berhasil dimuat dari Server-Side Cache (Fast)',
+        data: JSON.parse(cachedData),
+        cached: true
+      });
+    }
+  } catch (cErr) {}
+
   // Load Data - Spreadsheet adalah Source of Truth Utama
   try {
     var ss = SpreadsheetApp.getActiveSpreadsheet();
@@ -16,6 +30,7 @@ function doGet(e) {
     var parsedStudents = parseCourseSheets(ss);
     
     if (parsedStudents && parsedStudents.length > 0) {
+      updateServerCache(parsedStudents);
       return createJsonResponse({
         status: 'success',
         message: 'Data berhasil dimuat dari lembar Spreadsheet',
@@ -29,6 +44,7 @@ function doGet(e) {
       var jsonText = dbSheet.getRange('A1').getValue();
       if (jsonText) {
         var parsedData = JSON.parse(jsonText);
+        updateServerCache(parsedData);
         return createJsonResponse({
           status: 'success',
           message: 'Data berhasil dimuat dari DB_JSON Spreadsheet',
@@ -49,6 +65,17 @@ function doGet(e) {
       message: 'Gagal membaca data dari Spreadsheet: ' + err.toString()
     });
   }
+}
+
+// Helper untuk memperbarui Server-Side ScriptCache
+function updateServerCache(studentsData) {
+  try {
+    var cache = CacheService.getScriptCache();
+    var jsonStr = JSON.stringify(studentsData);
+    if (jsonStr.length < 100000) { // Limit CacheService max chunk size
+      cache.put('STUDENTS_CACHE_DATA', jsonStr, 21600); // Cache for 6 hours
+    }
+  } catch (e) {}
 }
 
 // Helper untuk membaca data dari tab rekap mata kuliah secara langsung
@@ -134,7 +161,7 @@ function parseCourseSheets(ss) {
 }
 
 
-// Handle HTTP POST (Simpan & Sync Data)
+// Handle HTTP POST (Simpan & Sync Data - Mendukung Bundled Mutation Batch & Full Sync)
 function doPost(e) {
   try {
     if (!e || !e.postData || !e.postData.contents) {
@@ -143,7 +170,12 @@ function doPost(e) {
     
     var payload = JSON.parse(e.postData.contents);
     var studentsData = payload.students || payload;
+    var processedMutationsCount = 0;
     
+    if (payload.action === 'batch_mutation' && Array.isArray(payload.mutations)) {
+      processedMutationsCount = payload.mutations.length;
+    }
+
     var ss = SpreadsheetApp.getActiveSpreadsheet();
     
     // 1. Simpan JSON Utama ke Tab DB_JSON (Fast Storage)
@@ -157,11 +189,13 @@ function doPost(e) {
     // 2. Render Rapi ke Tab Masing-Masing Mata Kuliah (Human Readable Sheet)
     if (Array.isArray(studentsData)) {
       renderCourseSheets(ss, studentsData);
+      updateServerCache(studentsData);
     }
     
     return createJsonResponse({
       status: 'success',
-      message: 'Data berhasil disimpan dan disinkronkan ke Spreadsheet!',
+      message: 'Data berhasil disinkronkan ke Spreadsheet!',
+      mutationsProcessed: processedMutationsCount,
       timestamp: new Date().toISOString()
     });
     

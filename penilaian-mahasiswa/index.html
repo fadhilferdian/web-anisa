@@ -158,22 +158,27 @@
                         <button 
                             @click="showBackendModal = true"
                             :class="{
-                                'bg-emerald-950/80 text-emerald-300 border-emerald-500/50 hover:bg-emerald-900': syncStatus === 'synced',
-                                'bg-amber-950/80 text-amber-300 border-amber-500/50 hover:bg-amber-900': syncStatus === 'syncing',
+                                'bg-emerald-950/80 text-emerald-300 border-emerald-500/50 hover:bg-emerald-900': syncStatus === 'synced' && outboxQueue.length === 0,
+                                'bg-amber-950/80 text-amber-300 border-amber-500/50 hover:bg-amber-900': syncStatus === 'syncing' || (syncStatus === 'synced' && outboxQueue.length > 0),
                                 'bg-slate-800 text-slate-300 border-slate-700 hover:bg-slate-700': syncStatus === 'offline',
                                 'bg-rose-950/80 text-rose-300 border-rose-500/50 hover:bg-rose-900': syncStatus === 'error'
                             }"
                             class="px-3 py-2 rounded-xl text-xs border font-semibold flex items-center gap-1.5 transition shadow-sm cursor-pointer"
-                            title="Pengaturan Google Spreadsheet Backend">
-                            <i class="fa-solid fa-table text-emerald-400" v-if="syncStatus === 'synced'"></i>
+                            title="Pengaturan Google Spreadsheet Backend & Sync Queue">
+                            <i class="fa-solid fa-cloud-check text-emerald-400" v-if="syncStatus === 'synced' && outboxQueue.length === 0"></i>
+                            <i class="fa-solid fa-box-archive text-amber-400" v-else-if="syncStatus === 'synced' && outboxQueue.length > 0"></i>
                             <i class="fa-solid fa-spinner fa-spin text-amber-400" v-else-if="syncStatus === 'syncing'"></i>
                             <i class="fa-solid fa-cloud-slash text-slate-400" v-else-if="syncStatus === 'offline'"></i>
                             <i class="fa-solid fa-triangle-exclamation text-rose-400" v-else></i>
                             <span class="font-bold">
-                                <span v-if="syncStatus === 'synced'">Spreadsheet</span>
-                                <span v-else-if="syncStatus === 'syncing'">Menyimpan...</span>
+                                <span v-if="syncStatus === 'synced' && outboxQueue.length === 0">Spreadsheet</span>
+                                <span v-else-if="syncStatus === 'synced' && outboxQueue.length > 0">Tersimpan Lokal</span>
+                                <span v-else-if="syncStatus === 'syncing'">Menyinkronkan...</span>
                                 <span v-else-if="syncStatus === 'offline'">Spreadsheet (Offline)</span>
                                 <span v-else>Sync Error</span>
+                            </span>
+                            <span v-if="outboxQueue.length > 0" class="bg-amber-400 text-slate-950 px-1.5 py-0.5 rounded-full text-[10px] font-black ml-0.5">
+                                {{ outboxQueue.length }}
                             </span>
                         </button>
                         <button 
@@ -689,28 +694,36 @@
 
                 <!-- Status Banner -->
                 <div :class="{
-                    'bg-emerald-50 border-emerald-200 text-emerald-900': syncStatus === 'synced',
-                    'bg-amber-50 border-amber-200 text-amber-900': syncStatus === 'syncing',
+                    'bg-emerald-50 border-emerald-200 text-emerald-900': syncStatus === 'synced' && outboxQueue.length === 0,
+                    'bg-amber-50 border-amber-200 text-amber-900': syncStatus === 'syncing' || outboxQueue.length > 0,
                     'bg-slate-50 border-slate-200 text-slate-700': syncStatus === 'offline',
                     'bg-rose-50 border-rose-200 text-rose-900': syncStatus === 'error'
                 }" class="p-4 rounded-2xl border flex items-start gap-3 text-xs">
-                    <i class="fa-solid fa-circle-check text-emerald-600 text-base mt-0.5" v-if="syncStatus === 'synced'"></i>
+                    <i class="fa-solid fa-circle-check text-emerald-600 text-base mt-0.5" v-if="syncStatus === 'synced' && outboxQueue.length === 0"></i>
+                    <i class="fa-solid fa-box-archive text-amber-600 text-base mt-0.5" v-else-if="outboxQueue.length > 0"></i>
                     <i class="fa-solid fa-spinner fa-spin text-amber-600 text-base mt-0.5" v-else-if="syncStatus === 'syncing'"></i>
                     <i class="fa-solid fa-circle-info text-slate-500 text-base mt-0.5" v-else-if="syncStatus === 'offline'"></i>
                     <i class="fa-solid fa-triangle-exclamation text-rose-600 text-base mt-0.5" v-else></i>
                     
                     <div class="flex-1 space-y-0.5">
-                        <div class="font-bold text-sm">
-                            <span v-if="syncStatus === 'synced'">Terhubung ke Google Spreadsheet!</span>
-                            <span v-else-if="syncStatus === 'syncing'">Sedang Menyinkronkan Data...</span>
-                            <span v-else-if="syncStatus === 'offline'">Mode Lokal (Belum Terhubung ke Spreadsheet)</span>
-                            <span v-else>Gagal Terhubung ke Apps Script</span>
+                        <div class="font-bold text-sm flex items-center justify-between">
+                            <span>
+                                <span v-if="syncStatus === 'synced' && outboxQueue.length === 0">Terhubung ke Google Spreadsheet!</span>
+                                <span v-else-if="outboxQueue.length > 0">Tersimpan di Lokal (Outbox: {{ outboxQueue.length }} Perubahan Pending)</span>
+                                <span v-else-if="syncStatus === 'syncing'">Sedang Menyinkronkan Data...</span>
+                                <span v-else-if="syncStatus === 'offline'">Mode Lokal (Belum Terhubung ke Spreadsheet)</span>
+                                <span v-else>Gagal Terhubung ke Apps Script</span>
+                            </span>
+                            <span v-if="retryCountdown > 0" class="text-[11px] font-mono text-rose-700 bg-rose-100 px-2 py-0.5 rounded-md">
+                                Retry in {{ retryCountdown }}s
+                            </span>
                         </div>
                         <p class="leading-relaxed opacity-90">
-                            <span v-if="syncStatus === 'synced'">Setiap perubahan nilai bintang & catatan disinkronkan langsung ke Google Spreadsheet. Spreadsheet adalah sumber data utama (Source of Truth). Terakhir sinkron: {{ lastSyncedTime || 'Baru saja' }}.</span>
-                            <span v-else-if="syncStatus === 'syncing'">Mohon tunggu, data sedang dikirim ke backend Google Apps Script.</span>
-                            <span v-else-if="syncStatus === 'offline'">Data saat ini tersimpan aman di browser (localStorage). Masukkan Web App URL di bawah ini untuk tersambung ke Spreadsheet.</span>
-                            <span v-else>Periksa kembali URL Apps Script Anda dan pastikan izin Akses diatur ke "Siapa saja" (Anyone).</span>
+                            <span v-if="syncStatus === 'synced' && outboxQueue.length === 0">Setiap perubahan disinkronkan langsung ke Google Spreadsheet via Outbox Queue & Server Cache. Terakhir sinkron: {{ lastSyncedTime || 'Baru saja' }}.</span>
+                            <span v-else-if="outboxQueue.length > 0">Perubahan tersimpan aman di browser (0ms cache-first). Terdapat {{ outboxQueue.length }} mutasi dalam antrean Outbox yang akan otomatis dikirim saat terhubung.</span>
+                            <span v-else-if="syncStatus === 'syncing'">Mohon tunggu, paket mutasi data sedang dikirim ke backend Google Apps Script.</span>
+                            <span v-else-if="syncStatus === 'offline'">Data tersimpan aman di browser (localStorage). Masukkan Web App URL di bawah ini untuk mengaktifkan sinkronisasi otomatis.</span>
+                            <span v-else>Periksa koneksi atau URL Apps Script. Sistem akan mencoba lagi secara otomatis (Auto-Retry).</span>
                         </p>
                     </div>
                 </div>
@@ -754,11 +767,12 @@
                     </button>
 
                     <button 
-                        @click="saveToGAS(true)"
+                        @click="flushOutboxQueue(true)"
                         :disabled="!gasUrl || isSyncing"
                         class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-sm disabled:opacity-50 ml-auto">
-                        <i class="fa-solid fa-cloud-arrow-up text-amber-300"></i>
-                        <span>Kirim Data ke Sheets (Push)</span>
+                        <i class="fa-solid fa-cloud-arrow-up text-amber-300" v-if="!isSyncing"></i>
+                        <i class="fa-solid fa-spinner fa-spin text-amber-300" v-else></i>
+                        <span>Sync Sekarang {{ outboxQueue.length > 0 ? '(' + outboxQueue.length + ' Outbox)' : '' }}</span>
                     </button>
                 </div>
 
@@ -1109,9 +1123,15 @@
                 };
 
                 const students = ref([]);
+                const outboxQueue = ref([]);
+                const retryCount = ref(0);
+                const retryCountdown = ref(0);
+                const isOnline = ref(navigator.onLine);
+                let retryTimer = null;
+                let retryCountdownInterval = null;
 
-                const loadData = () => {
-                    const saved = localStorage.getItem('mahasiswi_nilai_data_v11');
+                const loadLocalCache = () => {
+                    const saved = localStorage.getItem('mahasiswi_nilai_data_v12') || localStorage.getItem('mahasiswi_nilai_data_v11');
                     if (saved) {
                         try {
                             students.value = JSON.parse(saved);
@@ -1123,13 +1143,161 @@
                     }
                 };
 
+                const saveLocalCache = () => {
+                    localStorage.setItem('mahasiswi_nilai_data_v12', JSON.stringify(students.value));
+                };
+
+                const loadOutboxQueue = () => {
+                    try {
+                        const saved = localStorage.getItem('mahasiswi_outbox_queue_v1');
+                        outboxQueue.value = saved ? JSON.parse(saved) : [];
+                    } catch (e) {
+                        outboxQueue.value = [];
+                    }
+                    if (!gasUrl.value) {
+                        syncStatus.value = 'offline';
+                    } else {
+                        syncStatus.value = 'synced';
+                    }
+                };
+
+                const saveOutboxQueue = () => {
+                    localStorage.setItem('mahasiswi_outbox_queue_v1', JSON.stringify(outboxQueue.value));
+                };
+
+                const enqueueMutation = (actionType, payload) => {
+                    const mutationItem = {
+                        id: 'mut_' + Date.now() + '_' + Math.random().toString(36).substring(2, 6),
+                        type: actionType,
+                        payload,
+                        timestamp: Date.now()
+                    };
+                    outboxQueue.value.push(mutationItem);
+                    saveOutboxQueue();
+                    saveLocalCache();
+                    flushOutboxQueue();
+                };
+
+                const flushOutboxQueue = async (isManual = false) => {
+                    if (!gasUrl.value) {
+                        syncStatus.value = 'offline';
+                        if (isManual) showAlert('Mode Lokal', 'Masukkan Web App URL terlebih dahulu.');
+                        return;
+                    }
+
+                    if (isSyncing.value) return;
+
+                    if (outboxQueue.value.length === 0) {
+                        syncStatus.value = 'synced';
+                        if (isManual) {
+                            await saveFullStateToGAS(true);
+                        }
+                        return;
+                    }
+
+                    isSyncing.value = true;
+                    syncStatus.value = 'syncing';
+                    if (retryTimer) clearTimeout(retryTimer);
+                    if (retryCountdownInterval) clearInterval(retryCountdownInterval);
+                    retryCountdown.value = 0;
+
+                    try {
+                        const payload = JSON.stringify({
+                            action: 'batch_mutation',
+                            mutations: outboxQueue.value,
+                            students: students.value
+                        });
+
+                        const res = await fetch(gasUrl.value, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                            body: payload
+                        });
+
+                        const json = await res.json();
+                        if (json && json.status === 'success') {
+                            outboxQueue.value = [];
+                            saveOutboxQueue();
+                            syncStatus.value = 'synced';
+                            retryCount.value = 0;
+                            const now = new Date();
+                            lastSyncedTime.value = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+                            localStorage.setItem('mahasiswi_last_synced', lastSyncedTime.value);
+                            if (isManual) {
+                                showAlert('Sinkronisasi Berhasil!', 'Semua mutasi antrean berhasil terkirim dan disinkronkan ke Google Spreadsheet.');
+                            }
+                        } else {
+                            syncStatus.value = 'error';
+                            if (isManual) showAlert('Gagal Menyimpan', json.message || 'Respons dari Apps Script mengalami kesalahan.');
+                            scheduleAutoRetry();
+                        }
+                    } catch (err) {
+                        syncStatus.value = 'error';
+                        if (isManual) showAlert('Gagal Jaringan', 'Terjadi kesalahan jaringan saat mengirim data.');
+                        scheduleAutoRetry();
+                    } finally {
+                        isSyncing.value = false;
+                    }
+                };
+
+                const scheduleAutoRetry = () => {
+                    if (retryCount.value >= 5) return;
+                    retryCount.value++;
+                    const delaySec = Math.min(Math.pow(2, retryCount.value), 30);
+                    retryCountdown.value = delaySec;
+
+                    if (retryCountdownInterval) clearInterval(retryCountdownInterval);
+                    retryCountdownInterval = setInterval(() => {
+                        if (retryCountdown.value > 0) {
+                            retryCountdown.value--;
+                        } else {
+                            clearInterval(retryCountdownInterval);
+                        }
+                    }, 1000);
+
+                    if (retryTimer) clearTimeout(retryTimer);
+                    retryTimer = setTimeout(() => {
+                        flushOutboxQueue();
+                    }, delaySec * 1000);
+                };
+
+                const saveFullStateToGAS = async (isManual = false) => {
+                    if (!gasUrl.value) return;
+                    isSyncing.value = true;
+                    syncStatus.value = 'syncing';
+                    try {
+                        const payload = JSON.stringify({ students: students.value });
+                        const res = await fetch(gasUrl.value, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                            body: payload
+                        });
+                        const json = await res.json();
+                        if (json && json.status === 'success') {
+                            outboxQueue.value = [];
+                            saveOutboxQueue();
+                            syncStatus.value = 'synced';
+                            const now = new Date();
+                            lastSyncedTime.value = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+                            localStorage.setItem('mahasiswi_last_synced', lastSyncedTime.value);
+                            if (isManual) showAlert('Sinkronisasi Berhasil!', 'Data keaktifan mahasiswi berhasil dikirim ke Google Spreadsheet.');
+                        } else {
+                            syncStatus.value = 'error';
+                        }
+                    } catch (err) {
+                        syncStatus.value = 'error';
+                    } finally {
+                        isSyncing.value = false;
+                    }
+                };
+
                 // Save GAS URL to Local Storage
                 const saveGasUrl = () => {
                     gasUrl.value = gasUrlInput.value.trim();
                     localStorage.setItem('mahasiswi_gas_url', gasUrl.value);
                     if (!gasUrl.value) {
                         syncStatus.value = 'offline';
-                        showAlert('Mode Lokal Aktivated', 'URL Google Apps Script telah dihapus. Portal berjalan dalam mode simpan lokal.');
+                        showAlert('Mode Lokal Diaktifkan', 'URL Google Apps Script telah dihapus. Portal berjalan dalam mode simpan lokal.');
                     } else {
                         testGasConnection();
                     }
@@ -1146,8 +1314,8 @@
                         const json = await res.json();
                         if (json && json.status === 'success') {
                             syncStatus.value = 'synced';
-                            showAlert('Koneksi Berhasil! 🎉', 'Terhubung dengan Google Apps Script Backend. Memulai sinkronisasi data...');
-                            saveToGAS();
+                            showAlert('Koneksi Berhasil! 🎉', 'Terhubung dengan Google Apps Script Backend. Memulai sinkronisasi antrean...');
+                            flushOutboxQueue();
                         } else {
                             syncStatus.value = 'error';
                             showAlert('Koneksi Gagal', json.message || 'Respon dari Apps Script tidak sesuai.');
@@ -1157,45 +1325,6 @@
                         showAlert('Koneksi Gagal', 'Tidak dapat terhubung ke URL Apps Script. Pastikan Web App sudah di-deploy dengan akses "Siapa saja" (Anyone).');
                     } finally {
                         isTestingConnection.value = false;
-                    }
-                };
-
-                // Push Data to Google Spreadsheet
-                const saveToGAS = async (isManual = false) => {
-                    if (!gasUrl.value) {
-                        syncStatus.value = 'offline';
-                        return;
-                    }
-                    syncStatus.value = 'syncing';
-                    isSyncing.value = true;
-
-                    try {
-                        const payload = JSON.stringify({ students: students.value });
-                        const res = await fetch(gasUrl.value, {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'text/plain;charset=utf-8'
-                            },
-                            body: payload
-                        });
-                        const json = await res.json();
-                        if (json && json.status === 'success') {
-                            syncStatus.value = 'synced';
-                            const now = new Date();
-                            lastSyncedTime.value = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
-                            localStorage.setItem('mahasiswi_last_synced', lastSyncedTime.value);
-                            if (isManual) {
-                                showAlert('Sinkronisasi Berhasil!', 'Data keaktifan mahasiswi berhasil dikirim dan dirapikan di Google Spreadsheet.');
-                            }
-                        } else {
-                            syncStatus.value = 'error';
-                            if (isManual) showAlert('Gagal Menyimpan', json.message || 'Terjadi kesalahan pada Apps Script.');
-                        }
-                    } catch (err) {
-                        syncStatus.value = 'error';
-                        if (isManual) showAlert('Gagal Menyimpan', 'Terjadi kesalahan jaringan saat mengirim data ke Spreadsheet.');
-                    } finally {
-                        isSyncing.value = false;
                     }
                 };
 
@@ -1212,7 +1341,12 @@
                         const res = await fetch(loadUrl);
                         const json = await res.json();
                         if (json && json.status === 'success' && json.data && Array.isArray(json.data)) {
-                            students.value = json.data;
+                            if (outboxQueue.value.length === 0) {
+                                students.value = json.data;
+                                saveLocalCache();
+                            } else {
+                                flushOutboxQueue();
+                            }
                             syncStatus.value = 'synced';
                             const now = new Date();
                             lastSyncedTime.value = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
@@ -1220,7 +1354,7 @@
                             if (isManual) showAlert('Berhasil!', 'Data mahasiswi berhasil ditarik dari Google Spreadsheet.');
                         } else if (json && json.status === 'empty') {
                             if (isManual) showAlert('Informasi', 'Spreadsheet belum memiliki data tersimpan. Mengirimkan data lokal saat ini...');
-                            saveToGAS();
+                            saveFullStateToGAS();
                         } else {
                             syncStatus.value = 'error';
                             if (isManual) showAlert('Gagal', json.message || 'Gagal memuat data dari Spreadsheet.');
@@ -1233,39 +1367,50 @@
                     }
                 };
 
-                // Debounced Auto-sync trigger (1.5s delay to keep UI ultra responsive)
-                const triggerAutoSync = () => {
-                    if (!gasUrl.value) return;
-                    if (autoSyncTimer) clearTimeout(autoSyncTimer);
-                    syncStatus.value = 'syncing';
-                    autoSyncTimer = setTimeout(() => {
-                        saveToGAS();
-                    }, 1500);
-                };
-
                 // Copy Google Apps Script backend code
                 const copyAppsScriptCode = () => {
                     const code = `/**
- * BACKEND GOOGLE APPS SCRIPT - PORTAL KEAKTIFAN MAHASISWI
+ * BACKEND GOOGLE APPS SCRIPT - PORTAL KEAKTIFAN MAHASISWI (CACHE-FIRST)
  */
 function doGet(e) {
   var action = (e && e.parameter && e.parameter.action) ? e.parameter.action : 'load';
   if (action === 'ping') return createJsonResponse({ status: 'success', message: 'Koneksi Berhasil!' });
   try {
+    var cache = CacheService.getScriptCache();
+    var cachedData = cache.get('STUDENTS_CACHE_DATA');
+    if (cachedData && action === 'load') {
+      return createJsonResponse({ status: 'success', message: 'Data dimuat dari Cache', data: JSON.parse(cachedData), cached: true });
+    }
+  } catch (cErr) {}
+
+  try {
     var ss = SpreadsheetApp.getActiveSpreadsheet();
     var parsedStudents = parseCourseSheets(ss);
     if (parsedStudents && parsedStudents.length > 0) {
+      updateServerCache(parsedStudents);
       return createJsonResponse({ status: 'success', message: 'Data dimuat dari Spreadsheet', data: parsedStudents });
     }
     var dbSheet = ss.getSheetByName('DB_JSON');
     if (dbSheet) {
       var jsonText = dbSheet.getRange('A1').getValue();
-      if (jsonText) return createJsonResponse({ status: 'success', message: 'Data dimuat dari DB_JSON', data: JSON.parse(jsonText) });
+      if (jsonText) {
+        var parsedData = JSON.parse(jsonText);
+        updateServerCache(parsedData);
+        return createJsonResponse({ status: 'success', message: 'Data dimuat dari DB_JSON', data: parsedData });
+      }
     }
     return createJsonResponse({ status: 'empty', data: null });
   } catch (err) {
     return createJsonResponse({ status: 'error', message: err.toString() });
   }
+}
+
+function updateServerCache(studentsData) {
+  try {
+    var cache = CacheService.getScriptCache();
+    var jsonStr = JSON.stringify(studentsData);
+    if (jsonStr.length < 100000) cache.put('STUDENTS_CACHE_DATA', jsonStr, 21600);
+  } catch (e) {}
 }
 
 function parseCourseSheets(ss) {
@@ -1328,11 +1473,18 @@ function doPost(e) {
     if (!e || !e.postData || !e.postData.contents) return createJsonResponse({ status: 'error', message: 'No payload' });
     var payload = JSON.parse(e.postData.contents);
     var studentsData = payload.students || payload;
+    var processedMutationsCount = 0;
+    if (payload.action === 'batch_mutation' && Array.isArray(payload.mutations)) {
+      processedMutationsCount = payload.mutations.length;
+    }
     var ss = SpreadsheetApp.getActiveSpreadsheet();
     var dbSheet = ss.getSheetByName('DB_JSON') || ss.insertSheet('DB_JSON');
     dbSheet.getRange('A1').setValue(JSON.stringify(studentsData));
-    if (Array.isArray(studentsData)) renderCourseSheets(ss, studentsData);
-    return createJsonResponse({ status: 'success', message: 'Tersimpan ke Spreadsheet!' });
+    if (Array.isArray(studentsData)) {
+      renderCourseSheets(ss, studentsData);
+      updateServerCache(studentsData);
+    }
+    return createJsonResponse({ status: 'success', message: 'Tersimpan ke Spreadsheet!', mutationsProcessed: processedMutationsCount });
   } catch (err) {
     return createJsonResponse({ status: 'error', message: err.toString() });
   }
@@ -1381,13 +1533,8 @@ function renderCourseSheets(ss, students) {
   });
 }`;
                     navigator.clipboard.writeText(code);
-                    showAlert('Kode Disalin!', 'Kode Google Apps Script telah disalin. Buka Apps Script dan tempelkan kode tersebut.');
+                    showAlert('Kode Disalin!', 'Kode Google Apps Script terbaru dengan Server-Side Cache telah disalin.');
                 };
-
-                watch(students, (newVal) => {
-                    localStorage.setItem('mahasiswi_nilai_data_v11', JSON.stringify(newVal));
-                    triggerAutoSync();
-                }, { deep: true });
 
                 const currentCourseStudents = computed(() => {
                     return students.value.filter(s => s.courses && s.courses.includes(activeCourseId.value));
@@ -1399,14 +1546,6 @@ function renderCourseSheets(ss, students) {
                     return currentCourseStudents.value.filter(s => 
                         s.name.toLowerCase().includes(q) || s.nim.includes(q)
                     );
-                });
-
-                const allStudentsList = computed(() => {
-                    return [...students.value].sort((a, b) => a.name.localeCompare(b.name));
-                });
-
-                const selectedStudent = computed(() => {
-                    return students.value.find(s => s.id === selectedStudentId.value) || null;
                 });
 
                 const rankedStudents = computed(() => {
@@ -1448,7 +1587,9 @@ function renderCourseSheets(ss, students) {
                         if (!student.stars[activeCourseId.value]) {
                             student.stars[activeCourseId.value] = {};
                         }
-                        student.stars[activeCourseId.value][meeting] = Math.max(0, count);
+                        const newCount = Math.max(0, count);
+                        student.stars[activeCourseId.value][meeting] = newCount;
+                        enqueueMutation('UPDATE_STARS', { studentId, courseId: activeCourseId.value, meeting, count: newCount });
                     }
                 };
 
@@ -1471,6 +1612,7 @@ function renderCourseSheets(ss, students) {
                             student.notes[activeCourseId.value] = {};
                         }
                         student.notes[activeCourseId.value][meeting] = text;
+                        enqueueMutation('UPDATE_NOTE', { studentId, courseId: activeCourseId.value, meeting, text });
                     }
                 };
 
@@ -1480,31 +1622,12 @@ function renderCourseSheets(ss, students) {
                     return Object.values(student.stars[courseId]).reduce((a, b) => a + (b || 0), 0);
                 };
 
-                const getStudentAllCoursesTotalStars = (studentId) => {
-                    const student = students.value.find(s => s.id === studentId);
-                    if (!student || !student.courses) return 0;
-                    return student.courses.reduce((acc, cId) => acc + getTotalStars(studentId, cId), 0);
-                };
-
-                const getActiveMeetingsCountForStudent = (studentId, courseId) => {
-                    let count = 0;
-                    for (let m = 1; m <= 16; m++) {
-                        if (getMeetingStars(studentId, m, courseId) > 0) count++;
-                    }
-                    return count;
-                };
-
                 const getStudentCount = (courseId) => {
                     return students.value.filter(s => s.courses && s.courses.includes(courseId)).length;
                 };
 
                 const getActiveCourseName = () => {
                     const c = courses.find(item => item.id === activeCourseId.value);
-                    return c ? `${c.name} (${c.kelas})` : '';
-                };
-
-                const getCourseNameById = (id) => {
-                    const c = courses.find(item => item.id === id);
                     return c ? `${c.name} (${c.kelas})` : '';
                 };
 
@@ -1524,8 +1647,12 @@ function renderCourseSheets(ss, students) {
 
                 const giveBulkStars = () => {
                     filteredStudents.value.forEach(s => {
-                        changeStars(s.id, activeMeeting.value, 1);
+                        const current = getMeetingStars(s.id, activeMeeting.value);
+                        if (!s.stars) s.stars = {};
+                        if (!s.stars[activeCourseId.value]) s.stars[activeCourseId.value] = {};
+                        s.stars[activeCourseId.value][activeMeeting.value] = current + 1;
                     });
+                    enqueueMutation('BULK_STARS', { courseId: activeCourseId.value, meeting: activeMeeting.value });
                     showAlert('Berhasil', `Memberikan +1 bintang masal untuk semua mahasiswi pada Pertemuan ${activeMeeting.value}.`);
                 };
 
@@ -1554,7 +1681,6 @@ function renderCourseSheets(ss, students) {
                         showAlert('Peringatan', 'Nama dan NIM wajib diisi.');
                         return;
                     }
-
                     if (studentForm.value.courses.length === 0) {
                         showAlert('Peringatan', 'Pilih minimal satu kelas/mata kuliah.');
                         return;
@@ -1566,6 +1692,7 @@ function renderCourseSheets(ss, students) {
                             s.name = studentForm.value.name.trim();
                             s.nim = studentForm.value.nim.trim();
                             s.courses = [...studentForm.value.courses];
+                            enqueueMutation('EDIT_STUDENT', { studentId: s.id, name: s.name, nim: s.nim, courses: s.courses });
                         }
                     } else {
                         const newId = `MHS-${Date.now()}`;
@@ -1575,14 +1702,16 @@ function renderCourseSheets(ss, students) {
                             newStars[c.id] = {};
                             newNotes[c.id] = {};
                         });
-                        students.value.unshift({
+                        const newStudent = {
                             id: newId,
                             name: studentForm.value.name.trim(),
                             nim: studentForm.value.nim.trim(),
                             courses: [...studentForm.value.courses],
                             stars: newStars,
                             notes: newNotes
-                        });
+                        };
+                        students.value.unshift(newStudent);
+                        enqueueMutation('ADD_STUDENT', { student: newStudent });
                     }
                     closeStudentModal();
                 };
@@ -1595,6 +1724,7 @@ function renderCourseSheets(ss, students) {
                         isConfirm: true,
                         onConfirm: () => {
                             students.value = students.value.filter(s => s.id !== studentId);
+                            enqueueMutation('DELETE_STUDENT', { studentId });
                             closeStudentModal();
                             customAlert.value.show = false;
                         },
@@ -1610,6 +1740,7 @@ function renderCourseSheets(ss, students) {
                         isConfirm: true,
                         onConfirm: () => {
                             students.value = generateDefaultStudents();
+                            enqueueMutation('RESET_DATA', {});
                             customAlert.value.show = false;
                             showAlert('Berhasil', 'Data telah direset ke default.');
                         },
@@ -1620,7 +1751,6 @@ function renderCourseSheets(ss, students) {
                 const downloadCSV = () => {
                     const courseName = getActiveCourseName();
                     let csvContent = "data:text/csv;charset=utf-8,";
-                    
                     let headers = ["No", "NIM", "Nama Mahasiswi"];
                     for (let m = 1; m <= 16; m++) {
                         headers.push(`P${m}`);
@@ -1649,9 +1779,24 @@ function renderCourseSheets(ss, students) {
                 };
 
                 onMounted(() => {
-                    loadData();
+                    loadLocalCache();
+                    loadOutboxQueue();
+
+                    window.addEventListener('online', () => {
+                        isOnline.value = true;
+                        if (gasUrl.value) flushOutboxQueue();
+                    });
+                    window.addEventListener('offline', () => {
+                        isOnline.value = false;
+                        syncStatus.value = 'offline';
+                    });
+
                     if (gasUrl.value) {
-                        loadFromGAS(false);
+                        if (outboxQueue.value.length > 0) {
+                            flushOutboxQueue();
+                        } else {
+                            loadFromGAS(false);
+                        }
                     }
                 });
 
@@ -1670,13 +1815,15 @@ function renderCourseSheets(ss, students) {
                     customAlert,
                     gasUrl,
                     gasUrlInput,
+                    outboxQueue,
                     syncStatus,
                     lastSyncedTime,
                     isSyncing,
                     isTestingConnection,
+                    retryCountdown,
                     saveGasUrl,
                     testGasConnection,
-                    saveToGAS,
+                    flushOutboxQueue,
                     loadFromGAS,
                     copyAppsScriptCode,
                     courses,
@@ -1694,7 +1841,6 @@ function renderCourseSheets(ss, students) {
                     getTotalStars,
                     getStudentCount,
                     getActiveCourseName,
-                    getCourseNameById,
                     getInitials,
                     getRankBadgeClass,
                     giveBulkStars,
