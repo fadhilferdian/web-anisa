@@ -3,14 +3,16 @@
  * GOOGLE APPS SCRIPT BACKEND - PORTAL KEAKTIFAN MAHASISWI (ROBUST SYNC ENGINE)
  * ============================================================================
  * Prinsip:
- * 1. SPREADSHEET ADALAH SOURCE OF TRUTH UTAMA:
+ * 1. SPREADSHEET ADALAH SINGLE SOURCE OF TRUTH:
  *    Data dibaca langsung dari lembar sheet masing-masing mata kuliah.
- * 2. ANTI-DATA LOSS:
+ * 2. TOLERAN NILAI BINTANG:
+ *    Mendukung angka biasa (1, 2, 3), emoji bintang (⭐, ★), centang (✓, v), checkbox (TRUE).
+ * 3. ANTI-DATA LOSS:
  *    Sinkronisasi tidak akan pernah menghapus bintang atau mahasiswi yang sudah ada.
- * 3. CHUNKED STORAGE:
+ * 4. CHUNKED STORAGE:
  *    Tab DB_JSON disimpan per baris sehingga terhindar dari batas 50.000 karakter per sel.
- * 4. TOLERAN NAMA LEMBAR SHEET:
- *    Mampu mendeteksi nama tab sheet secara cerdas dan fleksibel.
+ * 5. FLEKSIBEL NAMA SHEET & KOLOM:
+ *    Mendeteksi otomatis header NIM, Nama, dan kolom P1-P16 pada sheet mata kuliah.
  */
 
 // Konfigurasi Standar Mata Kuliah
@@ -23,7 +25,7 @@ var COURSE_CONFIG = {
 };
 
 /**
- * Handle HTTP GET (Memuat data langsung dari Spreadsheet ke Web App)
+ * Handle HTTP GET (Memuat data langsung dari Spreadsheet sebagai Single Source of Truth)
  */
 function doGet(e) {
   var action = (e && e.parameter && e.parameter.action) ? e.parameter.action : 'load';
@@ -39,7 +41,8 @@ function doGet(e) {
   try {
     var ss = SpreadsheetApp.getActiveSpreadsheet();
     
-    // 1. PRIORITAS UTAMA: Baca langsung data nyata dari tab Spreadsheet!
+    // 1. SPREADSHEET SEBAGAI SINGLE SOURCE OF TRUTH:
+    // Baca langsung dari lembar sheet Spreadsheet yang ada!
     var parsedStudents = parseAllCourseSheets(ss);
     
     if (parsedStudents && Array.isArray(parsedStudents) && parsedStudents.length > 0) {
@@ -49,7 +52,7 @@ function doGet(e) {
       writeDbJson(ss, parsedStudents);
       return createJsonResponse({
         status: 'success',
-        message: 'Data berhasil dimuat langsung dari lembar Spreadsheet',
+        message: 'Data berhasil dimuat langsung dari lembar Spreadsheet (Single Source of Truth)',
         data: parsedStudents,
         total: parsedStudents.length,
         source: 'sheets'
@@ -103,7 +106,7 @@ function doPost(e) {
     var processedMutationsCount = 0;
     var finalStudents = [];
 
-    // Jika mutasi bertahap dikirimkan
+    // Jika mutasi bertahap dikirimkan dari Outbox Queue
     if (payload.action === 'batch_mutation' && Array.isArray(payload.mutations) && payload.mutations.length > 0) {
       finalStudents = applyMutations(existingStudents, payload.mutations);
       processedMutationsCount = payload.mutations.length;
@@ -169,14 +172,14 @@ function parseAllCourseSheets(ss) {
 function findSheetForCourse(ss, courseId) {
   var sheets = ss.getSheets();
   
-  // 1. Cek nama persis
+  // 1. Cek nama persis dari konfigurasi
   var defaultName = COURSE_CONFIG[courseId] ? COURSE_CONFIG[courseId].name : '';
   if (defaultName) {
     var exactSheet = ss.getSheetByName(defaultName);
     if (exactSheet) return exactSheet;
   }
   
-  // 2. Cek variasi kata kunci
+  // 2. Cek variasi kata kunci toleran
   var keywords = {
     'tafsir': ['tafsir'],
     'sirah1': ['sirah 1', 'sirah1', 'sirah nabawiyah 1', 'kpi'],
@@ -196,6 +199,35 @@ function findSheetForCourse(ss, courseId) {
     }
   }
   return null;
+}
+
+/**
+ * Parser serbaguna untuk membaca nilai bintang di sel (angka, emoji bintang, centang, boolean)
+ */
+function parseStarValue(cell) {
+  if (cell === null || cell === undefined || cell === '') return 0;
+  if (typeof cell === 'number') return Math.max(0, cell);
+  if (typeof cell === 'boolean') return cell ? 1 : 0;
+  
+  var str = String(cell).trim();
+  if (!str) return 0;
+  
+  // Jika angka biasa (misal: "1", "3", "5")
+  var num = Number(str);
+  if (!isNaN(num)) return Math.max(0, num);
+  
+  // Jika berisi emoji bintang: ⭐ (U+2B50), 🌟, ★ (U+2605)
+  var starMatches = str.match(/[\u2B50\u2605\u2728\uD83C\uDF1F]/g);
+  if (starMatches && starMatches.length > 0) {
+    return starMatches.length;
+  }
+  
+  // Jika centang atau huruf hadhir: ✓, ✔, V, v, H, h, X, x
+  if (/^[vV✓✔xXhH]$/.test(str)) {
+    return 1;
+  }
+  
+  return 0;
 }
 
 /**
@@ -235,7 +267,7 @@ function parseSingleCourseSheet(sheet, courseId, studentMap) {
     nimColIdx = 1;
     nameColIdx = 2;
   } else {
-    // Deteksi kolom P1 s.d P16
+    // Deteksi kolom P1 s.d P16 pada baris header
     var headerRow = data[headerRowIdx];
     for (var c = 0; c < headerRow.length; c++) {
       var colText = String(headerRow[c] || '').trim().toUpperCase();
@@ -292,9 +324,9 @@ function parseSingleCourseSheet(sheet, courseId, studentMap) {
     for (var m = 1; m <= 16; m++) {
       var cIdx = meetingColMap[m];
       if (cIdx !== undefined && cIdx < row.length) {
-        var val = Number(row[cIdx]);
-        if (!isNaN(val) && val > 0) {
-          student.stars[courseId][m] = val;
+        var starVal = parseStarValue(row[cIdx]);
+        if (starVal > 0) {
+          student.stars[courseId][m] = starVal;
         }
       }
     }
