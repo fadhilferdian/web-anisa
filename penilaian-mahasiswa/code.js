@@ -2,14 +2,18 @@
  * ============================================================================
  * GOOGLE APPS SCRIPT BACKEND - PORTAL KEAKTIFAN MAHASISWI (ROBUST SYNC ENGINE)
  * ============================================================================
- * Fitur:
- * 1. Safe Chunked Storage: Mengatasi batas 50.000 karakter per sel di Spreadsheet.
- * 2. Incremental Mutation Processor: Menangani mutasi satu per satu tanpa menghapus data lama.
- * 3. Safe Merge: Data lama di Spreadsheet tidak akan terhapus jika client mengirim data kosong/stale.
- * 4. Human-Readable Sheets: Otomatis merender lembar rekap rapi per mata kuliah.
+ * Prinsip:
+ * 1. SPREADSHEET ADALAH SOURCE OF TRUTH UTAMA:
+ *    Data dibaca langsung dari lembar sheet masing-masing mata kuliah.
+ * 2. ANTI-DATA LOSS:
+ *    Sinkronisasi tidak akan pernah menghapus bintang atau mahasiswi yang sudah ada.
+ * 3. CHUNKED STORAGE:
+ *    Tab DB_JSON disimpan per baris sehingga terhindar dari batas 50.000 karakter per sel.
+ * 4. TOLERAN NAMA LEMBAR SHEET:
+ *    Mampu mendeteksi nama tab sheet secara cerdas dan fleksibel.
  */
 
-// Konfigurasi Mata Kuliah & Lembar Sheet
+// Konfigurasi Standar Mata Kuliah
 var COURSE_CONFIG = {
   'tafsir': { name: 'Rekap Tafsir Al-Qur\'an', label: 'Tafsir Al-Qur\'an (PAI III)' },
   'sirah1': { name: 'Rekap Sirah Nabawiyah 1', label: 'Sirah Nabawiyah 1 (KPI I)' },
@@ -19,7 +23,7 @@ var COURSE_CONFIG = {
 };
 
 /**
- * Handle HTTP GET (Ping & Memuat Data ke Frontend)
+ * Handle HTTP GET (Memuat data langsung dari Spreadsheet ke Web App)
  */
 function doGet(e) {
   var action = (e && e.parameter && e.parameter.action) ? e.parameter.action : 'load';
@@ -35,27 +39,32 @@ function doGet(e) {
   try {
     var ss = SpreadsheetApp.getActiveSpreadsheet();
     
-    // 1. Coba baca dari tab DB_JSON (Format JSON utuh tersimpan dalam chunk baris)
+    // 1. PRIORITAS UTAMA: Baca langsung data nyata dari tab Spreadsheet!
+    var parsedStudents = parseAllCourseSheets(ss);
+    
+    if (parsedStudents && Array.isArray(parsedStudents) && parsedStudents.length > 0) {
+      // Perkaya dengan catatan lama jika ada di DB_JSON
+      enrichWithDbNotes(ss, parsedStudents);
+      // Simpan snapshot aman ke DB_JSON
+      writeDbJson(ss, parsedStudents);
+      return createJsonResponse({
+        status: 'success',
+        message: 'Data berhasil dimuat langsung dari lembar Spreadsheet',
+        data: parsedStudents,
+        total: parsedStudents.length,
+        source: 'sheets'
+      });
+    }
+    
+    // 2. Fallback: Coba baca dari DB_JSON jika tab mata kuliah belum terisi
     var dbData = readDbJson(ss);
     if (dbData && Array.isArray(dbData) && dbData.length > 0) {
       return createJsonResponse({
         status: 'success',
         message: 'Data berhasil dimuat dari DB_JSON Spreadsheet',
         data: dbData,
+        total: dbData.length,
         source: 'db_json'
-      });
-    }
-    
-    // 2. Fallback: Parse langsung dari lembar mata kuliah jika DB_JSON belum tersedia
-    var parsedStudents = parseCourseSheets(ss);
-    if (parsedStudents && Array.isArray(parsedStudents) && parsedStudents.length > 0) {
-      // Simpan ke DB_JSON agar panggilan berikutnya lebih cepat & persisten
-      writeDbJson(ss, parsedStudents);
-      return createJsonResponse({
-        status: 'success',
-        message: 'Data berhasil dimuat dari lembar mata kuliah Spreadsheet',
-        data: parsedStudents,
-        source: 'sheets'
       });
     }
     
@@ -74,7 +83,7 @@ function doGet(e) {
 }
 
 /**
- * Handle HTTP POST (Penyimpanan & Sinkronisasi Bertahap Tanpa Hapus Data)
+ * Handle HTTP POST (Penyimpanan Aman & Terkendali Tanpa Menghapus Data Lama)
  */
 function doPost(e) {
   try {
@@ -85,32 +94,36 @@ function doPost(e) {
     var payload = JSON.parse(e.postData.contents);
     var ss = SpreadsheetApp.getActiveSpreadsheet();
     
-    // 1. Muat data yang sudah ada di Spreadsheet sebagai basis authoritative
-    var existingStudents = readDbJson(ss) || parseCourseSheets(ss) || [];
+    // Muat data yang saat ini ada di Spreadsheet sebagai basis authoritative
+    var existingStudents = parseAllCourseSheets(ss);
+    if (!existingStudents || existingStudents.length === 0) {
+      existingStudents = readDbJson(ss) || [];
+    }
+    
     var processedMutationsCount = 0;
     var finalStudents = [];
 
-    // 2. Jika mutasi bertahap (Batch Mutations) dikirim dari Outbox Queue
+    // Jika mutasi bertahap dikirimkan
     if (payload.action === 'batch_mutation' && Array.isArray(payload.mutations) && payload.mutations.length > 0) {
       finalStudents = applyMutations(existingStudents, payload.mutations);
       processedMutationsCount = payload.mutations.length;
     } 
-    // 3. Jika pengiriman data penuh (Full Sync / Fallback)
+    // Jika sinkronisasi penuh dikirimkan
     else if (payload.students && Array.isArray(payload.students)) {
       if (existingStudents.length === 0) {
         finalStudents = payload.students;
       } else {
-        // Lakukan penggabungan aman (Safe Merge) agar bintang di spreadsheet tidak terhapus
+        // Safe Merge: Jangan pernah menimpa bintang yang sudah ada dengan 0
         finalStudents = safeMergeStudents(existingStudents, payload.students);
       }
     } else {
       finalStudents = existingStudents;
     }
     
-    // 4. Simpan hasil mutasi/penggabungan ke DB_JSON dengan chunked storage (aman dari limit 50k)
+    // Simpan ke DB_JSON
     writeDbJson(ss, finalStudents);
     
-    // 5. Render tampilan tabel visual di masing-masing sheet mata kuliah
+    // Render kembali lembar rekap rapi di masing-masing tab mata kuliah
     renderCourseSheets(ss, finalStudents);
     
     return createJsonResponse({
@@ -131,7 +144,184 @@ function doPost(e) {
 }
 
 /**
- * Memproses daftar mutasi secara bertahap terhadap dataset server
+ * Membaca data langsung dari seluruh lembar mata kuliah di Spreadsheet
+ */
+function parseAllCourseSheets(ss) {
+  var studentMap = {};
+
+  Object.keys(COURSE_CONFIG).forEach(function(courseId) {
+    var sheet = findSheetForCourse(ss, courseId);
+    if (!sheet) return;
+    parseSingleCourseSheet(sheet, courseId, studentMap);
+  });
+
+  var resultList = [];
+  Object.keys(studentMap).forEach(function(k) {
+    resultList.push(studentMap[k]);
+  });
+
+  return resultList;
+}
+
+/**
+ * Mencari sheet berdasarkan ID mata kuliah dengan fleksibilitas nama
+ */
+function findSheetForCourse(ss, courseId) {
+  var sheets = ss.getSheets();
+  
+  // 1. Cek nama persis
+  var defaultName = COURSE_CONFIG[courseId] ? COURSE_CONFIG[courseId].name : '';
+  if (defaultName) {
+    var exactSheet = ss.getSheetByName(defaultName);
+    if (exactSheet) return exactSheet;
+  }
+  
+  // 2. Cek variasi kata kunci
+  var keywords = {
+    'tafsir': ['tafsir'],
+    'sirah1': ['sirah 1', 'sirah1', 'sirah nabawiyah 1', 'kpi'],
+    'sirah2': ['sirah 2', 'sirah2', 'sirah nabawiyah 2', 'pba'],
+    'sharaf': ['sharaf', 'shorof', 'sarf', 'ilmu sharaf', 'il'],
+    'tauhid': ['tauhid', 'tawhid', 'ilmu tauhid', 'pai vii', 'pai 7']
+  };
+
+  var targetKeywords = keywords[courseId] || [courseId];
+
+  for (var i = 0; i < sheets.length; i++) {
+    var name = sheets[i].getName().toLowerCase();
+    for (var k = 0; k < targetKeywords.length; k++) {
+      if (name.indexOf(targetKeywords[k]) !== -1) {
+        return sheets[i];
+      }
+    }
+  }
+  return null;
+}
+
+/**
+ * Membaca satu lembar sheet mata kuliah secara cerdas
+ */
+function parseSingleCourseSheet(sheet, courseId, studentMap) {
+  var lastRow = sheet.getLastRow();
+  var lastCol = sheet.getLastColumn();
+  if (lastRow < 2 || lastCol < 2) return;
+
+  var data = sheet.getRange(1, 1, lastRow, lastCol).getValues();
+
+  // Cari baris header yang memuat 'NIM' atau 'Nama'
+  var headerRowIdx = -1;
+  var nimColIdx = -1;
+  var nameColIdx = -1;
+  var meetingColMap = {};
+
+  for (var r = 0; r < Math.min(data.length, 10); r++) {
+    var row = data[r];
+    for (var c = 0; c < row.length; c++) {
+      var cellVal = String(row[c] || '').trim().toLowerCase();
+      if (cellVal === 'nim' || cellVal.indexOf('nim') !== -1) {
+        nimColIdx = c;
+        headerRowIdx = r;
+      } else if (cellVal.indexOf('nama') !== -1) {
+        nameColIdx = c;
+        headerRowIdx = r;
+      }
+    }
+    if (headerRowIdx !== -1) break;
+  }
+
+  // Fallback posisi standar jika header tidak ditemukan
+  if (headerRowIdx === -1) {
+    headerRowIdx = (lastRow >= 4) ? 2 : 0;
+    nimColIdx = 1;
+    nameColIdx = 2;
+  } else {
+    // Deteksi kolom P1 s.d P16
+    var headerRow = data[headerRowIdx];
+    for (var c = 0; c < headerRow.length; c++) {
+      var colText = String(headerRow[c] || '').trim().toUpperCase();
+      var match = colText.match(/^P(\d+)$/);
+      if (match) {
+        var mNum = parseInt(match[1], 10);
+        if (mNum >= 1 && mNum <= 16) {
+          meetingColMap[mNum] = c;
+        }
+      }
+    }
+  }
+
+  // Jika kolom P1..P16 tidak ada di header teks, gunakan kolom setelah nama
+  if (Object.keys(meetingColMap).length === 0) {
+    var startCol = (nameColIdx !== -1 ? nameColIdx + 1 : 3);
+    for (var m = 1; m <= 16; m++) {
+      var targetC = startCol + (m - 1);
+      if (targetC < lastCol) {
+        meetingColMap[m] = targetC;
+      }
+    }
+  }
+
+  // Baca tiap baris mahasiswi
+  for (var r = headerRowIdx + 1; r < data.length; r++) {
+    var row = data[r];
+    var rawNim = (nimColIdx !== -1 && row[nimColIdx] !== undefined) ? String(row[nimColIdx]).trim() : '';
+    var nim = rawNim.replace(/^'/, '').trim();
+    var name = (nameColIdx !== -1 && row[nameColIdx] !== undefined) ? String(row[nameColIdx]).trim() : '';
+
+    if (!name && !nim) continue;
+    if (name.toLowerCase() === 'nama mahasiswi' || nim.toLowerCase() === 'nim') continue;
+    if (name.toLowerCase().indexOf('total') !== -1) continue;
+
+    var key = nim || name;
+    if (!studentMap[key]) {
+      studentMap[key] = {
+        id: 'MHS-' + (nim ? nim : name.replace(/\s+/g, '_')),
+        nim: nim,
+        name: name,
+        courses: [],
+        stars: { tafsir: {}, sirah1: {}, sirah2: {}, sharaf: {}, tauhid: {} },
+        notes: { tafsir: {}, sirah1: {}, sirah2: {}, sharaf: {}, tauhid: {} }
+      };
+    }
+
+    var student = studentMap[key];
+    if (student.courses.indexOf(courseId) === -1) {
+      student.courses.push(courseId);
+    }
+    if (!student.stars[courseId]) student.stars[courseId] = {};
+
+    for (var m = 1; m <= 16; m++) {
+      var cIdx = meetingColMap[m];
+      if (cIdx !== undefined && cIdx < row.length) {
+        var val = Number(row[cIdx]);
+        if (!isNaN(val) && val > 0) {
+          student.stars[courseId][m] = val;
+        }
+      }
+    }
+  }
+}
+
+/**
+ * Memperkaya hasil parse dengan catatan dari DB_JSON
+ */
+function enrichWithDbNotes(ss, parsedStudents) {
+  try {
+    var dbData = readDbJson(ss);
+    if (!dbData || !Array.isArray(dbData)) return;
+    var noteMap = {};
+    dbData.forEach(function(s) {
+      if (s.nim && s.notes) noteMap[s.nim] = s.notes;
+    });
+    parsedStudents.forEach(function(s) {
+      if (s.nim && noteMap[s.nim]) {
+        s.notes = noteMap[s.nim];
+      }
+    });
+  } catch(e) {}
+}
+
+/**
+ * Memproses mutasi bertahap terhadap dataset server
  */
 function applyMutations(students, mutations) {
   var list = students.slice(0);
@@ -276,7 +466,7 @@ function safeMergeStudents(serverList, incomingList) {
 }
 
 /**
- * Membaca JSON utuh dari tab DB_JSON yang terbagi per baris (Chunked)
+ * Membaca JSON utuh dari tab DB_JSON secara chunked
  */
 function readDbJson(ss) {
   var dbSheet = ss.getSheetByName('DB_JSON');
@@ -301,8 +491,7 @@ function readDbJson(ss) {
 }
 
 /**
- * Menyimpan JSON ke tab DB_JSON secara chunked per baris (maks 30.000 karakter per baris)
- * Hal ini 100% mencegah error limit 50.000 karakter per sel di Google Spreadsheet!
+ * Menyimpan JSON ke tab DB_JSON secara chunked per baris (bebas batas 50k karakter)
  */
 function writeDbJson(ss, data) {
   var dbSheet = ss.getSheetByName('DB_JSON');
@@ -327,69 +516,6 @@ function writeDbJson(ss, data) {
 }
 
 /**
- * Helper untuk membaca data dari tab rekap mata kuliah jika DB_JSON belum ada
- */
-function parseCourseSheets(ss) {
-  var studentMap = {};
-
-  Object.keys(COURSE_CONFIG).forEach(function(courseId) {
-    var config = COURSE_CONFIG[courseId];
-    var sheet = ss.getSheetByName(config.name);
-    if (!sheet) return;
-
-    var lastRow = sheet.getLastRow();
-    if (lastRow < 4) return;
-
-    var lastCol = sheet.getLastColumn();
-    var colsToFetch = Math.min(Math.max(lastCol, 3), 20);
-    var values = sheet.getRange(4, 1, lastRow - 3, colsToFetch).getValues();
-
-    values.forEach(function(row) {
-      var rawNim = String(row[1] || '').trim();
-      var nim = rawNim.replace(/^'/, '');
-      var name = String(row[2] || '').trim();
-
-      if (!nim && !name) return;
-
-      var key = nim || name;
-      if (!studentMap[key]) {
-        studentMap[key] = {
-          id: 'MHS-' + (nim ? nim : name.replace(/\s+/g, '_')),
-          nim: nim,
-          name: name,
-          courses: [],
-          stars: { tafsir: {}, sirah1: {}, sirah2: {}, sharaf: {}, tauhid: {} },
-          notes: { tafsir: {}, sirah1: {}, sirah2: {}, sharaf: {}, tauhid: {} }
-        };
-      }
-
-      var student = studentMap[key];
-      if (student.courses.indexOf(courseId) === -1) {
-        student.courses.push(courseId);
-      }
-
-      if (!student.stars[courseId]) student.stars[courseId] = {};
-      for (var m = 1; m <= 16; m++) {
-        var colIdx = 2 + m;
-        if (colIdx < colsToFetch) {
-          var val = Number(row[colIdx]);
-          if (!isNaN(val) && val > 0) {
-            student.stars[courseId][m] = val;
-          }
-        }
-      }
-    });
-  });
-
-  var resultList = [];
-  Object.keys(studentMap).forEach(function(k) {
-    resultList.push(studentMap[k]);
-  });
-
-  return resultList;
-}
-
-/**
  * Merender lembar rekap rapi per mata kuliah (Human Readable)
  */
 function renderCourseSheets(ss, students) {
@@ -397,7 +523,7 @@ function renderCourseSheets(ss, students) {
 
   Object.keys(COURSE_CONFIG).forEach(function(courseId) {
     var config = COURSE_CONFIG[courseId];
-    var sheet = ss.getSheetByName(config.name);
+    var sheet = findSheetForCourse(ss, courseId);
     if (!sheet) {
       sheet = ss.insertSheet(config.name);
     } else {
