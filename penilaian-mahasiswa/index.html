@@ -323,8 +323,30 @@
                         </div>
                     </div>
 
+                    <!-- Loading State (Saat Pertama Kali Memuat Tanpa Cache) -->
+                    <div v-if="isLoadingStudents && filteredStudents.length === 0" class="clean-card p-12 rounded-3xl text-center space-y-4">
+                        <div class="w-14 h-14 rounded-2xl bg-tosca-50 text-tosca-700 flex items-center justify-center mx-auto text-2xl animate-pulse">
+                            <i class="fa-solid fa-cloud-arrow-down fa-bounce"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-slate-800 text-base">Menghubungkan ke Google Spreadsheet...</h3>
+                            <p class="text-xs text-slate-500 mt-1 max-w-sm mx-auto">Memuat data mahasiswi & nilai bintang real-time agar tersinkronisasi di semua perangkat.</p>
+                        </div>
+                    </div>
+
+                    <!-- Empty State -->
+                    <div v-else-if="filteredStudents.length === 0" class="clean-card p-12 rounded-3xl text-center space-y-3">
+                        <div class="w-12 h-12 rounded-2xl bg-slate-100 text-slate-400 flex items-center justify-center mx-auto text-xl">
+                            <i class="fa-solid fa-users-slash"></i>
+                        </div>
+                        <p class="text-xs font-semibold text-slate-600">Tidak ada mahasiswi ditemukan untuk kelas ini.</p>
+                        <button @click="loadFromGAS(true)" class="px-4 py-2 bg-tosca-600 hover:bg-tosca-700 text-white rounded-xl text-xs font-bold shadow-sm transition">
+                            <i class="fa-solid fa-arrows-rotate mr-1.5"></i> Segarkan dari Spreadsheet
+                        </button>
+                    </div>
+
                     <!-- LIST MAHASISWI CARDS FOR CURRENT MEETING -->
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                         <div 
                             v-for="student in filteredStudents" 
                             :key="student.id"
@@ -446,7 +468,17 @@
                     </div>
 
                     <div class="overflow-x-auto custom-scrollbar">
-                        <table class="w-full text-left text-xs border-collapse">
+                        <div v-if="isLoadingStudents && filteredStudents.length === 0" class="p-12 text-center space-y-3">
+                            <i class="fa-solid fa-spinner fa-spin text-2xl text-tosca-600"></i>
+                            <p class="text-xs text-slate-500">Menghubungkan & memuat tabel nilai dari Google Spreadsheet...</p>
+                        </div>
+                        <div v-else-if="filteredStudents.length === 0" class="p-12 text-center space-y-3">
+                            <p class="text-xs font-semibold text-slate-600">Tidak ada data mahasiswi di kelas ini.</p>
+                            <button @click="loadFromGAS(true)" class="px-4 py-2 bg-tosca-600 hover:bg-tosca-700 text-white rounded-xl text-xs font-bold shadow-sm transition">
+                                <i class="fa-solid fa-arrows-rotate mr-1.5"></i> Segarkan dari Spreadsheet
+                            </button>
+                        </div>
+                        <table v-else class="w-full text-left text-xs border-collapse">
                             <thead>
                                 <tr class="bg-tosca-800 text-white font-bold text-xs uppercase tracking-wider">
                                     <th class="p-3 sticky left-0 bg-tosca-800 z-10 min-w-[200px] border-r border-tosca-700">Nama Mahasiswi</th>
@@ -825,20 +857,22 @@
                         </button>
                     </div>
 
-                    <ol class="text-[11.5px] text-slate-600 space-y-2 list-decimal list-inside leading-relaxed">
+                    <ol class="text-[11.5px] text-slate-600 space-y-2.5 list-decimal list-inside leading-relaxed">
                         <li>
-                            Buka Google Spreadsheet baru &gt; Menu <b>Ekstensi</b> &gt; <b>Apps Script</b>.
+                            Buka Google Spreadsheet &gt; Menu <b>Ekstensi</b> &gt; <b>Apps Script</b>.
                         </li>
                         <li>
-                            Hapus isi <code>Code.gs</code>, tempelkan kode Apps Script (dari file <code>google_apps_script.gs</code> atau via tombol Salin di atas), lalu tekan <b>Simpan</b> (Ctrl+S).
+                            Hapus seluruh isi <code>Code.gs</code>, tempelkan kode Apps Script terbaru via tombol <b>Salin Kode Backend</b> di atas, lalu tekan <b>Simpan</b> (Ctrl+S).
                         </li>
                         <li>
-                            Klik <b>Terapkan (Deploy)</b> di kanan atas &gt; <b>Terapkan sebagai Aplikasi Web</b>:
-                            <div class="ml-4 mt-1 space-y-0.5 font-mono text-[10.5px] bg-white p-2 rounded-lg border border-slate-200">
-                                <div>&bull; Jalankan sebagai: <b>Saya (Me)</b></div>
-                                <div>&bull; Siapa yang memiliki akses: <b>Siapa saja (Anyone)</b></div>
+                            <b class="text-tosca-900">Deploy Versi Baru (Wajib agar Perubahan Aktif di Cloud):</b>
+                            <div class="ml-4 mt-1.5 space-y-1 font-mono text-[10.5px] bg-white p-2.5 rounded-lg border border-slate-200">
+                                <div>1. Klik <b>Terapkan (Deploy)</b> &gt; pilih <b>Kelola penerapan (Manage deployments)</b>.</div>
+                                <div>2. Klik ikon <b>Pensil (Edit)</b> pada penerapan aktif.</div>
+                                <div>3. Pada dropdown <b>Versi (Version)</b>, pilih <b>Versi baru (New version)</b>.</div>
+                                <div>4. Pastikan akses: <b>Siapa saja (Anyone)</b>.</div>
+                                <div>5. Klik <b>Terapkan (Deploy)</b>. Selesai!</div>
                             </div>
-                            Selesai! Aplikasi ini sudah otomatis terhubung ke Google Spreadsheet Anda.
                         </li>
                     </ol>
                 </div>
@@ -903,13 +937,31 @@
                 const studentForm = ref({ name: '', nim: '', courses: [] });
 
                 // ============================================================
-                // KONFIGURASI BAKU GOOGLE APPS SCRIPT WEB APP (HARDCODED)
+                // KONFIGURASI SINKRONISASI CLOUD & STORAGE KEYS
                 // ============================================================
                 const DEFAULT_GAS_URL = 'https://script.google.com/macros/s/AKfycbysGc7z5Efgpj2t1Tuj2xgmeW_ThoA2klwKCa8SPCas8YdDQuf7lJTebK01wW4VDZ0/exec';
+                const STORAGE_KEY_STUDENTS = 'mahasiswi_cloud_students_v14';
+                const STORAGE_KEY_OUTBOX = 'mahasiswi_cloud_outbox_v14';
+                const STORAGE_KEY_DELETED = 'mahasiswi_cloud_deleted_v14';
+                const STORAGE_KEY_LAST_SYNC = 'mahasiswi_cloud_last_sync_v14';
+
+                // Bersihkan cache lama (versi hardcode terisolasi) dari seluruh device
+                try {
+                    const legacyKeys = [
+                        'mahasiswi_nilai_data_v12',
+                        'mahasiswi_nilai_data_v11',
+                        'mahasiswi_nilai_data_v10',
+                        'mahasiswi_outbox_queue_v1',
+                        'mahasiswi_deleted_ids',
+                        'mahasiswi_last_synced',
+                        'mahasiswi_gas_url'
+                    ];
+                    legacyKeys.forEach(k => localStorage.removeItem(k));
+                } catch (e) {}
 
                 const gasUrl = ref(DEFAULT_GAS_URL);
                 const syncStatus = ref('synced'); // 'synced' | 'syncing' | 'offline' | 'error'
-                const lastSyncedTime = ref(localStorage.getItem('mahasiswi_last_synced') || '');
+                const lastSyncedTime = ref(localStorage.getItem(STORAGE_KEY_LAST_SYNC) || '');
                 const isSyncing = ref(false);
                 const isTestingConnection = ref(false);
                 let autoSyncTimer = null;
@@ -942,231 +994,12 @@
                     { id: 'tauhid', name: 'Ilmu Tauhid', kelas: 'PAI VII', icon: 'fa-solid fa-sun' }
                 ];
 
-                const tauhidStudentsData = [
-                    { nim: "23303182", name: "Afini Rizkiya Afifah" },
-                    { nim: "23303183", name: "Agustin" },
-                    { nim: "23303184", name: "Ainayaa Nur Fadhillah" },
-                    { nim: "23303185", name: "Ainun Mardiyah" },
-                    { nim: "23303187", name: "Amelia Suciyanti" },
-                    { nim: "23303188", name: "Apserina Aqwa Hrp" },
-                    { nim: "23303189", name: "Devi Agustina" },
-                    { nim: "23303190", name: "Fannia Masrur Aini" },
-                    { nim: "23303191", name: "Fatimah Az-Zahra" },
-                    { nim: "23303192", name: "Filzah Auliya" },
-                    { nim: "23303194", name: "Halimah Tussakdiah" },
-                    { nim: "23303195", name: "Hanna Salsabila" },
-                    { nim: "23303196", name: "Haya Zahra" },
-                    { nim: "23303198", name: "Intan Maulidia Fajri" },
-                    { nim: "23303199", name: "Isma Liana" },
-                    { nim: "23303200", name: "Khairani Ulfa" },
-                    { nim: "23303201", name: "Latifatuz Zahra" },
-                    { nim: "23303202", name: "Liyyu Lathifa" },
-                    { nim: "23303203", name: "Maya Fadillah" },
-                    { nim: "23303204", name: "Meilenda Astuti" },
-                    { nim: "23303205", name: "Melja Safitri" },
-                    { nim: "23303206", name: "Mufidah Zahro" },
-                    { nim: "23303207", name: "Mutia Rahmah" },
-                    { nim: "23303208", name: "Nancy Pransiska" },
-                    { nim: "23303209", name: "Nur Fitriani" },
-                    { nim: "23303211", name: "Putri Junita" },
-                    { nim: "23303212", name: "Qonita" },
-                    { nim: "23303213", name: "Shiddiqa Saelan Mumpuni" },
-                    { nim: "23303214", name: "Shinta Amelia Khairani" },
-                    { nim: "23303215", name: "Shofiyyah" },
-                    { nim: "23303216", name: "Sindi Tifani" },
-                    { nim: "23303217", name: "Sumayyah Abizar" },
-                    { nim: "23303218", name: "Zahratumina" },
-                    { nim: "23303228", name: "Mutia Frawina" },
-                    { nim: "23303229", name: "Shinta Rohimah Simanjuntak" },
-                    { nim: "23303230", name: "Annisa Aulia Syahfitri" }
-                ];
-
-                const sharafStudentsData = [
-                    { nim: "266081040", name: "Ade Putri Al Azmi" },
-                    { nim: "266081041", name: "Ahzaura Khoiru Reza" },
-                    { nim: "266081042", name: "Aisha Muna Aufa" },
-                    { nim: "266081043", name: "Aisyah Ramadhani" },
-                    { nim: "266081044", name: "Anastasya Helmi Nasution" },
-                    { nim: "266081045", name: "Anil Hawa Safira" },
-                    { nim: "266081046", name: "Asiyah Sofiah" },
-                    { nim: "266081047", name: "Asti Rahana Harahap" },
-                    { nim: "266081048", name: "Cahaya Mutiara Diniah" },
-                    { nim: "266081049", name: "Humaira Rizki" },
-                    { nim: "266081050", name: "Kaila Luthfiani" },
-                    { nim: "266081051", name: "Louryma Nesya Putri" },
-                    { nim: "266081052", name: "Lubna Tabris" },
-                    { nim: "266081053", name: "Meilany Putri Nawawi" },
-                    { nim: "266081054", name: "Nabila Afifah Maiza" },
-                    { nim: "266081055", name: "Nada Mutia Pertiwi" },
-                    { nim: "266081056", name: "Nadhifa Zahrah" },
-                    { nim: "266081057", name: "Nadiyah Kholilah Cahputri" },
-                    { nim: "266081058", name: "Nashiha Al Madani Sitepu" },
-                    { nim: "266081059", name: "Nasywa Majidah" },
-                    { nim: "266081060", name: "Niswatur Rahma" },
-                    { nim: "266081061", name: "Nur Hurin Annabiha" },
-                    { nim: "266081062", name: "Rosna Yanti" },
-                    { nim: "266081063", name: "Salsabila Umairoh" },
-                    { nim: "266081064", name: "Saylan Niamy Ahmad" },
-                    { nim: "266081065", name: "Sulfani Deswila" },
-                    { nim: "266081066", name: "Valawa Nyak Alkhalifi" },
-                    { nim: "266081067", name: "Wilda Shulhana" },
-                    { nim: "266081068", name: "Yocy Rahmi Illahi" },
-                    { nim: "266081069", name: "Zahratul Azkia Fitri" },
-                    { nim: "266081070", name: "Zalfa Muthmainnah" }
-                ];
-
-                const sirah1StudentsData = [
-                    { nim: "26215537", name: "Aluna Syahgita" },
-                    { nim: "26215538", name: "Amelia Fitri" },
-                    { nim: "26215539", name: "Annisa 'Abidah Qororotul Iman" },
-                    { nim: "26215540", name: "Aqilla Salwa Ramadhani" },
-                    { nim: "26215541", name: "Asmaul Husna Arrahman" },
-                    { nim: "26215542", name: "Asyifa Dwi Kirana" },
-                    { nim: "26215543", name: "Athari Raihan" },
-                    { nim: "26215544", name: "Bida Siyah Siregar" },
-                    { nim: "26215545", name: "Dini Fazira" },
-                    { nim: "26215546", name: "Frezia Nayara Amelia Putri" },
-                    { nim: "26215547", name: "Fuji Lestari" },
-                    { nim: "26215548", name: "Indri Septia" },
-                    { nim: "26215549", name: "Kirana Aulia Putri Nasution" },
-                    { nim: "26215550", name: "Maidonatul Usnah" },
-                    { nim: "26215551", name: "Mugi Najla Mumpuni" },
-                    { nim: "26215552", name: "Nadhini Zahra" },
-                    { nim: "26215553", name: "Nailah Az Zahra" },
-                    { nim: "26215554", name: "Najwa Syifa Fuadah" },
-                    { nim: "26215555", name: "Naurah Zifa Azizah" },
-                    { nim: "26215556", name: "Nida' Syahidah" },
-                    { nim: "26215557", name: "Nurul Hidayah" },
-                    { nim: "26215558", name: "Nurul Thoybah" },
-                    { nim: "26215559", name: "Oryzae Sativa" },
-                    { nim: "26215560", name: "Puteri Delima Fathimah" },
-                    { nim: "26215561", name: "Qaisha Kumala Sari Nasution" },
-                    { nim: "26215562", name: "Ratu Balqis Zaskia" },
-                    { nim: "26215563", name: "Rizka Aulia Sirait" },
-                    { nim: "26215564", name: "Saira Ramadhani" },
-                    { nim: "26215565", name: "Salpida Hasnasyifa" },
-                    { nim: "26215566", name: "Shofa Ramadhani" },
-                    { nim: "26215567", name: "Sri Fadilah Hanum" },
-                    { nim: "26215568", name: "Suci Ramadhani Tanjung" },
-                    { nim: "26215569", name: "Sufura Nabilia Alidinah" },
-                    { nim: "26215570", name: "Suhaila Syafhah" },
-                    { nim: "26215571", name: "Ummu Salva Aisyah Kurniawan" }
-                ];
-
-                const sirah2StudentsData = [
-                    { nim: "261151393", name: "Adzkia Fathiyah Cahyu" },
-                    { nim: "261151394", name: "Alisya Mutiara Syahranny" },
-                    { nim: "261151395", name: "Aluna Gelcy Rumaisalwa" },
-                    { nim: "261151396", name: "Arsya Mulyana" },
-                    { nim: "261151397", name: "Audinar Maharani" },
-                    { nim: "261151398", name: "Berlianita Nasution" },
-                    { nim: "261151399", name: "Cut Syumaisah" },
-                    { nim: "261151400", name: "Devi Dayanti Siahaan" },
-                    { nim: "261151401", name: "Dini Hanifa Putri" },
-                    { nim: "261151402", name: "Dzakiyyah Az-Zahra" },
-                    { nim: "261151403", name: "Fatin Shidqiyah" },
-                    { nim: "261151404", name: "Fatma Fatimah Anamont" },
-                    { nim: "261151405", name: "Gita Nabilla" },
-                    { nim: "261151406", name: "Hanifatul Husna" },
-                    { nim: "261151407", name: "Khatamy Annisa" },
-                    { nim: "261151408", name: "Laras Herfita Loka" },
-                    { nim: "261151409", name: "Maidatil Fitri" },
-                    { nim: "261151410", name: "Maryam" },
-                    { nim: "261151411", name: "Miftahirrisqa" },
-                    { nim: "261151412", name: "Millati Hanifa" },
-                    { nim: "261151413", name: "Nabillah" },
-                    { nim: "261151414", name: "Nailah Syahda Fatin" },
-                    { nim: "261151415", name: "Nellayati Daulay" },
-                    { nim: "261151416", name: "Nur Azizah" },
-                    { nim: "261151417", name: "Nurul Asita" },
-                    { nim: "261151418", name: "Nurul Umayah" },
-                    { nim: "261151419", name: "Nyuwanda Agusti" },
-                    { nim: "261151420", name: "Putri Imam Diyaulhaq" },
-                    { nim: "261151421", name: "Reva Gadizha" },
-                    { nim: "261151422", name: "Salma Ramadhani" },
-                    { nim: "261151423", name: "Salsa Bila Harahap" },
-                    { nim: "261151424", name: "Sausan Elfaryana" },
-                    { nim: "261151425", name: "Silmi Uswatun Hasanah" },
-                    { nim: "261151426", name: "Suci Nurhidayah" },
-                    { nim: "261151427", name: "Uci Hardianti" },
-                    { nim: "261151428", name: "Wahyu Ningsih" },
-                    { nim: "261151429", name: "Wan Mutia Khuwailid Hasibuan" },
-                    { nim: "261151430", name: "Whenny Widya Rabono" }
-                ];
-
-                const tafsirStudentsData = [
-                    { nim: "25305331", name: "Alfiana Melin" },
-                    { nim: "25305332", name: "Aliatul Bariza" },
-                    { nim: "25305333", name: "Andriani" },
-                    { nim: "25305334", name: "Annisa Salsabila Suheidi" },
-                    { nim: "25305335", name: "Asma Nadia" },
-                    { nim: "25305336", name: "Bilqis Aghnia Fawaz" },
-                    { nim: "25305337", name: "Desi Wulandari" },
-                    { nim: "25305338", name: "Ejlin Salwa Khodijah" },
-                    { nim: "25305339", name: "Fauziah" },
-                    { nim: "25305340", name: "Fepy Padilah Ramadani" },
-                    { nim: "25305341", name: "Ferbi Nazwa Ghaniyah" },
-                    { nim: "25305342", name: "Ghina Mardiyah" },
-                    { nim: "25305343", name: "Hayaaul Hamidah Nasution" },
-                    { nim: "25305344", name: "Jamilatun Nazma" },
-                    { nim: "25305345", name: "Jihan Dillah Arkinanti" },
-                    { nim: "25305346", name: "Julianta Harahap" },
-                    { nim: "25305347", name: "Kasiani" },
-                    { nim: "25305348", name: "Khoirotun Nisa" },
-                    { nim: "25305349", name: "Luna Clarisya" },
-                    { nim: "25305350", name: "Munawwarah Afiah" },
-                    { nim: "25305351", name: "Nabila Noverinda Harahap" },
-                    { nim: "25305352", name: "Nadhiatun Nisa" },
-                    { nim: "25305353", name: "Najla Nashifah Dasta" },
-                    { nim: "25305354", name: "Najwa Helyana Yusri" },
-                    { nim: "25305355", name: "Neza Maizura" },
-                    { nim: "25305356", name: "Nur Fadhilah Putri" },
-                    { nim: "25305357", name: "Nur Hidayah" },
-                    { nim: "25305358", name: "Nurlaila Suhada" },
-                    { nim: "25305359", name: "Oktavia Pratama" },
-                    { nim: "25305360", name: "R Algisti Nesya Nazahra" },
-                    { nim: "25305363", name: "Siti Ikrimah Arbaiyah" },
-                    { nim: "25305364", name: "Syakira Salsa Az Zahra" },
-                    { nim: "25305365", name: "Syarifah Ulayya Ikhsani" },
-                    { nim: "25305366", name: "Syariifah Nabiilatul Muthmainnah" },
-                    { nim: "25305367", name: "Zahwa Muchlis" },
-                    { nim: "25305368", name: "Zhafira Keisha Amany" },
-                    { nim: "25305371", name: "Alya Nabila Simatupang" },
-                    { nim: "25305372", name: "Kayla Hani Fadhillah Harahap" },
-                    { nim: "25503361", name: "Raisyah Syahira Sirait" }
-                ];
-
-                const generateDefaultStudents = () => {
-                    const studentList = [];
-
-                    const addCourseData = (dataset, courseKey) => {
-                        dataset.forEach((item, idx) => {
-                            const id = `MHS-${courseKey.toUpperCase()}-${idx + 1}`;
-                            const stars = { tafsir: {}, sirah1: {}, sirah2: {}, sharaf: {}, tauhid: {} };
-                            const notes = { tafsir: {}, sirah1: {}, sirah2: {}, sharaf: {}, tauhid: {} };
-
-                            studentList.push({
-                                id, nim: item.nim, name: item.name,
-                                courses: [courseKey],
-                                stars, notes
-                            });
-                        });
-                    };
-
-                    addCourseData(tauhidStudentsData, 'tauhid');
-                    addCourseData(sharafStudentsData, 'sharaf');
-                    addCourseData(sirah1StudentsData, 'sirah1');
-                    addCourseData(sirah2StudentsData, 'sirah2');
-                    addCourseData(tafsirStudentsData, 'tafsir');
-
-                    return studentList;
-                };
-
                 const students = ref([]);
+                const isLoadingStudents = ref(true);
                 const outboxQueue = ref([]);
                 let initialDeleted = [];
                 try {
-                    initialDeleted = JSON.parse(localStorage.getItem('mahasiswi_deleted_ids') || '[]');
+                    initialDeleted = JSON.parse(localStorage.getItem(STORAGE_KEY_DELETED) || '[]');
                 } catch (e) { initialDeleted = []; }
                 const deletedStudentIds = ref(initialDeleted);
 
@@ -1177,27 +1010,39 @@
                 let retryCountdownInterval = null;
 
                 const loadLocalCache = () => {
-                    const saved = localStorage.getItem('mahasiswi_nilai_data_v12') || localStorage.getItem('mahasiswi_nilai_data_v11');
-                    if (saved) {
-                        try {
-                            const parsed = JSON.parse(saved);
-                            students.value = parsed.filter(s => !deletedStudentIds.value.includes(s.id) && !deletedStudentIds.value.includes(s.nim));
-                        } catch (e) {
-                            students.value = generateDefaultStudents();
+                    // Jika offline, gunakan cadangan lokal
+                    if (!navigator.onLine) {
+                        const saved = localStorage.getItem(STORAGE_KEY_STUDENTS);
+                        if (saved) {
+                            try {
+                                const parsed = JSON.parse(saved);
+                                if (Array.isArray(parsed) && parsed.length > 0) {
+                                    students.value = parsed.filter(s => !deletedStudentIds.value.includes(s.id) && !deletedStudentIds.value.includes(s.nim));
+                                }
+                            } catch (e) {
+                                students.value = [];
+                            }
                         }
+                        isLoadingStudents.value = false;
                     } else {
-                        students.value = generateDefaultStudents();
+                        // Jika online, Google Spreadsheet adalah Single Source of Truth
+                        isLoadingStudents.value = true;
                     }
                 };
 
                 const saveLocalCache = () => {
-                    localStorage.setItem('mahasiswi_nilai_data_v12', JSON.stringify(students.value));
+                    try {
+                        localStorage.setItem(STORAGE_KEY_STUDENTS, JSON.stringify(students.value));
+                    } catch (e) {}
                 };
 
                 const loadOutboxQueue = () => {
                     try {
-                        const saved = localStorage.getItem('mahasiswi_outbox_queue_v1');
+                        const saved = localStorage.getItem(STORAGE_KEY_OUTBOX);
                         outboxQueue.value = saved ? JSON.parse(saved) : [];
+                        // Bersihkan mutasi pending yang lebih lama dari 1 jam agar antrean tidak macet
+                        const oneHourAgo = Date.now() - 3600000;
+                        outboxQueue.value = outboxQueue.value.filter(m => m.timestamp && m.timestamp > oneHourAgo);
                     } catch (e) {
                         outboxQueue.value = [];
                     }
@@ -1209,7 +1054,9 @@
                 };
 
                 const saveOutboxQueue = () => {
-                    localStorage.setItem('mahasiswi_outbox_queue_v1', JSON.stringify(outboxQueue.value));
+                    try {
+                        localStorage.setItem(STORAGE_KEY_OUTBOX, JSON.stringify(outboxQueue.value));
+                    } catch (e) {}
                 };
 
                 const enqueueMutation = (actionType, payload) => {
@@ -1273,8 +1120,8 @@
                                 saveLocalCache();
                             }
                             const now = new Date();
-                            lastSyncedTime.value = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
-                            localStorage.setItem('mahasiswi_last_synced', lastSyncedTime.value);
+                            lastSyncedTime.value = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+                            localStorage.setItem(STORAGE_KEY_LAST_SYNC, lastSyncedTime.value);
                             if (isManual) {
                                 showAlert('Sinkronisasi Berhasil!', 'Semua mutasi antrean berhasil terkirim dan disinkronkan ke Google Spreadsheet.');
                             }
@@ -1338,8 +1185,8 @@
                                 saveLocalCache();
                             }
                             const now = new Date();
-                            lastSyncedTime.value = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
-                            localStorage.setItem('mahasiswi_last_synced', lastSyncedTime.value);
+                            lastSyncedTime.value = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+                            localStorage.setItem(STORAGE_KEY_LAST_SYNC, lastSyncedTime.value);
                             if (isManual) showAlert('Sinkronisasi Berhasil!', 'Data keaktifan mahasiswi berhasil dikirim ke Google Spreadsheet.');
                         } else {
                             syncStatus.value = 'error';
@@ -1395,7 +1242,7 @@
                             if (outboxQueue.value.length === 0) {
                                 students.value = json.data;
                                 deletedStudentIds.value = [];
-                                localStorage.removeItem('mahasiswi_deleted_ids');
+                                localStorage.removeItem(STORAGE_KEY_DELETED);
                             } else {
                                 // Jika ada mutasi pending, pertahankan filter hapus lokal sementara
                                 students.value = json.data.filter(s => 
@@ -1406,8 +1253,8 @@
                             saveLocalCache();
                             syncStatus.value = 'synced';
                             const now = new Date();
-                            lastSyncedTime.value = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
-                            localStorage.setItem('mahasiswi_last_synced', lastSyncedTime.value);
+                            lastSyncedTime.value = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+                            localStorage.setItem(STORAGE_KEY_LAST_SYNC, lastSyncedTime.value);
                             if (isManual) showAlert('Berhasil!', `Data terbaru (${json.data.length} mahasiswi) dan seluruh nilai bintang berhasil disinkronkan dari Spreadsheet.`);
                         } else if (json && json.status === 'empty') {
                             if (isManual) showAlert('Informasi', 'Spreadsheet belum memiliki data tersimpan.');
@@ -1420,6 +1267,7 @@
                         if (isManual) showAlert('Gagal Jaringan', 'Gagal terhubung ke Google Apps Script. Periksa koneksi internet atau izin Web App.');
                     } finally {
                         isSyncing.value = false;
+                        isLoadingStudents.value = false;
                     }
                 };
 
@@ -1455,6 +1303,9 @@ var COURSE_CONFIG = {
  * Handle HTTP GET (Memuat data langsung dari Spreadsheet sebagai Single Source of Truth)
  */
 function doGet(e) {
+  // Pastikan cache lama dihapus sepenuhnya
+  try { CacheService.getScriptCache().removeAll(['MAHASISWI_ALL_DATA_CACHE']); } catch(e) {}
+
   var action = (e && e.parameter && e.parameter.action) ? e.parameter.action : 'load';
   
   if (action === 'ping') {
@@ -1516,6 +1367,9 @@ function doGet(e) {
  * Handle HTTP POST (Penyimpanan Aman & Terkendali Tanpa Menghapus Data Lama)
  */
 function doPost(e) {
+  // Pastikan cache lama dihapus sepenuhnya
+  try { CacheService.getScriptCache().removeAll(['MAHASISWI_ALL_DATA_CACHE']); } catch(e) {}
+
   try {
     if (!e || !e.postData || !e.postData.contents) {
       return createJsonResponse({ status: 'error', message: 'Payload tidak ditemukan.' });
@@ -1528,6 +1382,8 @@ function doPost(e) {
     var existingStudents = parseAllCourseSheets(ss);
     if (!existingStudents || existingStudents.length === 0) {
       existingStudents = readDbJson(ss) || [];
+    } else {
+      enrichWithDbNotes(ss, existingStudents);
     }
     
     var processedMutationsCount = 0;
@@ -1797,10 +1653,31 @@ function enrichWithDbNotes(ss, parsedStudents) {
 function applyMutations(students, mutations) {
   var list = students.slice(0);
 
-  function findStudentIndex(id, nim) {
-    for (var i = 0; i < list.length; i++) {
-      if (id && list[i].id === id) return i;
-      if (nim && String(list[i].nim).trim() === String(nim).trim()) return i;
+  function findStudentIndex(id, nim, name) {
+    // 1. Prioritaskan pencocokan NIM (Kunci unik mahasiswa lintas device)
+    if (nim) {
+      var targetNim = String(nim).replace(/^'/, '').trim();
+      if (targetNim) {
+        for (var i = 0; i < list.length; i++) {
+          var sNim = String(list[i].nim || '').replace(/^'/, '').trim();
+          if (sNim && sNim === targetNim) return i;
+        }
+      }
+    }
+    // 2. Pencocokan ID
+    if (id) {
+      for (var i = 0; i < list.length; i++) {
+        if (list[i].id === id) return i;
+      }
+    }
+    // 3. Pencocokan Nama
+    if (name) {
+      var targetName = String(name).trim().toLowerCase();
+      if (targetName) {
+        for (var i = 0; i < list.length; i++) {
+          if (String(list[i].name || '').trim().toLowerCase() === targetName) return i;
+        }
+      }
     }
     return -1;
   }
@@ -1812,7 +1689,7 @@ function applyMutations(students, mutations) {
     switch (mut.type) {
       case 'ADD_STUDENT':
         if (p.student && p.student.name) {
-          var existingIdx = findStudentIndex(p.student.id, p.student.nim);
+          var existingIdx = findStudentIndex(p.student.id, p.student.nim, p.student.name);
           if (existingIdx === -1) {
             list.push(p.student);
           } else {
@@ -1827,7 +1704,7 @@ function applyMutations(students, mutations) {
         break;
 
       case 'UPDATE_STARS':
-        var idx = findStudentIndex(p.studentId, null);
+        var idx = findStudentIndex(p.studentId, p.nim, p.name);
         if (idx !== -1) {
           var student = list[idx];
           if (!student.stars) student.stars = {};
@@ -1837,7 +1714,7 @@ function applyMutations(students, mutations) {
         break;
 
       case 'UPDATE_NOTE':
-        var nIdx = findStudentIndex(p.studentId, null);
+        var nIdx = findStudentIndex(p.studentId, p.nim, p.name);
         if (nIdx !== -1) {
           var nStudent = list[nIdx];
           if (!nStudent.notes) nStudent.notes = {};
@@ -1860,7 +1737,7 @@ function applyMutations(students, mutations) {
         break;
 
       case 'EDIT_STUDENT':
-        var eIdx = findStudentIndex(p.studentId, null);
+        var eIdx = findStudentIndex(p.studentId, p.nim, p.name);
         if (eIdx !== -1) {
           list[eIdx].name = String(p.name || '').trim();
           list[eIdx].nim = String(p.nim || '').trim();
@@ -1869,7 +1746,7 @@ function applyMutations(students, mutations) {
         break;
 
       case 'DELETE_STUDENT':
-        var dIdx = findStudentIndex(p.studentId, p.nim);
+        var dIdx = findStudentIndex(p.studentId, p.nim, p.name);
         if (dIdx === -1 && p.name) {
           var targetName = String(p.name).trim().toLowerCase();
           for (var i = 0; i < list.length; i++) {
@@ -1898,12 +1775,12 @@ function applyMutations(students, mutations) {
 function safeMergeStudents(serverList, incomingList) {
   var serverMap = {};
   serverList.forEach(function(s) {
-    var key = s.id || s.nim;
+    var key = (s.nim ? String(s.nim).replace(/^'/, '').trim() : '') || s.id || s.name;
     serverMap[key] = s;
   });
 
   incomingList.forEach(function(inS) {
-    var key = inS.id || inS.nim;
+    var key = (inS.nim ? String(inS.nim).replace(/^'/, '').trim() : '') || inS.id || inS.name;
     if (!serverMap[key]) {
       serverList.push(inS);
       serverMap[key] = inS;
@@ -2130,7 +2007,14 @@ function createJsonResponse(obj) {
                         }
                         const newCount = Math.max(0, count);
                         student.stars[activeCourseId.value][meeting] = newCount;
-                        enqueueMutation('UPDATE_STARS', { studentId, courseId: activeCourseId.value, meeting, count: newCount });
+                        enqueueMutation('UPDATE_STARS', { 
+                            studentId, 
+                            nim: student.nim,
+                            name: student.name,
+                            courseId: activeCourseId.value, 
+                            meeting, 
+                            count: newCount 
+                        });
                     }
                 };
 
@@ -2153,7 +2037,14 @@ function createJsonResponse(obj) {
                             student.notes[activeCourseId.value] = {};
                         }
                         student.notes[activeCourseId.value][meeting] = text;
-                        enqueueMutation('UPDATE_NOTE', { studentId, courseId: activeCourseId.value, meeting, text });
+                        enqueueMutation('UPDATE_NOTE', { 
+                            studentId, 
+                            nim: student.nim,
+                            name: student.name,
+                            courseId: activeCourseId.value, 
+                            meeting, 
+                            text 
+                        });
                     }
                 };
 
@@ -2233,7 +2124,7 @@ function createJsonResponse(obj) {
                             s.name = studentForm.value.name.trim();
                             s.nim = studentForm.value.nim.trim();
                             s.courses = [...studentForm.value.courses];
-                            enqueueMutation('EDIT_STUDENT', { studentId: s.id, name: s.name, nim: s.nim, courses: s.courses });
+                            enqueueMutation('EDIT_STUDENT', { studentId: s.id, nim: s.nim, name: s.name, courses: s.courses });
                         }
                     } else {
                         const newId = `MHS-${Date.now()}`;
@@ -2256,7 +2147,7 @@ function createJsonResponse(obj) {
                         // Hapus dari blacklist jika sebelumnya pernah dihapus
                         const trimmedNim = studentForm.value.nim.trim();
                         deletedStudentIds.value = deletedStudentIds.value.filter(id => id !== newId && id !== trimmedNim);
-                        localStorage.setItem('mahasiswi_deleted_ids', JSON.stringify(deletedStudentIds.value));
+                        localStorage.setItem(STORAGE_KEY_DELETED, JSON.stringify(deletedStudentIds.value));
                         enqueueMutation('ADD_STUDENT', { student: newStudent });
                     }
                     closeStudentModal();
@@ -2275,7 +2166,7 @@ function createJsonResponse(obj) {
                             if (st) {
                                 if (st.id && !deletedStudentIds.value.includes(st.id)) deletedStudentIds.value.push(st.id);
                                 if (st.nim && !deletedStudentIds.value.includes(st.nim)) deletedStudentIds.value.push(st.nim);
-                                localStorage.setItem('mahasiswi_deleted_ids', JSON.stringify(deletedStudentIds.value));
+                                localStorage.setItem(STORAGE_KEY_DELETED, JSON.stringify(deletedStudentIds.value));
                             }
                             students.value = students.value.filter(s => s.id !== studentId);
                             enqueueMutation('DELETE_STUDENT', { 
@@ -2294,16 +2185,20 @@ function createJsonResponse(obj) {
                 const confirmResetData = () => {
                     customAlert.value = {
                         show: true,
-                        title: 'Reset Semua Data',
-                        message: 'Kembalikan data ke daftar mahasiswi default? Semua poin bintang tambahan akan dikembalikan ke awal.',
+                        title: 'Tarik Ulang dari Spreadsheet',
+                        message: 'Muat ulang seluruh data langsung dari Google Spreadsheet untuk memastikan sinkronisasi antar-perangkat?',
                         isConfirm: true,
-                        onConfirm: () => {
-                            deletedStudentIds.value = [];
-                            localStorage.removeItem('mahasiswi_deleted_ids');
-                            students.value = generateDefaultStudents();
-                            enqueueMutation('RESET_DATA', {});
+                        onConfirm: async () => {
                             customAlert.value.show = false;
-                            showAlert('Berhasil', 'Data telah direset ke default.');
+                            deletedStudentIds.value = [];
+                            try {
+                                localStorage.removeItem(STORAGE_KEY_DELETED);
+                                localStorage.removeItem(STORAGE_KEY_STUDENTS);
+                                localStorage.removeItem(STORAGE_KEY_OUTBOX);
+                            } catch (e) {}
+                            outboxQueue.value = [];
+                            isLoadingStudents.value = true;
+                            await loadFromGAS(true);
                         },
                         onCancel: () => { customAlert.value.show = false; }
                     };
@@ -2361,8 +2256,8 @@ function createJsonResponse(obj) {
                     let lastAutoPullTime = 0;
                     const triggerAutoPullFromGAS = () => {
                         const now = Date.now();
-                        // Throttle minimal 6 detik agar tidak spam request
-                        if (now - lastAutoPullTime < 6000) return;
+                        // Throttle minimal 4 detik agar tidak spam request
+                        if (now - lastAutoPullTime < 4000) return;
                         // Jangan sinkronkan jika sedang mengedit modal atau ada antrean lokal pending
                         if (showStudentModal.value || isSyncing.value || outboxQueue.value.length > 0) return;
                         if (gasUrl.value && isOnline.value) {
@@ -2378,12 +2273,12 @@ function createJsonResponse(obj) {
                         }
                     });
 
-                    // Polling berkala setiap 25 detik untuk memeriksa jika ada editan langsung di Spreadsheet
+                    // Polling berkala setiap 10 detik agar sinkronisasi antar-device langsung terasa responsif
                     setInterval(() => {
                         if (document.visibilityState === 'visible') {
                             triggerAutoPullFromGAS();
                         }
-                    }, 25000);
+                    }, 10000);
                 });
 
                 return {
@@ -2400,6 +2295,7 @@ function createJsonResponse(obj) {
                     studentForm,
                     customAlert,
                     gasUrl,
+                    isLoadingStudents,
                     outboxQueue,
                     syncStatus,
                     lastSyncedTime,

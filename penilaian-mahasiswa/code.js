@@ -28,6 +28,9 @@ var COURSE_CONFIG = {
  * Handle HTTP GET (Memuat data langsung dari Spreadsheet sebagai Single Source of Truth)
  */
 function doGet(e) {
+  // Pastikan cache lama dihapus sepenuhnya
+  try { CacheService.getScriptCache().removeAll(['MAHASISWI_ALL_DATA_CACHE']); } catch(e) {}
+
   var action = (e && e.parameter && e.parameter.action) ? e.parameter.action : 'load';
   
   if (action === 'ping') {
@@ -89,6 +92,9 @@ function doGet(e) {
  * Handle HTTP POST (Penyimpanan Aman & Terkendali Tanpa Menghapus Data Lama)
  */
 function doPost(e) {
+  // Pastikan cache lama dihapus sepenuhnya
+  try { CacheService.getScriptCache().removeAll(['MAHASISWI_ALL_DATA_CACHE']); } catch(e) {}
+
   try {
     if (!e || !e.postData || !e.postData.contents) {
       return createJsonResponse({ status: 'error', message: 'Payload tidak ditemukan.' });
@@ -101,6 +107,8 @@ function doPost(e) {
     var existingStudents = parseAllCourseSheets(ss);
     if (!existingStudents || existingStudents.length === 0) {
       existingStudents = readDbJson(ss) || [];
+    } else {
+      enrichWithDbNotes(ss, existingStudents);
     }
     
     var processedMutationsCount = 0;
@@ -370,10 +378,31 @@ function enrichWithDbNotes(ss, parsedStudents) {
 function applyMutations(students, mutations) {
   var list = students.slice(0);
 
-  function findStudentIndex(id, nim) {
-    for (var i = 0; i < list.length; i++) {
-      if (id && list[i].id === id) return i;
-      if (nim && String(list[i].nim).trim() === String(nim).trim()) return i;
+  function findStudentIndex(id, nim, name) {
+    // 1. Prioritaskan pencocokan NIM (Kunci unik mahasiswa lintas device)
+    if (nim) {
+      var targetNim = String(nim).replace(/^'/, '').trim();
+      if (targetNim) {
+        for (var i = 0; i < list.length; i++) {
+          var sNim = String(list[i].nim || '').replace(/^'/, '').trim();
+          if (sNim && sNim === targetNim) return i;
+        }
+      }
+    }
+    // 2. Pencocokan ID
+    if (id) {
+      for (var i = 0; i < list.length; i++) {
+        if (list[i].id === id) return i;
+      }
+    }
+    // 3. Pencocokan Nama
+    if (name) {
+      var targetName = String(name).trim().toLowerCase();
+      if (targetName) {
+        for (var i = 0; i < list.length; i++) {
+          if (String(list[i].name || '').trim().toLowerCase() === targetName) return i;
+        }
+      }
     }
     return -1;
   }
@@ -385,7 +414,7 @@ function applyMutations(students, mutations) {
     switch (mut.type) {
       case 'ADD_STUDENT':
         if (p.student && p.student.name) {
-          var existingIdx = findStudentIndex(p.student.id, p.student.nim);
+          var existingIdx = findStudentIndex(p.student.id, p.student.nim, p.student.name);
           if (existingIdx === -1) {
             list.push(p.student);
           } else {
@@ -400,7 +429,7 @@ function applyMutations(students, mutations) {
         break;
 
       case 'UPDATE_STARS':
-        var idx = findStudentIndex(p.studentId, null);
+        var idx = findStudentIndex(p.studentId, p.nim, p.name);
         if (idx !== -1) {
           var student = list[idx];
           if (!student.stars) student.stars = {};
@@ -410,7 +439,7 @@ function applyMutations(students, mutations) {
         break;
 
       case 'UPDATE_NOTE':
-        var nIdx = findStudentIndex(p.studentId, null);
+        var nIdx = findStudentIndex(p.studentId, p.nim, p.name);
         if (nIdx !== -1) {
           var nStudent = list[nIdx];
           if (!nStudent.notes) nStudent.notes = {};
@@ -433,7 +462,7 @@ function applyMutations(students, mutations) {
         break;
 
       case 'EDIT_STUDENT':
-        var eIdx = findStudentIndex(p.studentId, null);
+        var eIdx = findStudentIndex(p.studentId, p.nim, p.name);
         if (eIdx !== -1) {
           list[eIdx].name = String(p.name || '').trim();
           list[eIdx].nim = String(p.nim || '').trim();
@@ -442,7 +471,7 @@ function applyMutations(students, mutations) {
         break;
 
       case 'DELETE_STUDENT':
-        var dIdx = findStudentIndex(p.studentId, p.nim);
+        var dIdx = findStudentIndex(p.studentId, p.nim, p.name);
         if (dIdx === -1 && p.name) {
           var targetName = String(p.name).trim().toLowerCase();
           for (var i = 0; i < list.length; i++) {
@@ -471,12 +500,12 @@ function applyMutations(students, mutations) {
 function safeMergeStudents(serverList, incomingList) {
   var serverMap = {};
   serverList.forEach(function(s) {
-    var key = s.id || s.nim;
+    var key = (s.nim ? String(s.nim).replace(/^'/, '').trim() : '') || s.id || s.name;
     serverMap[key] = s;
   });
 
   incomingList.forEach(function(inS) {
-    var key = inS.id || inS.nim;
+    var key = (inS.nim ? String(inS.nim).replace(/^'/, '').trim() : '') || inS.id || inS.name;
     if (!serverMap[key]) {
       serverList.push(inS);
       serverMap[key] = inS;
