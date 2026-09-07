@@ -730,9 +730,14 @@
 
                 <!-- Form Web App URL -->
                 <div class="space-y-2">
-                    <label class="block text-xs font-bold text-slate-700">
-                        URL Aplikasi Web Apps Script (Web App URL)
-                    </label>
+                    <div class="flex items-center justify-between flex-wrap gap-1">
+                        <label class="block text-xs font-bold text-slate-700">
+                            URL Aplikasi Web Apps Script (Hardcoded Backend)
+                        </label>
+                        <span class="text-[10px] bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded-full border border-emerald-300 flex items-center gap-1">
+                            <i class="fa-solid fa-lock text-[9px]"></i> Auto-Sync Semua Device
+                        </span>
+                    </div>
                     <div class="flex gap-2">
                         <input 
                             v-model="gasUrlInput"
@@ -745,6 +750,9 @@
                             Simpan URL
                         </button>
                     </div>
+                    <p class="text-[11px] text-slate-500">
+                        URL ini sudah dikonfigurasi secara baku (hardcoded) dalam kode sistem agar seluruh perangkat langsung tersinkronisasi otomatis tanpa perlu input manual.
+                    </p>
                 </div>
 
                 <!-- Action Buttons: Manual Sync & Ping -->
@@ -865,8 +873,20 @@
                 const editingStudentId = ref(null);
                 const studentForm = ref({ name: '', nim: '', courses: [] });
 
-                // Google Apps Script Backend States
-                const gasUrl = ref(localStorage.getItem('mahasiswi_gas_url') || '');
+                // ============================================================
+                // KONFIGURASI HARDCODED GOOGLE APPS SCRIPT WEB APP
+                // ============================================================
+                // URL Web App Backend Google Apps Script (Baku / Hardcoded):
+                // Jika ingin mengganti URL secara permanen, ubah konstanta DEFAULT_GAS_URL di bawah ini.
+                const DEFAULT_GAS_URL = 'https://script.google.com/macros/s/AKfycbysGc7z5Efgpj2t1Tuj2xgmeW_ThoA2klwKCa8SPCas8YdDQuf7lJTebK01wW4VDZ0/exec';
+
+                // Inisialisasi: Prioritaskan DEFAULT_GAS_URL jika bukan placeholder,
+                // atau gunakan yang tersimpan di localStorage browser jika ada.
+                const initialGasUrl = (DEFAULT_GAS_URL && !DEFAULT_GAS_URL.includes('AKfycbz_web_anisa_backend'))
+                    ? DEFAULT_GAS_URL
+                    : (localStorage.getItem('mahasiswi_gas_url') || DEFAULT_GAS_URL);
+
+                const gasUrl = ref(initialGasUrl);
                 const gasUrlInput = ref(gasUrl.value);
                 const syncStatus = ref(gasUrl.value ? 'synced' : 'offline'); // 'synced' | 'syncing' | 'offline' | 'error'
                 const lastSyncedTime = ref(localStorage.getItem('mahasiswi_last_synced') || '');
@@ -1220,6 +1240,10 @@
                             saveOutboxQueue();
                             syncStatus.value = 'synced';
                             retryCount.value = 0;
+                            if (json.data && Array.isArray(json.data) && json.data.length > 0) {
+                                students.value = json.data;
+                                saveLocalCache();
+                            }
                             const now = new Date();
                             lastSyncedTime.value = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
                             localStorage.setItem('mahasiswi_last_synced', lastSyncedTime.value);
@@ -1266,7 +1290,10 @@
                     isSyncing.value = true;
                     syncStatus.value = 'syncing';
                     try {
-                        const payload = JSON.stringify({ students: students.value });
+                        const payload = JSON.stringify({ 
+                            action: 'full_sync',
+                            students: students.value 
+                        });
                         const res = await fetch(gasUrl.value, {
                             method: 'POST',
                             headers: { 'Content-Type': 'text/plain;charset=utf-8' },
@@ -1277,6 +1304,10 @@
                             outboxQueue.value = [];
                             saveOutboxQueue();
                             syncStatus.value = 'synced';
+                            if (json.data && Array.isArray(json.data) && json.data.length > 0) {
+                                students.value = json.data;
+                                saveLocalCache();
+                            }
                             const now = new Date();
                             lastSyncedTime.value = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
                             localStorage.setItem('mahasiswi_last_synced', lastSyncedTime.value);
@@ -1331,7 +1362,7 @@
                 // Pull Data from Google Spreadsheet
                 const loadFromGAS = async (isManual = false) => {
                     if (!gasUrl.value) {
-                        if (isManual) showAlert('Peringatan', 'Masukkan Web App URL terlebih dahulu.');
+                        if (isManual) showAlert('Peringatan', 'URL Google Apps Script belum terkonfigurasi.');
                         return;
                     }
                     syncStatus.value = 'syncing';
@@ -1340,18 +1371,14 @@
                         const loadUrl = gasUrl.value + (gasUrl.value.includes('?') ? '&' : '?') + 'action=load';
                         const res = await fetch(loadUrl);
                         const json = await res.json();
-                        if (json && json.status === 'success' && json.data && Array.isArray(json.data)) {
-                            if (outboxQueue.value.length === 0) {
-                                students.value = json.data;
-                                saveLocalCache();
-                            } else {
-                                flushOutboxQueue();
-                            }
+                        if (json && json.status === 'success' && json.data && Array.isArray(json.data) && json.data.length > 0) {
+                            students.value = json.data;
+                            saveLocalCache();
                             syncStatus.value = 'synced';
                             const now = new Date();
                             lastSyncedTime.value = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
                             localStorage.setItem('mahasiswi_last_synced', lastSyncedTime.value);
-                            if (isManual) showAlert('Berhasil!', 'Data mahasiswi berhasil ditarik dari Google Spreadsheet.');
+                            if (isManual) showAlert('Berhasil!', 'Data mahasiswi dan bintang berhasil ditarik dari Google Spreadsheet.');
                         } else if (json && json.status === 'empty') {
                             if (isManual) showAlert('Informasi', 'Spreadsheet belum memiliki data tersimpan. Mengirimkan data lokal saat ini...');
                             saveFullStateToGAS();
@@ -1361,7 +1388,7 @@
                         }
                     } catch (err) {
                         syncStatus.value = 'error';
-                        if (isManual) showAlert('Gagal Jaringan', 'Gagal terhubung ke Google Apps Script.');
+                        if (isManual) showAlert('Gagal Jaringan', 'Gagal terhubung ke Google Apps Script. Periksa koneksi internet atau izin Web App.');
                     } finally {
                         isSyncing.value = false;
                     }
@@ -1370,78 +1397,241 @@
                 // Copy Google Apps Script backend code
                 const copyAppsScriptCode = () => {
                     const code = `/**
- * BACKEND GOOGLE APPS SCRIPT - PORTAL KEAKTIFAN MAHASISWI (CACHE-FIRST)
+ * ============================================================================
+ * GOOGLE APPS SCRIPT BACKEND - PORTAL KEAKTIFAN MAHASISWI (ROBUST SYNC ENGINE)
+ * ============================================================================
  */
+
+var COURSE_CONFIG = {
+  'tafsir': { name: 'Rekap Tafsir Al-Qur\\'an', label: 'Tafsir Al-Qur\\'an (PAI III)' },
+  'sirah1': { name: 'Rekap Sirah Nabawiyah 1', label: 'Sirah Nabawiyah 1 (KPI I)' },
+  'sirah2': { name: 'Rekap Sirah Nabawiyah 2', label: 'Sirah Nabawiyah 2 (PBA I)' },
+  'sharaf': { name: 'Rekap Ilmu Sharaf', label: 'Ilmu Sharaf (IL)' },
+  'tauhid': { name: 'Rekap Ilmu Tauhid', label: 'Ilmu Tauhid (PAI VII)' }
+};
+
 function doGet(e) {
   var action = (e && e.parameter && e.parameter.action) ? e.parameter.action : 'load';
-  if (action === 'ping') return createJsonResponse({ status: 'success', message: 'Koneksi Berhasil!' });
-  try {
-    var cache = CacheService.getScriptCache();
-    var cachedData = cache.get('STUDENTS_CACHE_DATA');
-    if (cachedData && action === 'load') {
-      return createJsonResponse({ status: 'success', message: 'Data dimuat dari Cache', data: JSON.parse(cachedData), cached: true });
-    }
-  } catch (cErr) {}
-
+  if (action === 'ping') {
+    return createJsonResponse({ status: 'success', message: 'Koneksi ke Google Apps Script Backend Berhasil!' });
+  }
   try {
     var ss = SpreadsheetApp.getActiveSpreadsheet();
+    var dbData = readDbJson(ss);
+    if (dbData && Array.isArray(dbData) && dbData.length > 0) {
+      return createJsonResponse({ status: 'success', message: 'Data berhasil dimuat dari DB_JSON', data: dbData });
+    }
     var parsedStudents = parseCourseSheets(ss);
-    if (parsedStudents && parsedStudents.length > 0) {
-      updateServerCache(parsedStudents);
-      return createJsonResponse({ status: 'success', message: 'Data dimuat dari Spreadsheet', data: parsedStudents });
+    if (parsedStudents && Array.isArray(parsedStudents) && parsedStudents.length > 0) {
+      writeDbJson(ss, parsedStudents);
+      return createJsonResponse({ status: 'success', message: 'Data berhasil dimuat dari lembar mata kuliah', data: parsedStudents });
     }
-    var dbSheet = ss.getSheetByName('DB_JSON');
-    if (dbSheet) {
-      var jsonText = dbSheet.getRange('A1').getValue();
-      if (jsonText) {
-        var parsedData = JSON.parse(jsonText);
-        updateServerCache(parsedData);
-        return createJsonResponse({ status: 'success', message: 'Data dimuat dari DB_JSON', data: parsedData });
-      }
-    }
-    return createJsonResponse({ status: 'empty', data: null });
+    return createJsonResponse({ status: 'empty', message: 'Belum ada data tersimpan di Spreadsheet.', data: null });
   } catch (err) {
-    return createJsonResponse({ status: 'error', message: err.toString() });
+    return createJsonResponse({ status: 'error', message: 'Gagal membaca data dari Spreadsheet: ' + err.toString() });
   }
 }
 
-function updateServerCache(studentsData) {
+function doPost(e) {
   try {
-    var cache = CacheService.getScriptCache();
-    var jsonStr = JSON.stringify(studentsData);
-    if (jsonStr.length < 100000) cache.put('STUDENTS_CACHE_DATA', jsonStr, 21600);
-  } catch (e) {}
+    if (!e || !e.postData || !e.postData.contents) {
+      return createJsonResponse({ status: 'error', message: 'Payload tidak ditemukan.' });
+    }
+    var payload = JSON.parse(e.postData.contents);
+    var ss = SpreadsheetApp.getActiveSpreadsheet();
+    var existingStudents = readDbJson(ss) || parseCourseSheets(ss) || [];
+    var processedMutationsCount = 0;
+    var finalStudents = [];
+
+    if (payload.action === 'batch_mutation' && Array.isArray(payload.mutations) && payload.mutations.length > 0) {
+      finalStudents = applyMutations(existingStudents, payload.mutations);
+      processedMutationsCount = payload.mutations.length;
+    } else if (payload.students && Array.isArray(payload.students)) {
+      if (existingStudents.length === 0) {
+        finalStudents = payload.students;
+      } else {
+        finalStudents = safeMergeStudents(existingStudents, payload.students);
+      }
+    } else {
+      finalStudents = existingStudents;
+    }
+
+    writeDbJson(ss, finalStudents);
+    renderCourseSheets(ss, finalStudents);
+
+    return createJsonResponse({
+      status: 'success',
+      message: 'Data berhasil disinkronkan ke Spreadsheet tanpa menghapus riwayat!',
+      mutationsProcessed: processedMutationsCount,
+      totalStudents: finalStudents.length,
+      data: finalStudents,
+      timestamp: new Date().toISOString()
+    });
+  } catch (err) {
+    return createJsonResponse({ status: 'error', message: 'Gagal menyimpan ke Spreadsheet: ' + err.toString() });
+  }
+}
+
+function applyMutations(students, mutations) {
+  var list = students.slice(0);
+  function findStudentIndex(id, nim) {
+    for (var i = 0; i < list.length; i++) {
+      if (id && list[i].id === id) return i;
+      if (nim && String(list[i].nim).trim() === String(nim).trim()) return i;
+    }
+    return -1;
+  }
+  mutations.forEach(function(mut) {
+    if (!mut || !mut.type) return;
+    var p = mut.payload || {};
+    switch (mut.type) {
+      case 'ADD_STUDENT':
+        if (p.student && p.student.name) {
+          var existingIdx = findStudentIndex(p.student.id, p.student.nim);
+          if (existingIdx === -1) {
+            list.unshift(p.student);
+          } else {
+            var s = list[existingIdx];
+            if (Array.isArray(p.student.courses)) {
+              p.student.courses.forEach(function(c) {
+                if (s.courses.indexOf(c) === -1) s.courses.push(c);
+              });
+            }
+          }
+        }
+        break;
+      case 'UPDATE_STARS':
+        var idx = findStudentIndex(p.studentId, null);
+        if (idx !== -1) {
+          var student = list[idx];
+          if (!student.stars) student.stars = {};
+          if (!student.stars[p.courseId]) student.stars[p.courseId] = {};
+          student.stars[p.courseId][p.meeting] = Math.max(0, Number(p.count) || 0);
+        }
+        break;
+      case 'UPDATE_NOTE':
+        var nIdx = findStudentIndex(p.studentId, null);
+        if (nIdx !== -1) {
+          var nStudent = list[nIdx];
+          if (!nStudent.notes) nStudent.notes = {};
+          if (!nStudent.notes[p.courseId]) nStudent.notes[p.courseId] = {};
+          nStudent.notes[p.courseId][p.meeting] = String(p.text || '');
+        }
+        break;
+      case 'BULK_STARS':
+        var cId = p.courseId;
+        var m = p.meeting;
+        list.forEach(function(s) {
+          if (s.courses && s.courses.indexOf(cId) !== -1) {
+            if (!s.stars) s.stars = {};
+            if (!s.stars[cId]) s.stars[cId] = {};
+            var cur = Number(s.stars[cId][m]) || 0;
+            s.stars[cId][m] = cur + 1;
+          }
+        });
+        break;
+      case 'EDIT_STUDENT':
+        var eIdx = findStudentIndex(p.studentId, null);
+        if (eIdx !== -1) {
+          list[eIdx].name = String(p.name || '').trim();
+          list[eIdx].nim = String(p.nim || '').trim();
+          if (Array.isArray(p.courses)) list[eIdx].courses = p.courses;
+        }
+        break;
+      case 'DELETE_STUDENT':
+        var dIdx = findStudentIndex(p.studentId, null);
+        if (dIdx !== -1) list.splice(dIdx, 1);
+        break;
+      case 'RESET_DATA':
+        break;
+    }
+  });
+  return list;
+}
+
+function safeMergeStudents(serverList, incomingList) {
+  var serverMap = {};
+  serverList.forEach(function(s) {
+    serverMap[s.id || s.nim] = s;
+  });
+  incomingList.forEach(function(inS) {
+    var key = inS.id || inS.nim;
+    if (!serverMap[key]) {
+      serverList.push(inS);
+      serverMap[key] = inS;
+    } else {
+      var srvS = serverMap[key];
+      if (inS.name) srvS.name = inS.name;
+      if (inS.nim) srvS.nim = inS.nim;
+      if (Array.isArray(inS.courses)) {
+        inS.courses.forEach(function(c) {
+          if (srvS.courses.indexOf(c) === -1) srvS.courses.push(c);
+        });
+      }
+      if (inS.stars) {
+        if (!srvS.stars) srvS.stars = {};
+        Object.keys(inS.stars).forEach(function(cId) {
+          if (!srvS.stars[cId]) srvS.stars[cId] = {};
+          var cStars = inS.stars[cId];
+          Object.keys(cStars).forEach(function(m) {
+            var val = Number(cStars[m]);
+            if (!isNaN(val) && val > 0) srvS.stars[cId][m] = val;
+          });
+        });
+      }
+      if (inS.notes) {
+        if (!srvS.notes) srvS.notes = {};
+        Object.keys(inS.notes).forEach(function(cId) {
+          if (!srvS.notes[cId]) srvS.notes[cId] = {};
+          var cNotes = inS.notes[cId];
+          Object.keys(cNotes).forEach(function(m) {
+            if (cNotes[m]) srvS.notes[cId][m] = cNotes[m];
+          });
+        });
+      }
+    }
+  });
+  return serverList;
+}
+
+function readDbJson(ss) {
+  var dbSheet = ss.getSheetByName('DB_JSON');
+  if (!dbSheet) return null;
+  var lastRow = dbSheet.getLastRow();
+  if (lastRow < 1) return null;
+  var values = dbSheet.getRange(1, 1, lastRow, 1).getValues();
+  var jsonStr = '';
+  for (var i = 0; i < values.length; i++) {
+    jsonStr += String(values[i][0] || '');
+  }
+  if (!jsonStr || jsonStr.trim() === '') return null;
+  try { return JSON.parse(jsonStr); } catch (e) { return null; }
+}
+
+function writeDbJson(ss, data) {
+  var dbSheet = ss.getSheetByName('DB_JSON') || ss.insertSheet('DB_JSON');
+  try { dbSheet.hideSheet(); } catch(e) {}
+  dbSheet.clearContents();
+  var jsonStr = JSON.stringify(data);
+  var chunkSize = 30000;
+  var rows = [];
+  for (var i = 0; i < jsonStr.length; i += chunkSize) {
+    rows.push([jsonStr.substring(i, i + chunkSize)]);
+  }
+  if (rows.length > 0) dbSheet.getRange(1, 1, rows.length, 1).setValues(rows);
 }
 
 function parseCourseSheets(ss) {
-  var courseMap = {
-    'tafsir': { name: 'Rekap Tafsir Al-Qur\'an' },
-    'sirah1': { name: 'Rekap Sirah Nabawiyah 1' },
-    'sirah2': { name: 'Rekap Sirah Nabawiyah 2' },
-    'sharaf': { name: 'Rekap Ilmu Sharaf' },
-    'tauhid': { name: 'Rekap Ilmu Tauhid' }
-  };
-  var existingNotes = {};
-  var dbSheet = ss.getSheetByName('DB_JSON');
-  if (dbSheet) {
-    try {
-      var jsonText = dbSheet.getRange('A1').getValue();
-      if (jsonText) {
-        var oldList = JSON.parse(jsonText);
-        if (Array.isArray(oldList)) {
-          oldList.forEach(function(s) { if (s.nim && s.notes) existingNotes[s.nim] = s.notes; });
-        }
-      }
-    } catch (e) {}
-  }
   var studentMap = {};
-  Object.keys(courseMap).forEach(function(courseId) {
-    var config = courseMap[courseId];
+  Object.keys(COURSE_CONFIG).forEach(function(courseId) {
+    var config = COURSE_CONFIG[courseId];
     var sheet = ss.getSheetByName(config.name);
     if (!sheet) return;
     var lastRow = sheet.getLastRow();
     if (lastRow < 4) return;
-    var values = sheet.getRange(4, 1, lastRow - 3, 20).getValues();
+    var lastCol = sheet.getLastColumn();
+    var colsToFetch = Math.min(Math.max(lastCol, 3), 20);
+    var values = sheet.getRange(4, 1, lastRow - 3, colsToFetch).getValues();
     values.forEach(function(row) {
       var rawNim = String(row[1] || '').trim();
       var nim = rawNim.replace(/^'/, '');
@@ -1453,57 +1643,28 @@ function parseCourseSheets(ss) {
           id: 'MHS-' + (nim ? nim : name.replace(/\\s+/g, '_')),
           nim: nim, name: name, courses: [],
           stars: { tafsir: {}, sirah1: {}, sirah2: {}, sharaf: {}, tauhid: {} },
-          notes: existingNotes[nim] || { tafsir: {}, sirah1: {}, sirah2: {}, sharaf: {}, tauhid: {} }
+          notes: { tafsir: {}, sirah1: {}, sirah2: {}, sharaf: {}, tauhid: {} }
         };
       }
       var student = studentMap[key];
       if (student.courses.indexOf(courseId) === -1) student.courses.push(courseId);
       if (!student.stars[courseId]) student.stars[courseId] = {};
       for (var m = 1; m <= 16; m++) {
-        var val = Number(row[2 + m]);
-        if (!isNaN(val) && val > 0) student.stars[courseId][m] = val;
+        var colIdx = 2 + m;
+        if (colIdx < colsToFetch) {
+          var val = Number(row[colIdx]);
+          if (!isNaN(val) && val > 0) student.stars[courseId][m] = val;
+        }
       }
     });
   });
   return Object.keys(studentMap).map(function(k) { return studentMap[k]; });
 }
 
-function doPost(e) {
-  try {
-    if (!e || !e.postData || !e.postData.contents) return createJsonResponse({ status: 'error', message: 'No payload' });
-    var payload = JSON.parse(e.postData.contents);
-    var studentsData = payload.students || payload;
-    var processedMutationsCount = 0;
-    if (payload.action === 'batch_mutation' && Array.isArray(payload.mutations)) {
-      processedMutationsCount = payload.mutations.length;
-    }
-    var ss = SpreadsheetApp.getActiveSpreadsheet();
-    var dbSheet = ss.getSheetByName('DB_JSON') || ss.insertSheet('DB_JSON');
-    dbSheet.getRange('A1').setValue(JSON.stringify(studentsData));
-    if (Array.isArray(studentsData)) {
-      renderCourseSheets(ss, studentsData);
-      updateServerCache(studentsData);
-    }
-    return createJsonResponse({ status: 'success', message: 'Tersimpan ke Spreadsheet!', mutationsProcessed: processedMutationsCount });
-  } catch (err) {
-    return createJsonResponse({ status: 'error', message: err.toString() });
-  }
-}
-
-function createJsonResponse(obj) {
-  return ContentService.createTextOutput(JSON.stringify(obj)).setMimeType(ContentService.MimeType.JSON);
-}
-
 function renderCourseSheets(ss, students) {
-  var courseMap = {
-    'tafsir': { name: 'Rekap Tafsir Al-Qur\'an', label: 'Tafsir Al-Qur\'an (PAI III)' },
-    'sirah1': { name: 'Rekap Sirah Nabawiyah 1', label: 'Sirah Nabawiyah 1 (KPI I)' },
-    'sirah2': { name: 'Rekap Sirah Nabawiyah 2', label: 'Sirah Nabawiyah 2 (PBA I)' },
-    'sharaf': { name: 'Rekap Ilmu Sharaf', label: 'Ilmu Sharaf (IL)' },
-    'tauhid': { name: 'Rekap Ilmu Tauhid', label: 'Ilmu Tauhid (PAI VII)' }
-  };
-  Object.keys(courseMap).forEach(function(courseId) {
-    var config = courseMap[courseId];
+  if (!Array.isArray(students)) return;
+  Object.keys(COURSE_CONFIG).forEach(function(courseId) {
+    var config = COURSE_CONFIG[courseId];
     var sheet = ss.getSheetByName(config.name) || ss.insertSheet(config.name);
     sheet.clearContents();
     var courseStudents = students.filter(function(s) { return s.courses && s.courses.indexOf(courseId) !== -1; });
@@ -1518,7 +1679,7 @@ function renderCourseSheets(ss, students) {
         var row = [(idx + 1), "'" + s.nim, s.name];
         var total = 0;
         for (var m = 1; m <= 16; m++) {
-          var stars = (s.stars && s.stars[courseId] && s.stars[courseId][m]) ? s.stars[courseId][m] : 0;
+          var stars = (s.stars && s.stars[courseId] && s.stars[courseId][m]) ? Number(s.stars[courseId][m]) : 0;
           row.push(stars);
           total += stars;
         }
@@ -1530,10 +1691,19 @@ function renderCourseSheets(ss, students) {
       sheet.getRange(4, 4, rows.length, 17).setHorizontalAlignment('center');
       sheet.getRange(4, headers.length, rows.length, 1).setFontWeight('bold').setBackground('#edfbf8').setFontColor('#005f50');
     }
+    sheet.setColumnWidth(1, 40);
+    sheet.setColumnWidth(2, 110);
+    sheet.setColumnWidth(3, 230);
+    for (var col = 4; col <= 19; col++) sheet.setColumnWidth(col, 42);
+    sheet.setColumnWidth(20, 105);
   });
+}
+
+function createJsonResponse(obj) {
+  return ContentService.createTextOutput(JSON.stringify(obj)).setMimeType(ContentService.MimeType.JSON);
 }`;
                     navigator.clipboard.writeText(code);
-                    showAlert('Kode Disalin!', 'Kode Google Apps Script terbaru dengan Server-Side Cache telah disalin.');
+                    showAlert('Kode Disalin!', 'Kode Google Apps Script terbaru dengan Safe Sync & Anti-Data Loss telah disalin.');
                 };
 
                 const currentCourseStudents = computed(() => {
@@ -1778,7 +1948,7 @@ function renderCourseSheets(ss, students) {
                     showExportModal.value = false;
                 };
 
-                onMounted(() => {
+                onMounted(async () => {
                     loadLocalCache();
                     loadOutboxQueue();
 
@@ -1792,10 +1962,11 @@ function renderCourseSheets(ss, students) {
                     });
 
                     if (gasUrl.value) {
+                        // Muat data otoritatif dari server terlebih dahulu agar state selalu sinkron
+                        await loadFromGAS(false);
+                        // Jika ada mutasi antrean yang belum terkirim, flush setelah data termuat
                         if (outboxQueue.value.length > 0) {
                             flushOutboxQueue();
-                        } else {
-                            loadFromGAS(false);
                         }
                     }
                 });
