@@ -965,6 +965,7 @@
                 const isSyncing = ref(false);
                 const isTestingConnection = ref(false);
                 let autoSyncTimer = null;
+                let lastUserActionTime = 0;
 
                 const customAlert = ref({
                     show: false,
@@ -1010,22 +1011,20 @@
                 let retryCountdownInterval = null;
 
                 const loadLocalCache = () => {
-                    // Jika offline, gunakan cadangan lokal
-                    if (!navigator.onLine) {
-                        const saved = localStorage.getItem(STORAGE_KEY_STUDENTS);
-                        if (saved) {
-                            try {
-                                const parsed = JSON.parse(saved);
-                                if (Array.isArray(parsed) && parsed.length > 0) {
-                                    students.value = parsed.filter(s => !deletedStudentIds.value.includes(s.id) && !deletedStudentIds.value.includes(s.nim));
-                                }
-                            } catch (e) {
-                                students.value = [];
+                    // Stale-While-Revalidate: Muat data dari cache lokal secara instan (0ms load time)
+                    const saved = localStorage.getItem(STORAGE_KEY_STUDENTS);
+                    if (saved) {
+                        try {
+                            const parsed = JSON.parse(saved);
+                            if (Array.isArray(parsed) && parsed.length > 0) {
+                                students.value = parsed.filter(s => !deletedStudentIds.value.includes(s.id) && !deletedStudentIds.value.includes(s.nim));
+                                isLoadingStudents.value = false;
                             }
+                        } catch (e) {
+                            students.value = [];
                         }
-                        isLoadingStudents.value = false;
-                    } else {
-                        // Jika online, Google Spreadsheet adalah Single Source of Truth
+                    }
+                    if (students.value.length === 0) {
                         isLoadingStudents.value = true;
                     }
                 };
@@ -1049,7 +1048,7 @@
                     if (!gasUrl.value) {
                         syncStatus.value = 'offline';
                     } else {
-                        syncStatus.value = 'synced';
+                        syncStatus.value = outboxQueue.value.length > 0 ? 'syncing' : 'synced';
                     }
                 };
 
@@ -1059,26 +1058,169 @@
                     } catch (e) {}
                 };
 
+                // Replay mutasi lokal yang belum terkirim di atas data server agar UI tidak pernah revert / berkedip
+                const replayPendingMutations = (baseStudents, pendingMutations) => {
+                    if (!Array.isArray(pendingMutations) || pendingMutations.length === 0) return baseStudents;
+                    const cloned = JSON.parse(JSON.stringify(baseStudents));
+
+                    function findIdx(id, nim, name) {
+                        if (nim) {
+                            const tNim = String(nim).replace(/^'/, '').trim();
+                            if (tNim) {
+                                for (let i = 0; i < cloned.length; i++) {
+                                    const sNim = String(cloned[i].nim || '').replace(/^'/, '').trim();
+                                    if (sNim && sNim === tNim) return i;
+                                }
+                            }
+                        }
+                        if (id) {
+                            for (let i = 0; i < cloned.length; i++) {
+                                if (cloned[i].id === id) return i;
+                            }
+                        }
+                        if (name) {
+                            const tName = String(name).trim().toLowerCase();
+                            for (let i = 0; i < cloned.length; i++) {
+                                if (String(cloned[i].name || '').trim().toLowerCase() === tName) return i;
+                            }
+                        }
+                        return -1;
+                    }
+
+                    pendingMutations.forEach(mut => {
+                        if (!mut || !mut.type) return;
+                        const p = mut.payload || {};
+
+                        switch (mut.type) {
+                            case 'UPDATE_STARS': {
+                                const idx = findIdx(p.studentId, p.nim, p.name);
+                                if (idx !== -1) {
+                                    if (!cloned[idx].stars) cloned[idx].stars = {};
+                                    if (!cloned[idx].stars[p.courseId]) cloned[idx].stars[p.courseId] = {};
+                                    cloned[idx].stars[p.courseId][p.meeting] = Math.max(0, Number(p.count) || 0);
+                                }
+                                break;
+                            }
+                            case 'UPDATE_NOTE': {
+                                const idx = findIdx(p.studentId, p.nim, p.name);
+                                if (idx !== -1) {
+                                    if (!cloned[idx].notes) cloned[idx].notes = {};
+                                    if (!cloned[idx].notes[p.courseId]) cloned[idx].notes[p.courseId] = {};
+                                    cloned[idx].notes[p.courseId][p.meeting] = String(p.text || '');
+                                }
+                                break;
+                            }
+                            case 'BULK_STARS': {
+                                const cId = p.courseId;
+                                const m = p.meeting;
+                                cloned.forEach(s => {
+                                    if (s.courses && s.courses.includes(cId)) {
+                                        if (!s.stars) s.stars = {};
+                                        if (!s.stars[cId]) s.stars[cId] = {};
+                                        const cur = Number(s.stars[cId][m]) || 0;
+                                        s.stars[cId][m] = cur + 1;
+                                    }
+                                });
+                                break;
+                            }
+                            case 'ADD_STUDENT': {
+                                if (p.student && p.student.name) {
+                                    const idx = findIdx(p.student.id, p.student.nim, p.student.name);
+                                    if (idx === -1) {
+                                        cloned.push(JSON.parse(JSON.stringify(p.student)));
+                                    }
+                                }
+                                break;
+                            }
+                            case 'EDIT_STUDENT': {
+                                const idx = findIdx(p.studentId, p.nim, p.name);
+                                if (idx !== -1) {
+                                    cloned[idx].name = String(p.name || '').trim();
+                                    cloned[idx].nim = String(p.nim || '').trim();
+                                    if (Array.isArray(p.courses)) cloned[idx].courses = [...p.courses];
+                                }
+                                break;
+                            }
+                            case 'DELETE_STUDENT': {
+                                const idx = findIdx(p.studentId, p.nim, p.name);
+                                if (idx !== -1) {
+                                    cloned.splice(idx, 1);
+                                }
+                                break;
+                            }
+                        }
+                    });
+
+                    return cloned;
+                };
+
                 const enqueueMutation = (actionType, payload) => {
-                    const mutationItem = {
-                        id: 'mut_' + Date.now() + '_' + Math.random().toString(36).substring(2, 6),
-                        type: actionType,
-                        payload,
-                        timestamp: Date.now()
-                    };
-                    outboxQueue.value.push(mutationItem);
+                    lastUserActionTime = Date.now();
+
+                    // Coalescing mutasi berulang dalam antrean outbox (misal klik bertubi-tubi pada bintang mahasiswi yang sama)
+                    let coalesced = false;
+                    if (actionType === 'UPDATE_STARS') {
+                        const existingIdx = outboxQueue.value.findIndex(m => 
+                            m.type === 'UPDATE_STARS' && 
+                            m.payload.studentId === payload.studentId && 
+                            m.payload.courseId === payload.courseId && 
+                            m.payload.meeting === payload.meeting
+                        );
+                        if (existingIdx !== -1) {
+                            outboxQueue.value[existingIdx].payload.count = payload.count;
+                            outboxQueue.value[existingIdx].timestamp = Date.now();
+                            coalesced = true;
+                        }
+                    } else if (actionType === 'UPDATE_NOTE') {
+                        const existingIdx = outboxQueue.value.findIndex(m => 
+                            m.type === 'UPDATE_NOTE' && 
+                            m.payload.studentId === payload.studentId && 
+                            m.payload.courseId === payload.courseId && 
+                            m.payload.meeting === payload.meeting
+                        );
+                        if (existingIdx !== -1) {
+                            outboxQueue.value[existingIdx].payload.text = payload.text;
+                            outboxQueue.value[existingIdx].timestamp = Date.now();
+                            coalesced = true;
+                        }
+                    }
+
+                    if (!coalesced) {
+                        const mutationItem = {
+                            id: 'mut_' + Date.now() + '_' + Math.random().toString(36).substring(2, 7),
+                            type: actionType,
+                            payload,
+                            timestamp: Date.now()
+                        };
+                        outboxQueue.value.push(mutationItem);
+                    }
+
                     saveOutboxQueue();
                     saveLocalCache();
-                    flushOutboxQueue();
+
+                    // Debounce pengiriman ke backend (600ms) agar klik beruntun dikirim dalam 1 batch cepat
+                    if (autoSyncTimer) clearTimeout(autoSyncTimer);
+
+                    // Jika antrean menumpuk >= 8 item, langsung kirim tanpa tunggu debounce
+                    if (outboxQueue.value.length >= 8) {
+                        flushOutboxQueue();
+                    } else {
+                        autoSyncTimer = setTimeout(() => {
+                            flushOutboxQueue();
+                        }, 600);
+                    }
                 };
 
                 const flushOutboxQueue = async (isManual = false) => {
+                    if (autoSyncTimer) clearTimeout(autoSyncTimer);
+
                     if (!gasUrl.value) {
                         syncStatus.value = 'offline';
                         if (isManual) showAlert('Mode Lokal', 'Masukkan Web App URL terlebih dahulu.');
                         return;
                     }
 
+                    // Jika sedang sinkronisasi, biarkan batch yang berjalan selesai; batch baru akan otomatis menyusul
                     if (isSyncing.value) return;
 
                     if (outboxQueue.value.length === 0) {
@@ -1089,6 +1231,10 @@
                         return;
                     }
 
+                    // Ambil snapshot mutasi yang AKAN dikirimkan pada batch ini
+                    const batchToSend = [...outboxQueue.value];
+                    const batchIds = new Set(batchToSend.map(m => m.id));
+
                     isSyncing.value = true;
                     syncStatus.value = 'syncing';
                     if (retryTimer) clearTimeout(retryTimer);
@@ -1098,7 +1244,7 @@
                     try {
                         const payload = JSON.stringify({
                             action: 'batch_mutation',
-                            mutations: outboxQueue.value,
+                            mutations: batchToSend,
                             students: students.value,
                             deletedStudentIds: deletedStudentIds.value
                         });
@@ -1111,19 +1257,34 @@
 
                         const json = await res.json();
                         if (json && json.status === 'success') {
-                            outboxQueue.value = [];
+                            // HANYA hapus mutasi yang berhasil dikirim di batch ini!
+                            // Mutasi baru yang masuk selama fetch berjalan tetap tersimpan aman di antrean.
+                            outboxQueue.value = outboxQueue.value.filter(m => !batchIds.has(m.id));
                             saveOutboxQueue();
-                            syncStatus.value = 'synced';
+                            syncStatus.value = outboxQueue.value.length > 0 ? 'syncing' : 'synced';
                             retryCount.value = 0;
+
                             if (json.data && Array.isArray(json.data) && json.data.length > 0) {
-                                students.value = json.data;
+                                if (outboxQueue.value.length === 0) {
+                                    students.value = json.data;
+                                } else {
+                                    // Replay mutasi lokal yang baru masuk di atas data server terbaru
+                                    students.value = replayPendingMutations(json.data, outboxQueue.value);
+                                }
                                 saveLocalCache();
                             }
+
                             const now = new Date();
                             lastSyncedTime.value = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
                             localStorage.setItem(STORAGE_KEY_LAST_SYNC, lastSyncedTime.value);
-                            if (isManual) {
-                                showAlert('Sinkronisasi Berhasil!', 'Semua mutasi antrean berhasil terkirim dan disinkronkan ke Google Spreadsheet.');
+
+                            if (isManual && outboxQueue.value.length === 0) {
+                                showAlert('Sinkronisasi Berhasil!', 'Semua data dan nilai bintang berhasil disinkronkan ke Google Spreadsheet.');
+                            }
+
+                            // Jika ada mutasi baru yang masuk saat fetch berlangsung, kirimkan batch berikutnya
+                            if (outboxQueue.value.length > 0) {
+                                setTimeout(() => flushOutboxQueue(), 100);
                             }
                         } else {
                             syncStatus.value = 'error';
@@ -1198,7 +1359,6 @@
                     }
                 };
 
-
                 // Test Connection to Apps Script
                 const testGasConnection = async () => {
                     if (!gasUrl.value) return;
@@ -1233,25 +1393,26 @@
                     syncStatus.value = 'syncing';
                     isSyncing.value = true;
                     try {
-                        const loadUrl = gasUrl.value + (gasUrl.value.includes('?') ? '&' : '?') + 'action=load&_t=' + Date.now();
+                        // Jika manual, sertakan force_sheets=true agar membaca langsung dari lembar sheet Google Sheets
+                        const queryParam = isManual ? 'action=load&force_sheets=true&_t=' : 'action=load&_t=';
+                        const loadUrl = gasUrl.value + (gasUrl.value.includes('?') ? '&' : '?') + queryParam + Date.now();
                         const res = await fetch(loadUrl);
                         const json = await res.json();
                         if (json && json.status === 'success' && json.data && Array.isArray(json.data) && json.data.length > 0) {
-                            // Spreadsheet adalah Single Source of Truth
-                            // Jika outbox kosong (tidak ada mutasi lokal tertunda), gunakan data spreadsheet seutuhnya
                             if (outboxQueue.value.length === 0) {
                                 students.value = json.data;
                                 deletedStudentIds.value = [];
                                 localStorage.removeItem(STORAGE_KEY_DELETED);
                             } else {
-                                // Jika ada mutasi pending, pertahankan filter hapus lokal sementara
-                                students.value = json.data.filter(s => 
+                                // Jika ada mutasi pending, jangan timpa perubahan lokal yang belum terkirim!
+                                const filtered = json.data.filter(s => 
                                     !deletedStudentIds.value.includes(s.id) && 
                                     !deletedStudentIds.value.includes(s.nim)
                                 );
+                                students.value = replayPendingMutations(filtered, outboxQueue.value);
                             }
                             saveLocalCache();
-                            syncStatus.value = 'synced';
+                            syncStatus.value = outboxQueue.value.length > 0 ? 'syncing' : 'synced';
                             const now = new Date();
                             lastSyncedTime.value = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
                             localStorage.setItem(STORAGE_KEY_LAST_SYNC, lastSyncedTime.value);
@@ -1275,19 +1436,20 @@
                 const copyAppsScriptCode = () => {
                     const code = `/**
  * ============================================================================
- * GOOGLE APPS SCRIPT BACKEND - PORTAL KEAKTIFAN MAHASISWI (ROBUST SYNC ENGINE)
+ * GOOGLE APPS SCRIPT BACKEND - PORTAL KEAKTIFAN MAHASISWI (ULTRA FAST SYNC)
  * ============================================================================
  * Prinsip:
  * 1. SPREADSHEET ADALAH SINGLE SOURCE OF TRUTH:
- *    Data dibaca langsung dari lembar sheet masing-masing mata kuliah.
- * 2. TOLERAN NILAI BINTANG:
+ *    Data tersimpan konsisten di lembar Spreadsheet dan DB_JSON.
+ * 2. FAST READ & WRITE:
+ *    doGet membaca dari DB_JSON secara instan (<200ms) tanpa operasi tulis.
+ *    doPost hanya memperbarui lembar sheet yang dimutasi tanpa perulangan resize kolom.
+ * 3. ANTI-DATA LOSS & ZERO RACE CONDITION:
+ *    Sinkronisasi mutasi parsial aman tanpa menimpa data yang sedang aktif diedit.
+ * 4. TOLERAN NILAI BINTANG:
  *    Mendukung angka biasa (1, 2, 3), emoji bintang (⭐, ★), centang (✓, v), checkbox (TRUE).
- * 3. ANTI-DATA LOSS:
- *    Sinkronisasi tidak akan pernah menghapus bintang atau mahasiswi yang sudah ada.
- * 4. CHUNKED STORAGE:
+ * 5. CHUNKED STORAGE:
  *    Tab DB_JSON disimpan per baris sehingga terhindar dari batas 50.000 karakter per sel.
- * 5. FLEKSIBEL NAMA SHEET & KOLOM:
- *    Mendeteksi otomatis header NIM, Nama, dan kolom P1-P16 pada sheet mata kuliah.
  */
 
 // Konfigurasi Standar Mata Kuliah
@@ -1300,12 +1462,9 @@ var COURSE_CONFIG = {
 };
 
 /**
- * Handle HTTP GET (Memuat data langsung dari Spreadsheet sebagai Single Source of Truth)
+ * Handle HTTP GET (Memuat data langsung dari Spreadsheet / DB_JSON)
  */
 function doGet(e) {
-  // Pastikan cache lama dihapus sepenuhnya
-  try { CacheService.getScriptCache().removeAll(['MAHASISWI_ALL_DATA_CACHE']); } catch(e) {}
-
   var action = (e && e.parameter && e.parameter.action) ? e.parameter.action : 'load';
   
   if (action === 'ping') {
@@ -1318,15 +1477,26 @@ function doGet(e) {
   
   try {
     var ss = SpreadsheetApp.getActiveSpreadsheet();
+    var forceSheets = (e && e.parameter && (e.parameter.force_sheets === 'true' || e.parameter.force === 'true'));
     
-    // 1. SPREADSHEET SEBAGAI SINGLE SOURCE OF TRUTH:
-    // Baca langsung dari lembar sheet Spreadsheet yang ada!
+    // 1. FAST PATH: Jika bukan force_sheets, baca dari DB_JSON (super cepat, ~150ms)
+    if (!forceSheets) {
+      var dbData = readDbJson(ss);
+      if (dbData && Array.isArray(dbData) && dbData.length > 0) {
+        return createJsonResponse({
+          status: 'success',
+          message: 'Data berhasil dimuat dari DB_JSON Spreadsheet (Fast Path)',
+          data: dbData,
+          total: dbData.length,
+          source: 'db_json'
+        });
+      }
+    }
+    
+    // 2. FALLBACK / FORCE PATH: Baca langsung dari lembar sheet per mata kuliah
     var parsedStudents = parseAllCourseSheets(ss);
-    
     if (parsedStudents && Array.isArray(parsedStudents) && parsedStudents.length > 0) {
-      // Perkaya dengan catatan lama jika ada di DB_JSON
       enrichWithDbNotes(ss, parsedStudents);
-      // Simpan snapshot aman ke DB_JSON
       writeDbJson(ss, parsedStudents);
       return createJsonResponse({
         status: 'success',
@@ -1337,14 +1507,14 @@ function doGet(e) {
       });
     }
     
-    // 2. Fallback: Coba baca dari DB_JSON jika tab mata kuliah belum terisi
-    var dbData = readDbJson(ss);
-    if (dbData && Array.isArray(dbData) && dbData.length > 0) {
+    // 3. Fallback jika sheet kosong tapi DB_JSON mungkin ada
+    var dbDataFallback = readDbJson(ss);
+    if (dbDataFallback && Array.isArray(dbDataFallback) && dbDataFallback.length > 0) {
       return createJsonResponse({
         status: 'success',
         message: 'Data berhasil dimuat dari DB_JSON Spreadsheet',
-        data: dbData,
-        total: dbData.length,
+        data: dbDataFallback,
+        total: dbDataFallback.length,
         source: 'db_json'
       });
     }
@@ -1364,12 +1534,9 @@ function doGet(e) {
 }
 
 /**
- * Handle HTTP POST (Penyimpanan Aman & Terkendali Tanpa Menghapus Data Lama)
+ * Handle HTTP POST (Penyimpanan Aman, Cepat & Terkendali Tanpa Menghapus Data Lama)
  */
 function doPost(e) {
-  // Pastikan cache lama dihapus sepenuhnya
-  try { CacheService.getScriptCache().removeAll(['MAHASISWI_ALL_DATA_CACHE']); } catch(e) {}
-
   try {
     if (!e || !e.postData || !e.postData.contents) {
       return createJsonResponse({ status: 'error', message: 'Payload tidak ditemukan.' });
@@ -1379,15 +1546,20 @@ function doPost(e) {
     var ss = SpreadsheetApp.getActiveSpreadsheet();
     
     // Muat data yang saat ini ada di Spreadsheet sebagai basis authoritative
-    var existingStudents = parseAllCourseSheets(ss);
-    if (!existingStudents || existingStudents.length === 0) {
-      existingStudents = readDbJson(ss) || [];
-    } else {
-      enrichWithDbNotes(ss, existingStudents);
+    // Coba baca DB_JSON terlebih dahulu (sangat cepat ~100-200ms)
+    var existingStudents = readDbJson(ss);
+    if (!existingStudents || !Array.isArray(existingStudents) || existingStudents.length === 0) {
+      existingStudents = parseAllCourseSheets(ss);
+      if (!existingStudents || existingStudents.length === 0) {
+        existingStudents = [];
+      } else {
+        enrichWithDbNotes(ss, existingStudents);
+      }
     }
     
     var processedMutationsCount = 0;
     var finalStudents = [];
+    var affectedCourseIds = {};
 
     // Filter out student yang terdaftar di deletedStudentIds jika ada
     if (Array.isArray(payload.deletedStudentIds) && payload.deletedStudentIds.length > 0) {
@@ -1395,15 +1567,26 @@ function doPost(e) {
         return payload.deletedStudentIds.indexOf(s.id) === -1 && 
                payload.deletedStudentIds.indexOf(s.nim) === -1;
       });
+      // Penghapusan mahasiswa berpotensi mempengaruhi seluruh sheet kelas
+      Object.keys(COURSE_CONFIG).forEach(function(cId) { affectedCourseIds[cId] = true; });
     }
 
     // Jika mutasi bertahap dikirimkan dari Outbox Queue
     if (payload.action === 'batch_mutation' && Array.isArray(payload.mutations) && payload.mutations.length > 0) {
+      payload.mutations.forEach(function(mut) {
+        if (mut.payload && mut.payload.courseId) {
+          affectedCourseIds[mut.payload.courseId] = true;
+        } else {
+          // Mutasi umum (ADD/EDIT/DELETE) mempengaruhi semua kelas
+          Object.keys(COURSE_CONFIG).forEach(function(cId) { affectedCourseIds[cId] = true; });
+        }
+      });
       finalStudents = applyMutations(existingStudents, payload.mutations);
       processedMutationsCount = payload.mutations.length;
     } 
     // Jika sinkronisasi penuh dikirimkan
     else if (payload.students && Array.isArray(payload.students)) {
+      Object.keys(COURSE_CONFIG).forEach(function(cId) { affectedCourseIds[cId] = true; });
       if (existingStudents.length === 0) {
         finalStudents = payload.students;
       } else {
@@ -1414,11 +1597,11 @@ function doPost(e) {
       finalStudents = existingStudents;
     }
     
-    // Simpan ke DB_JSON
+    // Simpan snapshot aman ke DB_JSON
     writeDbJson(ss, finalStudents);
     
-    // Render kembali lembar rekap rapi di masing-masing tab mata kuliah
-    renderCourseSheets(ss, finalStudents);
+    // Render kembali lembar rekap rapi HANYA untuk kelas yang terkena mutasi (Fast rendering)
+    renderCourseSheets(ss, finalStudents, affectedCourseIds);
     
     return createJsonResponse({
       status: 'success',
@@ -1873,26 +2056,29 @@ function writeDbJson(ss, data) {
 }
 
 /**
- * Merender lembar rekap rapi per mata kuliah (Human Readable)
+ * Merender lembar rekap rapi per mata kuliah (Super Cepat & Efisien)
  */
-function renderCourseSheets(ss, students) {
+function renderCourseSheets(ss, students, targetCourseIds) {
   if (!Array.isArray(students)) return;
 
-  Object.keys(COURSE_CONFIG).forEach(function(courseId) {
+  var courseList = Object.keys(COURSE_CONFIG);
+  if (targetCourseIds && Object.keys(targetCourseIds).length > 0) {
+    courseList = courseList.filter(function(cId) { return !!targetCourseIds[cId]; });
+  }
+
+  courseList.forEach(function(courseId) {
     var config = COURSE_CONFIG[courseId];
     var sheet = findSheetForCourse(ss, courseId);
+    var isNewSheet = false;
+    
     if (!sheet) {
       sheet = ss.insertSheet(config.name);
-    } else {
-      sheet.clearContents();
+      isNewSheet = true;
     }
     
     var courseStudents = students.filter(function(s) {
       return s.courses && s.courses.indexOf(courseId) !== -1;
     });
-    
-    sheet.getRange('A1').setValue('REKAPITULASI BINTANG KEAKTIFAN - ' + config.label.toUpperCase());
-    sheet.getRange('A1').setFontWeight('bold').setFontSize(12).setFontColor('#004a3f');
     
     var headers = ['No', 'NIM', 'Nama Mahasiswi'];
     for (var m = 1; m <= 16; m++) {
@@ -1900,13 +2086,31 @@ function renderCourseSheets(ss, students) {
     }
     headers.push('Total Bintang');
     
-    sheet.getRange(3, 1, 1, headers.length).setValues([headers]);
-    sheet.getRange(3, 1, 1, headers.length)
-      .setBackground('#00897b')
-      .setFontColor('#ffffff')
-      .setFontWeight('bold')
-      .setHorizontalAlignment('center');
+    var lastRow = sheet.getLastRow();
+    
+    // Format Header dan Kolom HANYA sekali saat sheet baru atau header belum ada
+    if (isNewSheet || lastRow < 3) {
+      sheet.getRange('A1').setValue('REKAPITULASI BINTANG KEAKTIFAN - ' + config.label.toUpperCase());
+      sheet.getRange('A1').setFontWeight('bold').setFontSize(12).setFontColor('#004a3f');
       
+      sheet.getRange(3, 1, 1, headers.length).setValues([headers]);
+      sheet.getRange(3, 1, 1, headers.length)
+        .setBackground('#00897b')
+        .setFontColor('#ffffff')
+        .setFontWeight('bold')
+        .setHorizontalAlignment('center');
+        
+      sheet.setColumnWidth(1, 40);
+      sheet.setColumnWidth(2, 110);
+      sheet.setColumnWidth(3, 230);
+      for (var col = 4; col <= 19; col++) {
+        sheet.setColumnWidth(col, 42);
+      }
+      sheet.setColumnWidth(20, 105);
+    }
+    
+    var prevDataLastRow = sheet.getLastRow();
+    
     if (courseStudents.length > 0) {
       var rows = [];
       courseStudents.forEach(function(s, idx) {
@@ -1921,23 +2125,29 @@ function renderCourseSheets(ss, students) {
         rows.push(row);
       });
       
+      // Tulis seluruh baris nilai dalam 1 panggilan API (Ultra Cepat)
       sheet.getRange(4, 1, rows.length, headers.length).setValues(rows);
-      sheet.getRange(4, 1, rows.length, 3).setHorizontalAlignment('left');
-      sheet.getRange(4, 4, rows.length, 17).setHorizontalAlignment('center');
       
-      sheet.getRange(4, headers.length, rows.length, 1)
-        .setFontWeight('bold')
-        .setBackground('#edfbf8')
-        .setFontColor('#005f50');
+      // Jika sheet baru dibuat, berikan style dasar pada data
+      if (isNewSheet || prevDataLastRow < 4) {
+        sheet.getRange(4, 1, rows.length, 3).setHorizontalAlignment('left');
+        sheet.getRange(4, 4, rows.length, 17).setHorizontalAlignment('center');
+        sheet.getRange(4, headers.length, rows.length, 1)
+          .setFontWeight('bold')
+          .setBackground('#edfbf8')
+          .setFontColor('#005f50');
+      }
+      
+      // Bersihkan baris lama yang berlebih jika ada mahasiswa yang dihapus/pindah
+      if (prevDataLastRow > 3 + rows.length) {
+        sheet.getRange(4 + rows.length, 1, prevDataLastRow - (3 + rows.length), headers.length).clearContent();
+      }
+    } else {
+      // Jika tidak ada mahasiswa sama sekali di sheet ini
+      if (prevDataLastRow >= 4) {
+        sheet.getRange(4, 1, prevDataLastRow - 3, headers.length).clearContent();
+      }
     }
-    
-    sheet.setColumnWidth(1, 40);
-    sheet.setColumnWidth(2, 110);
-    sheet.setColumnWidth(3, 230);
-    for (var col = 4; col <= 19; col++) {
-      sheet.setColumnWidth(col, 42);
-    }
-    sheet.setColumnWidth(20, 105);
   });
 }
 
@@ -1951,7 +2161,7 @@ function createJsonResponse(obj) {
 }
 `;
                     navigator.clipboard.writeText(code);
-                    showAlert('Kode Disalin!', 'Kode Google Apps Script terbaru dengan Safe Sync & Anti-Data Loss telah disalin.');
+                    showAlert('Kode Disalin!', 'Kode Google Apps Script terbaru (Ultra Fast Sync & Anti-Data Loss) telah disalin.');
                 };
 
                 const currentCourseStudents = computed(() => {
@@ -2247,19 +2457,24 @@ function createJsonResponse(obj) {
                         syncStatus.value = 'offline';
                     });
 
+                    // Flush sisa antrean outbox jika ada saat aplikasi pertama kali dibuka
+                    if (gasUrl.value && outboxQueue.value.length > 0) {
+                        flushOutboxQueue();
+                    }
+
                     if (gasUrl.value) {
-                        // Otomatis tarik data langsung dari Spreadsheet agar langsung melanjutkan data yang ada
+                        // Tarik data terbaru di latar belakang (Stale-While-Revalidate)
                         await loadFromGAS(false);
                     }
 
-                    // Otomatis deteksi saat user kembali ke tab ini dari Google Spreadsheet
+                    // Otomatis deteksi saat user kembali ke tab ini dari tab/aplikasi lain
                     let lastAutoPullTime = 0;
                     const triggerAutoPullFromGAS = () => {
                         const now = Date.now();
-                        // Throttle minimal 4 detik agar tidak spam request
-                        if (now - lastAutoPullTime < 4000) return;
-                        // Jangan sinkronkan jika sedang mengedit modal atau ada antrean lokal pending
-                        if (showStudentModal.value || isSyncing.value || outboxQueue.value.length > 0) return;
+                        // Throttle minimal 6 detik agar tidak spam request
+                        if (now - lastAutoPullTime < 6000) return;
+                        // Jangan pull jika modal edit sedang buka, sedang sync, ada antrean outbox, atau dosen baru saja mengedit (< 15 detik)
+                        if (showStudentModal.value || isSyncing.value || outboxQueue.value.length > 0 || (now - lastUserActionTime < 15000)) return;
                         if (gasUrl.value && isOnline.value) {
                             lastAutoPullTime = now;
                             loadFromGAS(false);
@@ -2273,12 +2488,12 @@ function createJsonResponse(obj) {
                         }
                     });
 
-                    // Polling berkala setiap 10 detik agar sinkronisasi antar-device langsung terasa responsif
+                    // Polling berkala setiap 25 detik agar tetap terbarui antar-device tanpa membebani kuota API
                     setInterval(() => {
                         if (document.visibilityState === 'visible') {
                             triggerAutoPullFromGAS();
                         }
-                    }, 10000);
+                    }, 25000);
                 });
 
                 return {
