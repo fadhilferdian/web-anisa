@@ -182,6 +182,14 @@
                             </span>
                         </button>
                         <button 
+                            @click="loadFromGAS(true)"
+                            :disabled="isSyncing"
+                            title="Tarik & Segarkan Data Terbaru dari Spreadsheet" 
+                            class="bg-tosca-800 hover:bg-tosca-700 text-white p-2.5 rounded-xl text-xs border border-tosca-600 transition-all flex items-center gap-1.5 px-3.5 shadow-sm disabled:opacity-50 cursor-pointer">
+                            <i class="fa-solid fa-arrows-rotate text-amber-300" :class="{ 'fa-spin': isSyncing }"></i>
+                            <span class="font-semibold hidden sm:inline">Segarkan</span>
+                        </button>
+                        <button 
                             @click="showExportModal = true"
                             title="Ekspor Data Keaktifan" 
                             class="bg-tosca-800 hover:bg-tosca-700 text-white p-2.5 rounded-xl text-xs border border-tosca-600 transition-all flex items-center gap-1.5 px-3.5 shadow-sm">
@@ -337,12 +345,21 @@
                                         </div>
                                     </div>
 
-                                    <!-- Student Action Button -->
-                                    <button 
-                                        @click="openEditStudentModal(student)"
-                                        class="text-slate-400 hover:text-tosca-700 p-1.5 rounded-lg transition text-xs hover:bg-slate-100">
-                                        <i class="fa-solid fa-pen-to-square"></i>
-                                    </button>
+                                    <!-- Student Action Buttons -->
+                                    <div class="flex items-center gap-1">
+                                        <button 
+                                            @click="openEditStudentModal(student)"
+                                            class="text-slate-400 hover:text-tosca-700 p-1.5 rounded-lg transition text-xs hover:bg-slate-100"
+                                            title="Edit Data Mahasiswi">
+                                            <i class="fa-solid fa-pen-to-square"></i>
+                                        </button>
+                                        <button 
+                                            @click="deleteStudent(student.id)"
+                                            class="text-slate-300 hover:text-rose-600 p-1.5 rounded-lg transition text-xs hover:bg-rose-50"
+                                            title="Hapus Mahasiswi">
+                                            <i class="fa-solid fa-trash-can"></i>
+                                        </button>
+                                    </div>
                                 </div>
 
                                 <!-- Meeting Star Interactive Control -->
@@ -438,10 +455,28 @@
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-slate-200 bg-white">
-                                <tr v-for="student in filteredStudents" :key="student.id" class="hover:bg-teal-50/50 transition">
+                                <tr v-for="student in filteredStudents" :key="student.id" class="hover:bg-teal-50/50 transition group">
                                     <td class="p-3 font-semibold text-slate-800 sticky left-0 bg-white shadow-sm z-10 border-r border-slate-200">
-                                        <div class="font-bold text-slate-900">{{ student.name }}</div>
-                                        <div class="text-[11px] text-slate-500 font-mono">NIM: {{ student.nim }}</div>
+                                        <div class="flex items-center justify-between gap-2">
+                                            <div>
+                                                <div class="font-bold text-slate-900">{{ student.name }}</div>
+                                                <div class="text-[11px] text-slate-500 font-mono">NIM: {{ student.nim }}</div>
+                                            </div>
+                                            <div class="flex items-center gap-0.5 opacity-60 group-hover:opacity-100 transition">
+                                                <button 
+                                                    @click="openEditStudentModal(student)"
+                                                    class="text-slate-400 hover:text-tosca-700 p-1 rounded hover:bg-slate-100 transition text-xs"
+                                                    title="Edit Data Mahasiswi">
+                                                    <i class="fa-solid fa-pen-to-square"></i>
+                                                </button>
+                                                <button 
+                                                    @click="deleteStudent(student.id)"
+                                                    class="text-slate-400 hover:text-rose-600 p-1 rounded hover:bg-rose-50 transition text-xs"
+                                                    title="Hapus Mahasiswi">
+                                                    <i class="fa-solid fa-trash-can"></i>
+                                                </button>
+                                            </div>
+                                        </div>
                                     </td>
                                     <td 
                                         v-for="m in 16" 
@@ -616,8 +651,8 @@
                     <button 
                         v-if="editingStudentId"
                         @click="deleteStudent(editingStudentId)"
-                        class="text-rose-600 hover:text-rose-800 text-xs font-bold px-3 py-2 rounded-xl hover:bg-rose-50">
-                        <i class="fa-solid fa-trash mr-1"></i> Hapus
+                        class="text-rose-600 hover:text-rose-800 text-xs font-bold px-3 py-2 rounded-xl hover:bg-rose-50 transition">
+                        <i class="fa-solid fa-trash-can mr-1.5"></i> Hapus Mahasiswi Ini
                     </button>
                     <div class="flex gap-2 ml-auto">
                         <button 
@@ -728,31 +763,22 @@
                     </div>
                 </div>
 
-                <!-- Form Web App URL -->
-                <div class="space-y-2">
-                    <div class="flex items-center justify-between flex-wrap gap-1">
-                        <label class="block text-xs font-bold text-slate-700">
-                            URL Aplikasi Web Apps Script (Hardcoded Backend)
-                        </label>
-                        <span class="text-[10px] bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded-full border border-emerald-300 flex items-center gap-1">
-                            <i class="fa-solid fa-lock text-[9px]"></i> Auto-Sync Semua Device
-                        </span>
+                <!-- Status Koneksi Backend Baku (Tanpa Input Manual) -->
+                <div class="bg-slate-50 border border-slate-200 rounded-2xl p-4 flex items-center justify-between gap-3">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl bg-tosca-100 text-tosca-800 flex items-center justify-center text-lg shrink-0">
+                            <i class="fa-solid fa-link"></i>
+                        </div>
+                        <div>
+                            <div class="text-xs font-bold text-slate-800 flex items-center gap-2">
+                                <span>Backend Google Apps Script Terhubung</span>
+                                <span class="text-[10px] bg-emerald-100 text-emerald-800 font-extrabold px-2 py-0.5 rounded-full border border-emerald-300">
+                                    <i class="fa-solid fa-lock text-[9px]"></i> Baku / Hardcoded
+                                </span>
+                            </div>
+                            <p class="text-[11px] text-slate-500 mt-0.5">URL Web App Apps Script telah tertanam permanen di sistem, sehingga seluruh perangkat otomatis tersinkronisasi tanpa perlu input URL manual.</p>
+                        </div>
                     </div>
-                    <div class="flex gap-2">
-                        <input 
-                            v-model="gasUrlInput"
-                            type="url" 
-                            placeholder="https://script.google.com/macros/s/AKfycb.../exec"
-                            class="flex-1 px-3.5 py-2.5 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-tosca-500 focus:border-tosca-500 font-mono">
-                        <button 
-                            @click="saveGasUrl"
-                            class="px-4 py-2.5 bg-tosca-600 hover:bg-tosca-700 text-white rounded-xl text-xs font-bold transition shadow-sm">
-                            Simpan URL
-                        </button>
-                    </div>
-                    <p class="text-[11px] text-slate-500">
-                        URL ini sudah dikonfigurasi secara baku (hardcoded) dalam kode sistem agar seluruh perangkat langsung tersinkronisasi otomatis tanpa perlu input manual.
-                    </p>
                 </div>
 
                 <!-- Action Buttons: Manual Sync & Ping -->
@@ -812,7 +838,7 @@
                                 <div>&bull; Jalankan sebagai: <b>Saya (Me)</b></div>
                                 <div>&bull; Siapa yang memiliki akses: <b>Siapa saja (Anyone)</b></div>
                             </div>
-                            Lalu salin <b>Web App URL</b> yang muncul dan tempelkan pada kolom di atas.
+                            Selesai! Aplikasi ini sudah otomatis terhubung ke Google Spreadsheet Anda.
                         </li>
                     </ol>
                 </div>
@@ -830,8 +856,10 @@
         <!-- MODAL: CUSTOM ALERT DIALOG -->
         <div v-if="customAlert.show" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
             <div class="bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl text-center space-y-4">
-                <div class="w-12 h-12 rounded-2xl bg-amber-100 text-amber-600 flex items-center justify-center mx-auto text-xl shadow-sm">
-                    <i class="fa-solid fa-circle-info"></i>
+                <div 
+                    :class="customAlert.title.includes('Hapus') ? 'bg-rose-100 text-rose-600' : 'bg-amber-100 text-amber-600'"
+                    class="w-12 h-12 rounded-2xl flex items-center justify-center mx-auto text-xl shadow-sm">
+                    <i :class="customAlert.title.includes('Hapus') ? 'fa-solid fa-trash-can' : 'fa-solid fa-circle-info'"></i>
                 </div>
                 <h3 class="font-bold text-slate-800 text-base">{{ customAlert.title }}</h3>
                 <p class="text-xs text-slate-500 leading-relaxed">{{ customAlert.message }}</p>
@@ -840,13 +868,14 @@
                     <button 
                         v-if="customAlert.isConfirm" 
                         @click="customAlert.onCancel" 
-                        class="px-4 py-2 bg-slate-100 text-slate-700 rounded-xl text-xs font-semibold">
+                        class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-semibold">
                         Batal
                     </button>
                     <button 
                         @click="customAlert.onConfirm" 
-                        class="px-4 py-2 bg-tosca-600 hover:bg-tosca-700 text-white rounded-xl text-xs font-bold shadow">
-                        {{ customAlert.isConfirm ? 'Ya, Lanjutkan' : 'OK' }}
+                        :class="customAlert.title.includes('Hapus') ? 'bg-rose-600 hover:bg-rose-700' : 'bg-tosca-600 hover:bg-tosca-700'"
+                        class="px-4 py-2 text-white rounded-xl text-xs font-bold shadow">
+                        {{ customAlert.isConfirm ? (customAlert.title.includes('Hapus') ? 'Ya, Hapus' : 'Ya, Lanjutkan') : 'OK' }}
                     </button>
                 </div>
             </div>
@@ -874,21 +903,12 @@
                 const studentForm = ref({ name: '', nim: '', courses: [] });
 
                 // ============================================================
-                // KONFIGURASI HARDCODED GOOGLE APPS SCRIPT WEB APP
+                // KONFIGURASI BAKU GOOGLE APPS SCRIPT WEB APP (HARDCODED)
                 // ============================================================
-                // URL Web App Backend Google Apps Script (Baku / Hardcoded):
-                // Jika ingin mengganti URL secara permanen, ubah konstanta DEFAULT_GAS_URL di bawah ini.
                 const DEFAULT_GAS_URL = 'https://script.google.com/macros/s/AKfycbysGc7z5Efgpj2t1Tuj2xgmeW_ThoA2klwKCa8SPCas8YdDQuf7lJTebK01wW4VDZ0/exec';
 
-                // Inisialisasi: Prioritaskan DEFAULT_GAS_URL jika bukan placeholder,
-                // atau gunakan yang tersimpan di localStorage browser jika ada.
-                const initialGasUrl = (DEFAULT_GAS_URL && !DEFAULT_GAS_URL.includes('AKfycbz_web_anisa_backend'))
-                    ? DEFAULT_GAS_URL
-                    : (localStorage.getItem('mahasiswi_gas_url') || DEFAULT_GAS_URL);
-
-                const gasUrl = ref(initialGasUrl);
-                const gasUrlInput = ref(gasUrl.value);
-                const syncStatus = ref(gasUrl.value ? 'synced' : 'offline'); // 'synced' | 'syncing' | 'offline' | 'error'
+                const gasUrl = ref(DEFAULT_GAS_URL);
+                const syncStatus = ref('synced'); // 'synced' | 'syncing' | 'offline' | 'error'
                 const lastSyncedTime = ref(localStorage.getItem('mahasiswi_last_synced') || '');
                 const isSyncing = ref(false);
                 const isTestingConnection = ref(false);
@@ -1144,6 +1164,12 @@
 
                 const students = ref([]);
                 const outboxQueue = ref([]);
+                let initialDeleted = [];
+                try {
+                    initialDeleted = JSON.parse(localStorage.getItem('mahasiswi_deleted_ids') || '[]');
+                } catch (e) { initialDeleted = []; }
+                const deletedStudentIds = ref(initialDeleted);
+
                 const retryCount = ref(0);
                 const retryCountdown = ref(0);
                 const isOnline = ref(navigator.onLine);
@@ -1154,7 +1180,8 @@
                     const saved = localStorage.getItem('mahasiswi_nilai_data_v12') || localStorage.getItem('mahasiswi_nilai_data_v11');
                     if (saved) {
                         try {
-                            students.value = JSON.parse(saved);
+                            const parsed = JSON.parse(saved);
+                            students.value = parsed.filter(s => !deletedStudentIds.value.includes(s.id) && !deletedStudentIds.value.includes(s.nim));
                         } catch (e) {
                             students.value = generateDefaultStudents();
                         }
@@ -1225,7 +1252,8 @@
                         const payload = JSON.stringify({
                             action: 'batch_mutation',
                             mutations: outboxQueue.value,
-                            students: students.value
+                            students: students.value,
+                            deletedStudentIds: deletedStudentIds.value
                         });
 
                         const res = await fetch(gasUrl.value, {
@@ -1292,7 +1320,8 @@
                     try {
                         const payload = JSON.stringify({ 
                             action: 'full_sync',
-                            students: students.value 
+                            students: students.value,
+                            deletedStudentIds: deletedStudentIds.value
                         });
                         const res = await fetch(gasUrl.value, {
                             method: 'POST',
@@ -1322,17 +1351,6 @@
                     }
                 };
 
-                // Save GAS URL to Local Storage
-                const saveGasUrl = () => {
-                    gasUrl.value = gasUrlInput.value.trim();
-                    localStorage.setItem('mahasiswi_gas_url', gasUrl.value);
-                    if (!gasUrl.value) {
-                        syncStatus.value = 'offline';
-                        showAlert('Mode Lokal Diaktifkan', 'URL Google Apps Script telah dihapus. Portal berjalan dalam mode simpan lokal.');
-                    } else {
-                        testGasConnection();
-                    }
-                };
 
                 // Test Connection to Apps Script
                 const testGasConnection = async () => {
@@ -1372,16 +1390,25 @@
                         const res = await fetch(loadUrl);
                         const json = await res.json();
                         if (json && json.status === 'success' && json.data && Array.isArray(json.data) && json.data.length > 0) {
-                            students.value = json.data;
+                            // Spreadsheet adalah Single Source of Truth
+                            // Jika outbox kosong (tidak ada mutasi lokal tertunda), gunakan data spreadsheet seutuhnya
+                            if (outboxQueue.value.length === 0) {
+                                students.value = json.data;
+                                deletedStudentIds.value = [];
+                                localStorage.removeItem('mahasiswi_deleted_ids');
+                            } else {
+                                // Jika ada mutasi pending, pertahankan filter hapus lokal sementara
+                                students.value = json.data.filter(s => 
+                                    !deletedStudentIds.value.includes(s.id) && 
+                                    !deletedStudentIds.value.includes(s.nim)
+                                );
+                            }
                             saveLocalCache();
-                            // Kosongkan outbox lama agar tidak menimpa data spreadsheet yang baru ditarik
-                            outboxQueue.value = [];
-                            saveOutboxQueue();
                             syncStatus.value = 'synced';
                             const now = new Date();
                             lastSyncedTime.value = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
                             localStorage.setItem('mahasiswi_last_synced', lastSyncedTime.value);
-                            if (isManual) showAlert('Berhasil!', `Data mahasiswi (${json.data.length}) dan seluruh nilai bintang berhasil ditarik dari Spreadsheet.`);
+                            if (isManual) showAlert('Berhasil!', `Data terbaru (${json.data.length} mahasiswi) dan seluruh nilai bintang berhasil disinkronkan dari Spreadsheet.`);
                         } else if (json && json.status === 'empty') {
                             if (isManual) showAlert('Informasi', 'Spreadsheet belum memiliki data tersimpan.');
                         } else {
@@ -1505,6 +1532,14 @@ function doPost(e) {
     
     var processedMutationsCount = 0;
     var finalStudents = [];
+
+    // Filter out student yang terdaftar di deletedStudentIds jika ada
+    if (Array.isArray(payload.deletedStudentIds) && payload.deletedStudentIds.length > 0) {
+      existingStudents = existingStudents.filter(function(s) {
+        return payload.deletedStudentIds.indexOf(s.id) === -1 && 
+               payload.deletedStudentIds.indexOf(s.nim) === -1;
+      });
+    }
 
     // Jika mutasi bertahap dikirimkan dari Outbox Queue
     if (payload.action === 'batch_mutation' && Array.isArray(payload.mutations) && payload.mutations.length > 0) {
@@ -1716,6 +1751,12 @@ function parseSingleCourseSheet(sheet, courseId, studentMap) {
     }
 
     var student = studentMap[key];
+    if (name) {
+      student.name = name;
+    }
+    if (nim) {
+      student.nim = nim;
+    }
     if (student.courses.indexOf(courseId) === -1) {
       student.courses.push(courseId);
     }
@@ -1725,9 +1766,7 @@ function parseSingleCourseSheet(sheet, courseId, studentMap) {
       var cIdx = meetingColMap[m];
       if (cIdx !== undefined && cIdx < row.length) {
         var starVal = parseStarValue(row[cIdx]);
-        if (starVal > 0) {
-          student.stars[courseId][m] = starVal;
-        }
+        student.stars[courseId][m] = starVal;
       }
     }
   }
@@ -1775,7 +1814,7 @@ function applyMutations(students, mutations) {
         if (p.student && p.student.name) {
           var existingIdx = findStudentIndex(p.student.id, p.student.nim);
           if (existingIdx === -1) {
-            list.unshift(p.student);
+            list.push(p.student);
           } else {
             var s = list[existingIdx];
             if (Array.isArray(p.student.courses)) {
@@ -1830,7 +1869,16 @@ function applyMutations(students, mutations) {
         break;
 
       case 'DELETE_STUDENT':
-        var dIdx = findStudentIndex(p.studentId, null);
+        var dIdx = findStudentIndex(p.studentId, p.nim);
+        if (dIdx === -1 && p.name) {
+          var targetName = String(p.name).trim().toLowerCase();
+          for (var i = 0; i < list.length; i++) {
+            if (String(list[i].name).trim().toLowerCase() === targetName) {
+              dIdx = i;
+              break;
+            }
+          }
+        }
         if (dIdx !== -1) {
           list.splice(dIdx, 1);
         }
@@ -2203,23 +2251,41 @@ function createJsonResponse(obj) {
                             stars: newStars,
                             notes: newNotes
                         };
-                        students.value.unshift(newStudent);
+                        // Pastikan mahasiswi baru muncul di paling bawah daftar
+                        students.value.push(newStudent);
+                        // Hapus dari blacklist jika sebelumnya pernah dihapus
+                        const trimmedNim = studentForm.value.nim.trim();
+                        deletedStudentIds.value = deletedStudentIds.value.filter(id => id !== newId && id !== trimmedNim);
+                        localStorage.setItem('mahasiswi_deleted_ids', JSON.stringify(deletedStudentIds.value));
                         enqueueMutation('ADD_STUDENT', { student: newStudent });
                     }
                     closeStudentModal();
                 };
 
                 const deleteStudent = (studentId) => {
+                    const st = students.value.find(s => s.id === studentId);
+                    const studentName = st ? st.name : 'Mahasiswi ini';
+                    const studentNim = st && st.nim ? ` (NIM: ${st.nim})` : '';
                     customAlert.value = {
                         show: true,
                         title: 'Hapus Mahasiswi',
-                        message: 'Apakah Anda yakin ingin menghapus mahasiswi ini dari daftar?',
+                        message: `Apakah Anda yakin ingin menghapus "${studentName}"${studentNim} dari daftar? Data keaktifan mahasiswi ini akan dihapus dari portal dan Spreadsheet saat disinkronkan.`,
                         isConfirm: true,
                         onConfirm: () => {
+                            if (st) {
+                                if (st.id && !deletedStudentIds.value.includes(st.id)) deletedStudentIds.value.push(st.id);
+                                if (st.nim && !deletedStudentIds.value.includes(st.nim)) deletedStudentIds.value.push(st.nim);
+                                localStorage.setItem('mahasiswi_deleted_ids', JSON.stringify(deletedStudentIds.value));
+                            }
                             students.value = students.value.filter(s => s.id !== studentId);
-                            enqueueMutation('DELETE_STUDENT', { studentId });
+                            enqueueMutation('DELETE_STUDENT', { 
+                                studentId,
+                                nim: st ? st.nim : null,
+                                name: st ? st.name : null
+                            });
                             closeStudentModal();
                             customAlert.value.show = false;
+                            showAlert('Berhasil Dihapus', `Data mahasiswi "${studentName}" berhasil dihapus.`);
                         },
                         onCancel: () => { customAlert.value.show = false; }
                     };
@@ -2232,6 +2298,8 @@ function createJsonResponse(obj) {
                         message: 'Kembalikan data ke daftar mahasiswi default? Semua poin bintang tambahan akan dikembalikan ke awal.',
                         isConfirm: true,
                         onConfirm: () => {
+                            deletedStudentIds.value = [];
+                            localStorage.removeItem('mahasiswi_deleted_ids');
                             students.value = generateDefaultStudents();
                             enqueueMutation('RESET_DATA', {});
                             customAlert.value.show = false;
@@ -2288,6 +2356,34 @@ function createJsonResponse(obj) {
                         // Otomatis tarik data langsung dari Spreadsheet agar langsung melanjutkan data yang ada
                         await loadFromGAS(false);
                     }
+
+                    // Otomatis deteksi saat user kembali ke tab ini dari Google Spreadsheet
+                    let lastAutoPullTime = 0;
+                    const triggerAutoPullFromGAS = () => {
+                        const now = Date.now();
+                        // Throttle minimal 6 detik agar tidak spam request
+                        if (now - lastAutoPullTime < 6000) return;
+                        // Jangan sinkronkan jika sedang mengedit modal atau ada antrean lokal pending
+                        if (showStudentModal.value || isSyncing.value || outboxQueue.value.length > 0) return;
+                        if (gasUrl.value && isOnline.value) {
+                            lastAutoPullTime = now;
+                            loadFromGAS(false);
+                        }
+                    };
+
+                    window.addEventListener('focus', triggerAutoPullFromGAS);
+                    document.addEventListener('visibilitychange', () => {
+                        if (document.visibilityState === 'visible') {
+                            triggerAutoPullFromGAS();
+                        }
+                    });
+
+                    // Polling berkala setiap 25 detik untuk memeriksa jika ada editan langsung di Spreadsheet
+                    setInterval(() => {
+                        if (document.visibilityState === 'visible') {
+                            triggerAutoPullFromGAS();
+                        }
+                    }, 25000);
                 });
 
                 return {
@@ -2304,14 +2400,12 @@ function createJsonResponse(obj) {
                     studentForm,
                     customAlert,
                     gasUrl,
-                    gasUrlInput,
                     outboxQueue,
                     syncStatus,
                     lastSyncedTime,
                     isSyncing,
                     isTestingConnection,
                     retryCountdown,
-                    saveGasUrl,
                     testGasConnection,
                     flushOutboxQueue,
                     loadFromGAS,

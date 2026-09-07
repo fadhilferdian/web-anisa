@@ -106,6 +106,14 @@ function doPost(e) {
     var processedMutationsCount = 0;
     var finalStudents = [];
 
+    // Filter out student yang terdaftar di deletedStudentIds jika ada
+    if (Array.isArray(payload.deletedStudentIds) && payload.deletedStudentIds.length > 0) {
+      existingStudents = existingStudents.filter(function(s) {
+        return payload.deletedStudentIds.indexOf(s.id) === -1 && 
+               payload.deletedStudentIds.indexOf(s.nim) === -1;
+      });
+    }
+
     // Jika mutasi bertahap dikirimkan dari Outbox Queue
     if (payload.action === 'batch_mutation' && Array.isArray(payload.mutations) && payload.mutations.length > 0) {
       finalStudents = applyMutations(existingStudents, payload.mutations);
@@ -316,6 +324,12 @@ function parseSingleCourseSheet(sheet, courseId, studentMap) {
     }
 
     var student = studentMap[key];
+    if (name) {
+      student.name = name;
+    }
+    if (nim) {
+      student.nim = nim;
+    }
     if (student.courses.indexOf(courseId) === -1) {
       student.courses.push(courseId);
     }
@@ -325,9 +339,7 @@ function parseSingleCourseSheet(sheet, courseId, studentMap) {
       var cIdx = meetingColMap[m];
       if (cIdx !== undefined && cIdx < row.length) {
         var starVal = parseStarValue(row[cIdx]);
-        if (starVal > 0) {
-          student.stars[courseId][m] = starVal;
-        }
+        student.stars[courseId][m] = starVal;
       }
     }
   }
@@ -375,7 +387,7 @@ function applyMutations(students, mutations) {
         if (p.student && p.student.name) {
           var existingIdx = findStudentIndex(p.student.id, p.student.nim);
           if (existingIdx === -1) {
-            list.unshift(p.student);
+            list.push(p.student);
           } else {
             var s = list[existingIdx];
             if (Array.isArray(p.student.courses)) {
@@ -430,7 +442,16 @@ function applyMutations(students, mutations) {
         break;
 
       case 'DELETE_STUDENT':
-        var dIdx = findStudentIndex(p.studentId, null);
+        var dIdx = findStudentIndex(p.studentId, p.nim);
+        if (dIdx === -1 && p.name) {
+          var targetName = String(p.name).trim().toLowerCase();
+          for (var i = 0; i < list.length; i++) {
+            if (String(list[i].name).trim().toLowerCase() === targetName) {
+              dIdx = i;
+              break;
+            }
+          }
+        }
         if (dIdx !== -1) {
           list.splice(dIdx, 1);
         }
