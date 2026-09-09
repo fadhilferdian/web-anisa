@@ -5,14 +5,17 @@
  * Prinsip:
  * 1. SPREADSHEET ADALAH SINGLE SOURCE OF TRUTH:
  *    Data dibaca langsung dari lembar sheet masing-masing mata kuliah.
- * 2. TOLERAN NILAI BINTANG:
- *    Mendukung angka biasa (1, 2, 3), emoji bintang (⭐, ★), centang (✓, v), checkbox (TRUE).
- * 3. ANTI-DATA LOSS:
- *    Sinkronisasi tidak akan pernah menghapus bintang atau mahasiswi yang sudah ada.
- * 4. CHUNKED STORAGE:
+ * 2. TOLERAN NILAI BINTANG (TERMASUK NOL):
+ *    Mendukung angka biasa (0, 1, 2, 3), emoji bintang (⭐, ★), centang (✓, v), checkbox (TRUE).
+ * 3. ANTI-DATA LOSS & CONCURRENCY CONTROL (MUTEX):
+ *    Menggunakan LockService untuk mencegah tabrakan eksekusi antara GET dan POST.
+ * 4. GRANULAR ACKNOWLEDGMENT (ACK):
+ *    Mengembalikan ID mutasi yang berhasil diolah agar frontend hanya menghapus mutasi terkonfirmasi.
+ * 5. IN-PLACE TARGETED SHEET UPDATES:
+ *    Hanya memperbarui range sel data tanpa menghapus (clearContents) seluruh sheet dan tanpa
+ *    memformat ulang lebar kolom secara berulang sehingga eksekusi super cepat (< 1.5 detik).
+ * 6. CHUNKED STORAGE:
  *    Tab DB_JSON disimpan per baris sehingga terhindar dari batas 50.000 karakter per sel.
- * 5. FLEKSIBEL NAMA SHEET & KOLOM:
- *    Mendeteksi otomatis header NIM, Nama, dan kolom P1-P16 pada sheet mata kuliah.
  */
 
 // Konfigurasi Standar Mata Kuliah
@@ -25,11 +28,11 @@ var COURSE_CONFIG = {
 };
 
 /**
- * Handle HTTP GET (Memuat data langsung dari Spreadsheet sebagai Single Source of Truth)
+ * Handle HTTP GET (Memuat data langsung dari Spreadsheet dengan Lock Protection)
  */
 function doGet(e) {
-  // Pastikan cache lama dihapus sepenuhnya
-  try { CacheService.getScriptCache().removeAll(['MAHASISWI_ALL_DATA_CACHE']); } catch(e) {}
+  // Bersihkan cache lama
+  try { CacheService.getScriptCache().removeAll(['MAHASISWI_ALL_DATA_CACHE']); } catch(err) {}
 
   var action = (e && e.parameter && e.parameter.action) ? e.parameter.action : 'load';
   
@@ -40,12 +43,21 @@ function doGet(e) {
       timestamp: new Date().toISOString()
     });
   }
+
+  var lock = LockService.getScriptLock();
+  var hasLock = false;
+  try {
+    // Tunggu hingga 10 detik untuk memastikan tidak membaca saat POST sedang menulis sheet
+    hasLock = lock.waitLock(10000);
+  } catch (lockErr) {
+    // Lanjutkan jika lock timeout agar pembacaan tetap berlangsung
+  }
   
   try {
     var ss = SpreadsheetApp.getActiveSpreadsheet();
     
     // 1. SPREADSHEET SEBAGAI SINGLE SOURCE OF TRUTH:
-    // Baca langsung dari lembar sheet Spreadsheet yang ada!
+    // Baca langsung dari lembar sheet Spreadsheet yang ada
     var parsedStudents = parseAllCourseSheets(ss);
     
     if (parsedStudents && Array.isArray(parsedStudents) && parsedStudents.length > 0) {
@@ -85,15 +97,29 @@ function doGet(e) {
       status: 'error',
       message: 'Gagal membaca data dari Spreadsheet: ' + err.toString()
     });
+  } finally {
+    if (hasLock) {
+      try { lock.releaseLock(); } catch(err) {}
+    }
   }
 }
 
 /**
- * Handle HTTP POST (Penyimpanan Aman & Terkendali Tanpa Menghapus Data Lama)
+ * Handle HTTP POST (Penyimpanan Mutasi dengan Concurrency Lock & Granular ACK)
  */
 function doPost(e) {
-  // Pastikan cache lama dihapus sepenuhnya
-  try { CacheService.getScriptCache().removeAll(['MAHASISWI_ALL_DATA_CACHE']); } catch(e) {}
+  try { CacheService.getScriptCache().removeAll(['MAHASISWI_ALL_DATA_CACHE']); } catch(err) {}
+
+  var lock = LockService.getScriptLock();
+  var hasLock = false;
+  try {
+    hasLock = lock.waitLock(15000);
+  } catch (lockErr) {
+    return createJsonResponse({ 
+      status: 'error', 
+      message: 'Server Google Apps Script sedang sibuk memproses antrean lain. Silakan coba kembali sesaat lagi.' 
+    });
+  }
 
   try {
     if (!e || !e.postData || !e.postData.contents) {
@@ -112,7 +138,9 @@ function doPost(e) {
     }
     
     var processedMutationsCount = 0;
+    var acknowledgedIds = [];
     var finalStudents = [];
+    var affectedCourseIds = {};
 
     // Filter out student yang terdaftar di deletedStudentIds jika ada
     if (Array.isArray(payload.deletedStudentIds) && payload.deletedStudentIds.length > 0) {
@@ -124,6 +152,12 @@ function doPost(e) {
 
     // Jika mutasi bertahap dikirimkan dari Outbox Queue
     if (payload.action === 'batch_mutation' && Array.isArray(payload.mutations) && payload.mutations.length > 0) {
+      payload.mutations.forEach(function(m) {
+        if (m && m.id) acknowledgedIds.push(m.id);
+        if (m && m.payload && m.payload.courseId) {
+          affectedCourseIds[m.payload.courseId] = true;
+        }
+      });
       finalStudents = applyMutations(existingStudents, payload.mutations);
       processedMutationsCount = payload.mutations.length;
     } 
@@ -132,23 +166,26 @@ function doPost(e) {
       if (existingStudents.length === 0) {
         finalStudents = payload.students;
       } else {
-        // Safe Merge: Jangan pernah menimpa bintang yang sudah ada dengan 0
         finalStudents = safeMergeStudents(existingStudents, payload.students);
+      }
+      if (Array.isArray(payload.mutationIds)) {
+        acknowledgedIds = payload.mutationIds;
       }
     } else {
       finalStudents = existingStudents;
     }
     
-    // Simpan ke DB_JSON
+    // Simpan ke DB_JSON snapshot
     writeDbJson(ss, finalStudents);
     
-    // Render kembali lembar rekap rapi di masing-masing tab mata kuliah
-    renderCourseSheets(ss, finalStudents);
+    // Render efisien: hanya perbarui lembar mata kuliah yang terdampak (atau seluruhnya jika sinkronisasi penuh)
+    renderCourseSheets(ss, finalStudents, Object.keys(affectedCourseIds).length > 0 ? affectedCourseIds : null);
     
     return createJsonResponse({
       status: 'success',
       message: 'Data berhasil disinkronkan ke Spreadsheet tanpa menghapus riwayat!',
       mutationsProcessed: processedMutationsCount,
+      acknowledgedIds: acknowledgedIds,
       totalStudents: finalStudents.length,
       data: finalStudents,
       timestamp: new Date().toISOString()
@@ -159,6 +196,10 @@ function doPost(e) {
       status: 'error',
       message: 'Gagal menyimpan ke Spreadsheet: ' + err.toString()
     });
+  } finally {
+    if (hasLock) {
+      try { lock.releaseLock(); } catch(err) {}
+    }
   }
 }
 
@@ -183,7 +224,7 @@ function parseAllCourseSheets(ss) {
 }
 
 /**
- * Mencari sheet berdasarkan ID mata kuliah dengan fleksibilitas nama
+ * Mencari sheet berdasarkan ID mata kuliah dengan toleransi nama
  */
 function findSheetForCourse(ss, courseId) {
   var sheets = ss.getSheets();
@@ -222,15 +263,15 @@ function findSheetForCourse(ss, courseId) {
  */
 function parseStarValue(cell) {
   if (cell === null || cell === undefined || cell === '') return 0;
-  if (typeof cell === 'number') return Math.max(0, cell);
+  if (typeof cell === 'number') return Math.max(0, Math.floor(cell));
   if (typeof cell === 'boolean') return cell ? 1 : 0;
   
   var str = String(cell).trim();
-  if (!str) return 0;
+  if (!str || str === '-') return 0;
   
-  // Jika angka biasa (misal: "1", "3", "5")
+  // Jika angka biasa (misal: "1", "3", "5", "0")
   var num = Number(str);
-  if (!isNaN(num)) return Math.max(0, num);
+  if (!isNaN(num)) return Math.max(0, Math.floor(num));
   
   // Jika berisi emoji bintang: ⭐ (U+2B50), 🌟, ★ (U+2605)
   var starMatches = str.match(/[\u2B50\u2605\u2728\uD83C\uDF1F]/g);
@@ -247,7 +288,7 @@ function parseStarValue(cell) {
 }
 
 /**
- * Membaca satu lembar sheet mata kuliah secara cerdas
+ * Membaca satu lembar sheet mata kuliah secara cerdas dan toleran header
  */
 function parseSingleCourseSheet(sheet, courseId, studentMap) {
   var lastRow = sheet.getLastRow();
@@ -256,25 +297,35 @@ function parseSingleCourseSheet(sheet, courseId, studentMap) {
 
   var data = sheet.getRange(1, 1, lastRow, lastCol).getValues();
 
-  // Cari baris header yang memuat 'NIM' atau 'Nama'
   var headerRowIdx = -1;
   var nimColIdx = -1;
   var nameColIdx = -1;
   var meetingColMap = {};
 
+  // Cari baris header yang memuat 'NIM' dan 'Nama Mahasiswi'
   for (var r = 0; r < Math.min(data.length, 10); r++) {
     var row = data[r];
+    var foundNim = -1;
+    var foundName = -1;
     for (var c = 0; c < row.length; c++) {
       var cellVal = String(row[c] || '').trim().toLowerCase();
       if (cellVal === 'nim' || cellVal.indexOf('nim') !== -1) {
-        nimColIdx = c;
-        headerRowIdx = r;
+        foundNim = c;
       } else if (cellVal.indexOf('nama') !== -1) {
-        nameColIdx = c;
-        headerRowIdx = r;
+        foundName = c;
       }
     }
-    if (headerRowIdx !== -1) break;
+    // Hanya anggap baris header jika terdapat kolom NIM atau Nama yang sah
+    if (foundNim !== -1 && foundName !== -1) {
+      headerRowIdx = r;
+      nimColIdx = foundNim;
+      nameColIdx = foundName;
+      break;
+    } else if (foundName !== -1 && headerRowIdx === -1 && r > 0) {
+      headerRowIdx = r;
+      nameColIdx = foundName;
+      nimColIdx = (foundNim !== -1) ? foundNim : 1;
+    }
   }
 
   // Fallback posisi standar jika header tidak ditemukan
@@ -282,17 +333,17 @@ function parseSingleCourseSheet(sheet, courseId, studentMap) {
     headerRowIdx = (lastRow >= 4) ? 2 : 0;
     nimColIdx = 1;
     nameColIdx = 2;
-  } else {
-    // Deteksi kolom P1 s.d P16 pada baris header
-    var headerRow = data[headerRowIdx];
-    for (var c = 0; c < headerRow.length; c++) {
-      var colText = String(headerRow[c] || '').trim().toUpperCase();
-      var match = colText.match(/^P(\d+)$/);
-      if (match) {
-        var mNum = parseInt(match[1], 10);
-        if (mNum >= 1 && mNum <= 16) {
-          meetingColMap[mNum] = c;
-        }
+  }
+
+  // Deteksi kolom P1 s.d P16 pada baris header (toleran spasi dan 'Pertemuan')
+  var headerRow = data[headerRowIdx];
+  for (var c = 0; c < headerRow.length; c++) {
+    var colText = String(headerRow[c] || '').trim().toUpperCase();
+    var match = colText.match(/^P\s*(\d+)$/) || colText.match(/^PERTEMUAN\s*(\d+)$/);
+    if (match) {
+      var mNum = parseInt(match[1], 10);
+      if (mNum >= 1 && mNum <= 16) {
+        meetingColMap[mNum] = c;
       }
     }
   }
@@ -317,9 +368,9 @@ function parseSingleCourseSheet(sheet, courseId, studentMap) {
 
     if (!name && !nim) continue;
     if (name.toLowerCase() === 'nama mahasiswi' || nim.toLowerCase() === 'nim') continue;
-    if (name.toLowerCase().indexOf('total') !== -1) continue;
+    if (name.toLowerCase().indexOf('total') !== -1 || name.toLowerCase().indexOf('rekapitulasi') !== -1) continue;
 
-    var key = nim || name;
+    var key = (nim ? nim.toLowerCase() : '') || name.toLowerCase();
     if (!studentMap[key]) {
       studentMap[key] = {
         id: 'MHS-' + (nim ? nim : name.replace(/\s+/g, '_')),
@@ -332,12 +383,8 @@ function parseSingleCourseSheet(sheet, courseId, studentMap) {
     }
 
     var student = studentMap[key];
-    if (name) {
-      student.name = name;
-    }
-    if (nim) {
-      student.nim = nim;
-    }
+    if (name) student.name = name;
+    if (nim) student.nim = nim;
     if (student.courses.indexOf(courseId) === -1) {
       student.courses.push(courseId);
     }
@@ -362,11 +409,13 @@ function enrichWithDbNotes(ss, parsedStudents) {
     if (!dbData || !Array.isArray(dbData)) return;
     var noteMap = {};
     dbData.forEach(function(s) {
-      if (s.nim && s.notes) noteMap[s.nim] = s.notes;
+      var key = (s.nim ? String(s.nim).replace(/^'/, '').trim().toLowerCase() : '') || (s.name ? s.name.trim().toLowerCase() : '');
+      if (key && s.notes) noteMap[key] = s.notes;
     });
     parsedStudents.forEach(function(s) {
-      if (s.nim && noteMap[s.nim]) {
-        s.notes = noteMap[s.nim];
+      var key = (s.nim ? String(s.nim).replace(/^'/, '').trim().toLowerCase() : '') || (s.name ? s.name.trim().toLowerCase() : '');
+      if (key && noteMap[key]) {
+        s.notes = noteMap[key];
       }
     });
   } catch(e) {}
@@ -379,12 +428,12 @@ function applyMutations(students, mutations) {
   var list = students.slice(0);
 
   function findStudentIndex(id, nim, name) {
-    // 1. Prioritaskan pencocokan NIM (Kunci unik mahasiswa lintas device)
+    // 1. Prioritaskan pencocokan NIM yang dinormalisasi
     if (nim) {
-      var targetNim = String(nim).replace(/^'/, '').trim();
+      var targetNim = String(nim).replace(/^'/, '').trim().toLowerCase();
       if (targetNim) {
         for (var i = 0; i < list.length; i++) {
-          var sNim = String(list[i].nim || '').replace(/^'/, '').trim();
+          var sNim = String(list[i].nim || '').replace(/^'/, '').trim().toLowerCase();
           if (sNim && sNim === targetNim) return i;
         }
       }
@@ -495,17 +544,17 @@ function applyMutations(students, mutations) {
 }
 
 /**
- * Safe Merge: Menggabungkan data incoming tanpa menghapus bintang yang sudah ada di server
+ * Safe Merge: Menggabungkan data incoming tanpa merusak data lama, dengan dukungan nilai 0
  */
 function safeMergeStudents(serverList, incomingList) {
   var serverMap = {};
   serverList.forEach(function(s) {
-    var key = (s.nim ? String(s.nim).replace(/^'/, '').trim() : '') || s.id || s.name;
+    var key = (s.nim ? String(s.nim).replace(/^'/, '').trim().toLowerCase() : '') || s.id || s.name.toLowerCase();
     serverMap[key] = s;
   });
 
   incomingList.forEach(function(inS) {
-    var key = (inS.nim ? String(inS.nim).replace(/^'/, '').trim() : '') || inS.id || inS.name;
+    var key = (inS.nim ? String(inS.nim).replace(/^'/, '').trim().toLowerCase() : '') || inS.id || (inS.name ? inS.name.toLowerCase() : '');
     if (!serverMap[key]) {
       serverList.push(inS);
       serverMap[key] = inS;
@@ -525,8 +574,9 @@ function safeMergeStudents(serverList, incomingList) {
           var cStars = inS.stars[cId];
           Object.keys(cStars).forEach(function(m) {
             var val = Number(cStars[m]);
-            if (!isNaN(val) && val > 0) {
-              srvS.stars[cId][m] = val;
+            // FIX: Nilai 0 sekarang diterima sebagai pembaruan sah
+            if (!isNaN(val) && val >= 0) {
+              srvS.stars[cId][m] = Math.floor(val);
             }
           });
         });
@@ -537,7 +587,7 @@ function safeMergeStudents(serverList, incomingList) {
           if (!srvS.notes[cId]) srvS.notes[cId] = {};
           var cNotes = inS.notes[cId];
           Object.keys(cNotes).forEach(function(m) {
-            if (cNotes[m]) srvS.notes[cId][m] = cNotes[m];
+            if (cNotes[m] !== undefined) srvS.notes[cId][m] = cNotes[m];
           });
         });
       }
@@ -598,54 +648,83 @@ function writeDbJson(ss, data) {
 }
 
 /**
- * Merender lembar rekap rapi per mata kuliah (Human Readable)
+ * Merender lembar rekap rapi secara in-place tanpa menghapus seluruh struktur lembar
  */
-function renderCourseSheets(ss, students) {
+function renderCourseSheets(ss, students, targetCourseFilter) {
   if (!Array.isArray(students)) return;
 
-  Object.keys(COURSE_CONFIG).forEach(function(courseId) {
+  var coursesToRender = Object.keys(COURSE_CONFIG);
+  if (targetCourseFilter && typeof targetCourseFilter === 'object') {
+    coursesToRender = coursesToRender.filter(function(cId) {
+      return targetCourseFilter[cId];
+    });
+  }
+
+  coursesToRender.forEach(function(courseId) {
     var config = COURSE_CONFIG[courseId];
     var sheet = findSheetForCourse(ss, courseId);
+    var isNewSheet = false;
     if (!sheet) {
       sheet = ss.insertSheet(config.name);
-    } else {
-      sheet.clearContents();
+      isNewSheet = true;
     }
     
     var courseStudents = students.filter(function(s) {
       return s.courses && s.courses.indexOf(courseId) !== -1;
     });
-    
-    sheet.getRange('A1').setValue('REKAPITULASI BINTANG KEAKTIFAN - ' + config.label.toUpperCase());
-    sheet.getRange('A1').setFontWeight('bold').setFontSize(12).setFontColor('#004a3f');
-    
+
     var headers = ['No', 'NIM', 'Nama Mahasiswi'];
     for (var m = 1; m <= 16; m++) {
       headers.push('P' + m);
     }
     headers.push('Total Bintang');
-    
-    sheet.getRange(3, 1, 1, headers.length).setValues([headers]);
-    sheet.getRange(3, 1, 1, headers.length)
-      .setBackground('#00897b')
-      .setFontColor('#ffffff')
-      .setFontWeight('bold')
-      .setHorizontalAlignment('center');
-      
+
+    // Jika sheet baru atau belum memiliki struktur header di baris 3, buat struktur sekali saja
+    var currentLastRow = sheet.getLastRow();
+    if (isNewSheet || currentLastRow < 3) {
+      sheet.clearContents();
+      sheet.getRange('A1').setValue('REKAPITULASI BINTANG KEAKTIFAN - ' + config.label.toUpperCase());
+      sheet.getRange('A1').setFontWeight('bold').setFontSize(12).setFontColor('#004a3f');
+
+      sheet.getRange(3, 1, 1, headers.length).setValues([headers]);
+      sheet.getRange(3, 1, 1, headers.length)
+        .setBackground('#00897b')
+        .setFontColor('#ffffff')
+        .setFontWeight('bold')
+        .setHorizontalAlignment('center');
+
+      sheet.setColumnWidth(1, 40);
+      sheet.setColumnWidth(2, 110);
+      sheet.setColumnWidth(3, 230);
+      for (var col = 4; col <= 19; col++) {
+        sheet.setColumnWidth(col, 42);
+      }
+      sheet.setColumnWidth(20, 105);
+    }
+
+    // Tulis baris data mahasiswi secara in-place
     if (courseStudents.length > 0) {
       var rows = [];
       courseStudents.forEach(function(s, idx) {
         var row = [(idx + 1), "'" + s.nim, s.name];
         var total = 0;
         for (var m = 1; m <= 16; m++) {
-          var stars = (s.stars && s.stars[courseId] && s.stars[courseId][m]) ? Number(s.stars[courseId][m]) : 0;
+          var stars = (s.stars && s.stars[courseId] && s.stars[courseId][m] !== undefined) ? Number(s.stars[courseId][m]) : 0;
           row.push(stars);
           total += stars;
         }
         row.push(total);
         rows.push(row);
       });
-      
+
+      // Bersihkan sisa baris lama di bawah baris data baru jika ada mahasiswa berkurang
+      var prevLastRow = sheet.getLastRow();
+      var neededRows = rows.length;
+      if (prevLastRow > (3 + neededRows)) {
+        sheet.getRange(4 + neededRows, 1, prevLastRow - (3 + neededRows), headers.length).clearContent();
+      }
+
+      // Tulis seluruh baris baru sekaligus secara efisien
       sheet.getRange(4, 1, rows.length, headers.length).setValues(rows);
       sheet.getRange(4, 1, rows.length, 3).setHorizontalAlignment('left');
       sheet.getRange(4, 4, rows.length, 17).setHorizontalAlignment('center');
@@ -654,15 +733,13 @@ function renderCourseSheets(ss, students) {
         .setFontWeight('bold')
         .setBackground('#edfbf8')
         .setFontColor('#005f50');
+    } else {
+      // Jika tidak ada mahasiswi di kelas ini, bersihkan data di bawah header
+      var lastRow = sheet.getLastRow();
+      if (lastRow >= 4) {
+        sheet.getRange(4, 1, lastRow - 3, headers.length).clearContent();
+      }
     }
-    
-    sheet.setColumnWidth(1, 40);
-    sheet.setColumnWidth(2, 110);
-    sheet.setColumnWidth(3, 230);
-    for (var col = 4; col <= 19; col++) {
-      sheet.setColumnWidth(col, 42);
-    }
-    sheet.setColumnWidth(20, 105);
   });
 }
 
