@@ -174,6 +174,23 @@ function doPost(e) {
           Object.keys(COURSE_CONFIG).forEach(function(cId) { affectedCourseIds[cId] = true; });
         }
       });
+      // Pastikan data mahasiswi dari client digabungkan jika ada yang belum tercatat di existingStudents
+      if (Array.isArray(payload.students) && payload.students.length > 0) {
+        if (existingStudents.length === 0) {
+          existingStudents = payload.students;
+        } else {
+          payload.students.forEach(function(cSt) {
+            var targetNim = cSt.nim ? String(cSt.nim).replace(/^'/, '').trim().toLowerCase() : '';
+            var exists = existingStudents.some(function(eSt) {
+              var eNim = eSt.nim ? String(eSt.nim).replace(/^'/, '').trim().toLowerCase() : '';
+              return (targetNim && eNim === targetNim) || eSt.id === cSt.id || (cSt.name && eSt.name && eSt.name.trim().toLowerCase() === cSt.name.trim().toLowerCase());
+            });
+            if (!exists) {
+              existingStudents.push(cSt);
+            }
+          });
+        }
+      }
       finalStudents = applyMutations(existingStudents, payload.mutations);
       processedMutationsCount = payload.mutations.length;
     } 
@@ -197,6 +214,9 @@ function doPost(e) {
     
     // Render kembali lembar rekap rapi HANYA untuk kelas yang terkena mutasi (Fast in-place rendering)
     renderCourseSheets(ss, finalStudents, affectedCourseIds);
+
+    // Paksa Google Spreadsheet untuk langsung menerapkan dan menampilkan data di sel tanpa jeda
+    SpreadsheetApp.flush();
     
     return createJsonResponse({
       status: 'success',
