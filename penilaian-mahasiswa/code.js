@@ -1,32 +1,21 @@
 /**
  * ============================================================================
- * GOOGLE APPS SCRIPT BACKEND - PORTAL KEAKTIFAN MAHASISWI (ULTRA FAST SYNC)
+ * GOOGLE APPS SCRIPT BACKEND - PORTAL KEAKTIFAN MAHASISWI (ULTRA FAST & ROBUST)
  * ============================================================================
  * Prinsip:
  * 1. SPREADSHEET ADALAH SINGLE SOURCE OF TRUTH:
-<<<<<<< HEAD
- *    Data dibaca langsung dari lembar sheet masing-masing mata kuliah.
- * 2. TOLERAN NILAI BINTANG (TERMASUK NOL):
- *    Mendukung angka biasa (0, 1, 2, 3), emoji bintang (⭐, ★), centang (✓, v), checkbox (TRUE).
+ *    Data tersimpan konsisten di lembar Spreadsheet dan DB_JSON.
+ * 2. FAST READ & WRITE:
+ *    doGet membaca dari DB_JSON secara instan (<200ms) tanpa operasi tulis.
+ *    Jika parameter force_sheets=true dikirimkan, backend membaca langsung dari lembar sheet.
+ *    doPost hanya memperbarui lembar sheet yang dimutasi tanpa perulangan resize kolom.
  * 3. ANTI-DATA LOSS & CONCURRENCY CONTROL (MUTEX):
  *    Menggunakan LockService untuk mencegah tabrakan eksekusi antara GET dan POST.
  * 4. GRANULAR ACKNOWLEDGMENT (ACK):
  *    Mengembalikan ID mutasi yang berhasil diolah agar frontend hanya menghapus mutasi terkonfirmasi.
- * 5. IN-PLACE TARGETED SHEET UPDATES:
- *    Hanya memperbarui range sel data tanpa menghapus (clearContents) seluruh sheet dan tanpa
- *    memformat ulang lebar kolom secara berulang sehingga eksekusi super cepat (< 1.5 detik).
+ * 5. TOLERAN NILAI BINTANG (TERMASUK NOL):
+ *    Mendukung angka biasa (0, 1, 2, 3), emoji bintang (⭐, ★), centang (✓, v), checkbox (TRUE).
  * 6. CHUNKED STORAGE:
-=======
- *    Data tersimpan konsisten di lembar Spreadsheet dan DB_JSON.
- * 2. FAST READ & WRITE:
- *    doGet membaca dari DB_JSON secara instan (<200ms) tanpa operasi tulis.
- *    doPost hanya memperbarui lembar sheet yang dimutasi tanpa perulangan resize kolom.
- * 3. ANTI-DATA LOSS & ZERO RACE CONDITION:
- *    Sinkronisasi mutasi parsial aman tanpa menimpa data yang sedang aktif diedit.
- * 4. TOLERAN NILAI BINTANG:
- *    Mendukung angka biasa (1, 2, 3), emoji bintang (⭐, ★), centang (✓, v), checkbox (TRUE).
- * 5. CHUNKED STORAGE:
->>>>>>> 449540fab6af1872b1dfb30353933e336588882b
  *    Tab DB_JSON disimpan per baris sehingga terhindar dari batas 50.000 karakter per sel.
  */
 
@@ -40,18 +29,11 @@ var COURSE_CONFIG = {
 };
 
 /**
-<<<<<<< HEAD
- * Handle HTTP GET (Memuat data langsung dari Spreadsheet dengan Lock Protection)
- */
-function doGet(e) {
-  // Bersihkan cache lama
-  try { CacheService.getScriptCache().removeAll(['MAHASISWI_ALL_DATA_CACHE']); } catch(err) {}
-
-=======
  * Handle HTTP GET (Memuat data langsung dari Spreadsheet / DB_JSON)
  */
 function doGet(e) {
->>>>>>> 449540fab6af1872b1dfb30353933e336588882b
+  try { CacheService.getScriptCache().removeAll(['MAHASISWI_ALL_DATA_CACHE']); } catch(err) {}
+
   var action = (e && e.parameter && e.parameter.action) ? e.parameter.action : 'load';
   
   if (action === 'ping') {
@@ -65,20 +47,13 @@ function doGet(e) {
   var lock = LockService.getScriptLock();
   var hasLock = false;
   try {
-    // Tunggu hingga 10 detik untuk memastikan tidak membaca saat POST sedang menulis sheet
     hasLock = lock.waitLock(10000);
-  } catch (lockErr) {
-    // Lanjutkan jika lock timeout agar pembacaan tetap berlangsung
-  }
+  } catch (lockErr) {}
   
   try {
     var ss = SpreadsheetApp.getActiveSpreadsheet();
     var forceSheets = (e && e.parameter && (e.parameter.force_sheets === 'true' || e.parameter.force === 'true'));
     
-<<<<<<< HEAD
-    // 1. SPREADSHEET SEBAGAI SINGLE SOURCE OF TRUTH:
-    // Baca langsung dari lembar sheet Spreadsheet yang ada
-=======
     // 1. FAST PATH: Jika bukan force_sheets, baca dari DB_JSON (super cepat, ~150ms)
     if (!forceSheets) {
       var dbData = readDbJson(ss);
@@ -94,7 +69,6 @@ function doGet(e) {
     }
     
     // 2. FALLBACK / FORCE PATH: Baca langsung dari lembar sheet per mata kuliah
->>>>>>> 449540fab6af1872b1dfb30353933e336588882b
     var parsedStudents = parseAllCourseSheets(ss);
     if (parsedStudents && Array.isArray(parsedStudents) && parsedStudents.length > 0) {
       enrichWithDbNotes(ss, parsedStudents);
@@ -125,7 +99,6 @@ function doGet(e) {
       message: 'Belum ada data tersimpan di Spreadsheet.',
       data: null
     });
-    
   } catch (err) {
     return createJsonResponse({
       status: 'error',
@@ -139,8 +112,7 @@ function doGet(e) {
 }
 
 /**
-<<<<<<< HEAD
- * Handle HTTP POST (Penyimpanan Mutasi dengan Concurrency Lock & Granular ACK)
+ * Handle HTTP POST (Penyimpanan Aman, Cepat & Terkendali Tanpa Menghapus Data Lama)
  */
 function doPost(e) {
   try { CacheService.getScriptCache().removeAll(['MAHASISWI_ALL_DATA_CACHE']); } catch(err) {}
@@ -156,11 +128,6 @@ function doPost(e) {
     });
   }
 
-=======
- * Handle HTTP POST (Penyimpanan Aman, Cepat & Terkendali Tanpa Menghapus Data Lama)
- */
-function doPost(e) {
->>>>>>> 449540fab6af1872b1dfb30353933e336588882b
   try {
     if (!e || !e.postData || !e.postData.contents) {
       return createJsonResponse({ status: 'error', message: 'Payload tidak ditemukan.' });
@@ -198,19 +165,13 @@ function doPost(e) {
 
     // Jika mutasi bertahap dikirimkan dari Outbox Queue
     if (payload.action === 'batch_mutation' && Array.isArray(payload.mutations) && payload.mutations.length > 0) {
-<<<<<<< HEAD
       payload.mutations.forEach(function(m) {
         if (m && m.id) acknowledgedIds.push(m.id);
         if (m && m.payload && m.payload.courseId) {
           affectedCourseIds[m.payload.courseId] = true;
-=======
-      payload.mutations.forEach(function(mut) {
-        if (mut.payload && mut.payload.courseId) {
-          affectedCourseIds[mut.payload.courseId] = true;
         } else {
           // Mutasi umum (ADD/EDIT/DELETE) mempengaruhi semua kelas
           Object.keys(COURSE_CONFIG).forEach(function(cId) { affectedCourseIds[cId] = true; });
->>>>>>> 449540fab6af1872b1dfb30353933e336588882b
         }
       });
       finalStudents = applyMutations(existingStudents, payload.mutations);
@@ -231,19 +192,11 @@ function doPost(e) {
       finalStudents = existingStudents;
     }
     
-<<<<<<< HEAD
-    // Simpan ke DB_JSON snapshot
-    writeDbJson(ss, finalStudents);
-    
-    // Render efisien: hanya perbarui lembar mata kuliah yang terdampak (atau seluruhnya jika sinkronisasi penuh)
-    renderCourseSheets(ss, finalStudents, Object.keys(affectedCourseIds).length > 0 ? affectedCourseIds : null);
-=======
     // Simpan snapshot aman ke DB_JSON
     writeDbJson(ss, finalStudents);
     
-    // Render kembali lembar rekap rapi HANYA untuk kelas yang terkena mutasi (Fast rendering)
+    // Render kembali lembar rekap rapi HANYA untuk kelas yang terkena mutasi (Fast in-place rendering)
     renderCourseSheets(ss, finalStudents, affectedCourseIds);
->>>>>>> 449540fab6af1872b1dfb30353933e336588882b
     
     return createJsonResponse({
       status: 'success',
@@ -254,7 +207,6 @@ function doPost(e) {
       data: finalStudents,
       timestamp: new Date().toISOString()
     });
-    
   } catch (err) {
     return createJsonResponse({
       status: 'error',
@@ -712,24 +664,6 @@ function writeDbJson(ss, data) {
 }
 
 /**
-<<<<<<< HEAD
- * Merender lembar rekap rapi secara in-place tanpa menghapus seluruh struktur lembar
- */
-function renderCourseSheets(ss, students, targetCourseFilter) {
-  if (!Array.isArray(students)) return;
-
-  var coursesToRender = Object.keys(COURSE_CONFIG);
-  if (targetCourseFilter && typeof targetCourseFilter === 'object') {
-    coursesToRender = coursesToRender.filter(function(cId) {
-      return targetCourseFilter[cId];
-    });
-  }
-
-  coursesToRender.forEach(function(courseId) {
-    var config = COURSE_CONFIG[courseId];
-    var sheet = findSheetForCourse(ss, courseId);
-    var isNewSheet = false;
-=======
  * Merender lembar rekap rapi per mata kuliah (Super Cepat & Efisien)
  */
 function renderCourseSheets(ss, students, targetCourseIds) {
@@ -745,7 +679,6 @@ function renderCourseSheets(ss, students, targetCourseIds) {
     var sheet = findSheetForCourse(ss, courseId);
     var isNewSheet = false;
     
->>>>>>> 449540fab6af1872b1dfb30353933e336588882b
     if (!sheet) {
       sheet = ss.insertSheet(config.name);
       isNewSheet = true;
@@ -754,26 +687,12 @@ function renderCourseSheets(ss, students, targetCourseIds) {
     var courseStudents = students.filter(function(s) {
       return s.courses && s.courses.indexOf(courseId) !== -1;
     });
-<<<<<<< HEAD
 
-=======
-    
->>>>>>> 449540fab6af1872b1dfb30353933e336588882b
     var headers = ['No', 'NIM', 'Nama Mahasiswi'];
     for (var m = 1; m <= 16; m++) {
       headers.push('P' + m);
     }
     headers.push('Total Bintang');
-<<<<<<< HEAD
-
-    // Jika sheet baru atau belum memiliki struktur header di baris 3, buat struktur sekali saja
-    var currentLastRow = sheet.getLastRow();
-    if (isNewSheet || currentLastRow < 3) {
-      sheet.clearContents();
-      sheet.getRange('A1').setValue('REKAPITULASI BINTANG KEAKTIFAN - ' + config.label.toUpperCase());
-      sheet.getRange('A1').setFontWeight('bold').setFontSize(12).setFontColor('#004a3f');
-
-=======
     
     var lastRow = sheet.getLastRow();
     
@@ -782,18 +701,13 @@ function renderCourseSheets(ss, students, targetCourseIds) {
       sheet.getRange('A1').setValue('REKAPITULASI BINTANG KEAKTIFAN - ' + config.label.toUpperCase());
       sheet.getRange('A1').setFontWeight('bold').setFontSize(12).setFontColor('#004a3f');
       
->>>>>>> 449540fab6af1872b1dfb30353933e336588882b
       sheet.getRange(3, 1, 1, headers.length).setValues([headers]);
       sheet.getRange(3, 1, 1, headers.length)
         .setBackground('#00897b')
         .setFontColor('#ffffff')
         .setFontWeight('bold')
         .setHorizontalAlignment('center');
-<<<<<<< HEAD
-
-=======
         
->>>>>>> 449540fab6af1872b1dfb30353933e336588882b
       sheet.setColumnWidth(1, 40);
       sheet.setColumnWidth(2, 110);
       sheet.setColumnWidth(3, 230);
@@ -802,14 +716,9 @@ function renderCourseSheets(ss, students, targetCourseIds) {
       }
       sheet.setColumnWidth(20, 105);
     }
-<<<<<<< HEAD
-
-    // Tulis baris data mahasiswi secara in-place
-=======
     
     var prevDataLastRow = sheet.getLastRow();
     
->>>>>>> 449540fab6af1872b1dfb30353933e336588882b
     if (courseStudents.length > 0) {
       var rows = [];
       courseStudents.forEach(function(s, idx) {
@@ -823,33 +732,10 @@ function renderCourseSheets(ss, students, targetCourseIds) {
         row.push(total);
         rows.push(row);
       });
-<<<<<<< HEAD
-
-      // Bersihkan sisa baris lama di bawah baris data baru jika ada mahasiswa berkurang
-      var prevLastRow = sheet.getLastRow();
-      var neededRows = rows.length;
-      if (prevLastRow > (3 + neededRows)) {
-        sheet.getRange(4 + neededRows, 1, prevLastRow - (3 + neededRows), headers.length).clearContent();
-      }
-
-      // Tulis seluruh baris baru sekaligus secara efisien
-=======
       
       // Tulis seluruh baris nilai dalam 1 panggilan API (Ultra Cepat)
->>>>>>> 449540fab6af1872b1dfb30353933e336588882b
       sheet.getRange(4, 1, rows.length, headers.length).setValues(rows);
       
-<<<<<<< HEAD
-      sheet.getRange(4, headers.length, rows.length, 1)
-        .setFontWeight('bold')
-        .setBackground('#edfbf8')
-        .setFontColor('#005f50');
-    } else {
-      // Jika tidak ada mahasiswi di kelas ini, bersihkan data di bawah header
-      var lastRow = sheet.getLastRow();
-      if (lastRow >= 4) {
-        sheet.getRange(4, 1, lastRow - 3, headers.length).clearContent();
-=======
       // Jika sheet baru dibuat, berikan style dasar pada data
       if (isNewSheet || prevDataLastRow < 4) {
         sheet.getRange(4, 1, rows.length, 3).setHorizontalAlignment('left');
@@ -868,7 +754,6 @@ function renderCourseSheets(ss, students, targetCourseIds) {
       // Jika tidak ada mahasiswa sama sekali di sheet ini
       if (prevDataLastRow >= 4) {
         sheet.getRange(4, 1, prevDataLastRow - 3, headers.length).clearContent();
->>>>>>> 449540fab6af1872b1dfb30353933e336588882b
       }
     }
   });
