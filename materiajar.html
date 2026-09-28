@@ -82,11 +82,11 @@
         <!-- BAGIAN MATERI -->
         <section id="materiSection" class="fade-in">
             <div class="text-center mb-8 bg-white p-6 rounded-2xl shadow-sm border border-teal-100">
-                <h2 id="materiTitle" class="text-3xl font-bold text-teal-700 mb-4">جدول التصريف اللغوي لفعل السالم (كَتَبَ)</h2>
+                <h2 id="materiTitle" class="text-3xl font-bold text-teal-700 mb-4">جدول التصريف اللغوي لفعل السالم (فَعَلَ - يَفْعَلُ)</h2>
                 
                 <!-- Verb Type Selector (Jenis Fi'il) -->
                 <div class="flex justify-center flex-wrap gap-2 mb-4">
-                    <button onclick="switchVerb('salim')" id="btnSalim" class="verb-btn px-6 py-2 rounded-md font-bold transition-colors bg-teal-600 text-white shadow-inner">السالم (كَتَبَ)</button>
+                    <button onclick="switchVerb('salim')" id="btnSalim" class="verb-btn px-6 py-2 rounded-md font-bold transition-colors bg-teal-600 text-white shadow-inner">السالم (فَعَلَ - يَفْعَلُ)</button>
                     <button onclick="switchVerb('mahmuz')" id="btnMahmuz" class="verb-btn px-6 py-2 rounded-md font-bold transition-colors text-teal-700 bg-white border border-teal-200 hover:bg-teal-50">المهموز (أَكَلَ)</button>
                     <button onclick="switchVerb('mudhaaf')" id="btnMudhaaf" class="verb-btn px-6 py-2 rounded-md font-bold transition-colors text-teal-700 bg-white border border-teal-200 hover:bg-teal-50">المضعف (مَدَّ)</button>
                 </div>
@@ -154,7 +154,7 @@
                     <div class="flex items-center gap-1.5 flex-wrap justify-center">
                         <span class="text-xs font-bold text-gray-500 ml-1">نوع الفعل:</span>
                         <button onclick="setGameVerbFilter('all')" id="gameVerbBtn-all" class="game-verb-btn px-4 py-1.5 rounded-full font-bold bg-teal-600 text-white shadow-sm transition text-xs">كل الأفعال</button>
-                        <button onclick="setGameVerbFilter('salim')" id="gameVerbBtn-salim" class="game-verb-btn px-4 py-1.5 rounded-full font-bold text-teal-700 bg-teal-50 hover:bg-teal-100 transition text-xs">السالم (كَتَبَ)</button>
+                        <button onclick="setGameVerbFilter('salim')" id="gameVerbBtn-salim" class="game-verb-btn px-4 py-1.5 rounded-full font-bold text-teal-700 bg-teal-50 hover:bg-teal-100 transition text-xs">السالم (فَعَلَ - يَفْعَلُ)</button>
                         <button onclick="setGameVerbFilter('mahmuz')" id="gameVerbBtn-mahmuz" class="game-verb-btn px-4 py-1.5 rounded-full font-bold text-teal-700 bg-teal-50 hover:bg-teal-100 transition text-xs">المهموز (أَكَلَ)</button>
                         <button onclick="setGameVerbFilter('mudhaaf')" id="gameVerbBtn-mudhaaf" class="game-verb-btn px-4 py-1.5 rounded-full font-bold text-teal-700 bg-teal-50 hover:bg-teal-100 transition text-xs">المضعف (مَدَّ)</button>
                     </div>
@@ -176,44 +176,44 @@
     <script>
         // Data lengkap untuk 3 Tense (Madhi, Mudhari', Amr) dan 3 Jenis Fi'il
         const tashrifData = [
-            // --- SALIM (كَتَبَ) ---
+            // --- SALIM (فَعَلَ - يَفْعَلُ) ---
             // Madhi
-            { id: 's_m1', verb: 'salim', tense: 'madhi', arti: "مفرد مذكر", fiil: "كَتَبَ", gender: "male", count: 1, person: 3, group: "الغائب (الطرف الثالث)" },
-            { id: 's_m2', verb: 'salim', tense: 'madhi', arti: "مثنى مذكر", fiil: "كَتَبَا", gender: "male", count: 2, person: 3, group: "الغائب (الطرف الثالث)" },
-            { id: 's_m3', verb: 'salim', tense: 'madhi', arti: "جمع مذكر", fiil: "كَتَبُوْا", gender: "male", count: 3, person: 3, group: "الغائب (الطرف الثالث)" },
-            { id: 's_m4', verb: 'salim', tense: 'madhi', arti: "مفرد مؤنث", fiil: "كَتَبَتْ", gender: "female", count: 1, person: 3, group: "الغائبة (الطرف الثالث - مؤنث)" },
-            { id: 's_m5', verb: 'salim', tense: 'madhi', arti: "مثنى مؤنث", fiil: "كَتَبَتَا", gender: "female", count: 2, person: 3, group: "الغائبة (الطرف الثالث - مؤنث)" },
-            { id: 's_m6', verb: 'salim', tense: 'madhi', arti: "جمع مؤنث", fiil: "كَتَبْنَ", gender: "female", count: 3, person: 3, group: "الغائبة (الطرف الثالث - مؤنث)" },
-            { id: 's_m7', verb: 'salim', tense: 'madhi', arti: "مفرد مذكر", fiil: "كَتَبْتَ", gender: "male", count: 1, person: 2, group: "المخاطب (الطرف الثاني)" },
-            { id: 's_m8', verb: 'salim', tense: 'madhi', arti: "مثنى مذكر", fiil: "كَتَبْتُمَا", gender: "male", count: 2, person: 2, group: "المخاطب (الطرف الثاني)" },
-            { id: 's_m9', verb: 'salim', tense: 'madhi', arti: "جمع مذكر", fiil: "كَتَبْتُمْ", gender: "male", count: 3, person: 2, group: "المخاطب (الطرف الثاني)" },
-            { id: 's_m10', verb: 'salim', tense: 'madhi', arti: "مفرد مؤنث", fiil: "كَتَبْتِ", gender: "female", count: 1, person: 2, group: "المخاطبة (الطرف الثاني - مؤنث)" },
-            { id: 's_m11', verb: 'salim', tense: 'madhi', arti: "مثنى مؤنث", fiil: "كَتَبْتُمَا", gender: "female", count: 2, person: 2, group: "المخاطبة (الطرف الثاني - مؤنث)" },
-            { id: 's_m12', verb: 'salim', tense: 'madhi', arti: "جمع مؤنث", fiil: "كَتَبْتُنَّ", gender: "female", count: 3, person: 2, group: "المخاطبة (الطرف الثاني - مؤنث)" },
-            { id: 's_m13', verb: 'salim', tense: 'madhi', arti: "مفرد (مذكر/مؤنث)", fiil: "كَتَبْتُ", gender: "mix", count: 1, person: 1, group: "المتكلم (الطرف الأول)" },
-            { id: 's_m14', verb: 'salim', tense: 'madhi', arti: "جمع/مثنى (مذكر/مؤنث)", fiil: "كَتَبْنَا", gender: "mix", count: 3, person: 1, group: "المتكلم (الطرف الأول)" },
+            { id: 's_m1', verb: 'salim', tense: 'madhi', arti: "مفرد مذكر", fiil: "فَعَلَ", gender: "male", count: 1, person: 3, group: "الغائب (الطرف الثالث)" },
+            { id: 's_m2', verb: 'salim', tense: 'madhi', arti: "مثنى مذكر", fiil: "فَعَلَا", gender: "male", count: 2, person: 3, group: "الغائب (الطرف الثالث)" },
+            { id: 's_m3', verb: 'salim', tense: 'madhi', arti: "جمع مذكر", fiil: "فَعَلُوْا", gender: "male", count: 3, person: 3, group: "الغائب (الطرف الثالث)" },
+            { id: 's_m4', verb: 'salim', tense: 'madhi', arti: "مفرد مؤنث", fiil: "فَعَلَتْ", gender: "female", count: 1, person: 3, group: "الغائبة (الطرف الثالث - مؤنث)" },
+            { id: 's_m5', verb: 'salim', tense: 'madhi', arti: "مثنى مؤنث", fiil: "فَعَلَتَا", gender: "female", count: 2, person: 3, group: "الغائبة (الطرف الثالث - مؤنث)" },
+            { id: 's_m6', verb: 'salim', tense: 'madhi', arti: "جمع مؤنث", fiil: "فَعَلْنَ", gender: "female", count: 3, person: 3, group: "الغائبة (الطرف الثالث - مؤنث)" },
+            { id: 's_m7', verb: 'salim', tense: 'madhi', arti: "مفرد مذكر", fiil: "فَعَلْتَ", gender: "male", count: 1, person: 2, group: "المخاطب (الطرف الثاني)" },
+            { id: 's_m8', verb: 'salim', tense: 'madhi', arti: "مثنى مذكر", fiil: "فَعَلْتُمَا", gender: "male", count: 2, person: 2, group: "المخاطب (الطرف الثاني)" },
+            { id: 's_m9', verb: 'salim', tense: 'madhi', arti: "جمع مذكر", fiil: "فَعَلْتُمْ", gender: "male", count: 3, person: 2, group: "المخاطب (الطرف الثاني)" },
+            { id: 's_m10', verb: 'salim', tense: 'madhi', arti: "مفرد مؤنث", fiil: "فَعَلْتِ", gender: "female", count: 1, person: 2, group: "المخاطبة (الطرف الثاني - مؤنث)" },
+            { id: 's_m11', verb: 'salim', tense: 'madhi', arti: "مثنى مؤنث", fiil: "فَعَلْتُمَا", gender: "female", count: 2, person: 2, group: "المخاطبة (الطرف الثاني - مؤنث)" },
+            { id: 's_m12', verb: 'salim', tense: 'madhi', arti: "جمع مؤنث", fiil: "فَعَلْتُنَّ", gender: "female", count: 3, person: 2, group: "المخاطبة (الطرف الثاني - مؤنث)" },
+            { id: 's_m13', verb: 'salim', tense: 'madhi', arti: "مفرد (مذكر/مؤنث)", fiil: "فَعَلْتُ", gender: "mix", count: 1, person: 1, group: "المتكلم (الطرف الأول)" },
+            { id: 's_m14', verb: 'salim', tense: 'madhi', arti: "جمع/مثنى (مذكر/مؤنث)", fiil: "فَعَلْنَا", gender: "mix", count: 3, person: 1, group: "المتكلم (الطرف الأول)" },
             // Mudhari
-            { id: 's_mu1', verb: 'salim', tense: 'mudhari', arti: "مفرد مذكر", fiil: "يَكْتُبُ", gender: "male", count: 1, person: 3, group: "الغائب (الطرف الثالث)" },
-            { id: 's_mu2', verb: 'salim', tense: 'mudhari', arti: "مثنى مذكر", fiil: "يَكْتُبَانِ", gender: "male", count: 2, person: 3, group: "الغائب (الطرف الثالث)" },
-            { id: 's_mu3', verb: 'salim', tense: 'mudhari', arti: "جمع مذكر", fiil: "يَكْتُبُوْنَ", gender: "male", count: 3, person: 3, group: "الغائب (الطرف الثالث)" },
-            { id: 's_mu4', verb: 'salim', tense: 'mudhari', arti: "مفرد مؤنث", fiil: "تَكْتُبُ", gender: "female", count: 1, person: 3, group: "الغائبة (الطرف الثالث - مؤنث)" },
-            { id: 's_mu5', verb: 'salim', tense: 'mudhari', arti: "مثنى مؤنث", fiil: "تَكْتُبَانِ", gender: "female", count: 2, person: 3, group: "الغائبة (الطرف الثالث - مؤنث)" },
-            { id: 's_mu6', verb: 'salim', tense: 'mudhari', arti: "جمع مؤنث", fiil: "يَكْتُبْنَ", gender: "female", count: 3, person: 3, group: "الغائبة (الطرف الثالث - مؤنث)" },
-            { id: 's_mu7', verb: 'salim', tense: 'mudhari', arti: "مفرد مذكر", fiil: "تَكْتُبُ", gender: "male", count: 1, person: 2, group: "المخاطب (الطرف الثاني)" },
-            { id: 's_mu8', verb: 'salim', tense: 'mudhari', arti: "مثنى مذكر", fiil: "تَكْتُبَانِ", gender: "male", count: 2, person: 2, group: "المخاطب (الطرف الثاني)" },
-            { id: 's_mu9', verb: 'salim', tense: 'mudhari', arti: "جمع مذكر", fiil: "تَكْتُبُوْنَ", gender: "male", count: 3, person: 2, group: "المخاطب (الطرف الثاني)" },
-            { id: 's_mu10', verb: 'salim', tense: 'mudhari', arti: "مفرد مؤنث", fiil: "تَكْتُبِيْنَ", gender: "female", count: 1, person: 2, group: "المخاطبة (الطرف الثاني - مؤنث)" },
-            { id: 's_mu11', verb: 'salim', tense: 'mudhari', arti: "مثنى مؤنث", fiil: "تَكْتُبَانِ", gender: "female", count: 2, person: 2, group: "المخاطبة (الطرف الثاني - مؤنث)" },
-            { id: 's_mu12', verb: 'salim', tense: 'mudhari', arti: "جمع مؤنث", fiil: "تَكْتُبْنَ", gender: "female", count: 3, person: 2, group: "المخاطبة (الطرف الثاني - مؤنث)" },
-            { id: 's_mu13', verb: 'salim', tense: 'mudhari', arti: "مفرد (مذكر/مؤنث)", fiil: "أَكْتُبُ", gender: "mix", count: 1, person: 1, group: "المتكلم (الطرف الأول)" },
-            { id: 's_mu14', verb: 'salim', tense: 'mudhari', arti: "جمع/مثنى (مذكر/مؤنث)", fiil: "نَكْتُبُ", gender: "mix", count: 3, person: 1, group: "المتكلم (الطرف الأول)" },
+            { id: 's_mu1', verb: 'salim', tense: 'mudhari', arti: "مفرد مذكر", fiil: "يَفْعَلُ", gender: "male", count: 1, person: 3, group: "الغائب (الطرف الثالث)" },
+            { id: 's_mu2', verb: 'salim', tense: 'mudhari', arti: "مثنى مذكر", fiil: "يَفْعَلَانِ", gender: "male", count: 2, person: 3, group: "الغائب (الطرف الثالث)" },
+            { id: 's_mu3', verb: 'salim', tense: 'mudhari', arti: "جمع مذكر", fiil: "يَفْعَلُوْنَ", gender: "male", count: 3, person: 3, group: "الغائب (الطرف الثالث)" },
+            { id: 's_mu4', verb: 'salim', tense: 'mudhari', arti: "مفرد مؤنث", fiil: "تَفْعَلُ", gender: "female", count: 1, person: 3, group: "الغائبة (الطرف الثالث - مؤنث)" },
+            { id: 's_mu5', verb: 'salim', tense: 'mudhari', arti: "مثنى مؤنث", fiil: "تَفْعَلَانِ", gender: "female", count: 2, person: 3, group: "الغائبة (الطرف الثالث - مؤنث)" },
+            { id: 's_mu6', verb: 'salim', tense: 'mudhari', arti: "جمع مؤنث", fiil: "يَفْعَلْنَ", gender: "female", count: 3, person: 3, group: "الغائبة (الطرف الثالث - مؤنث)" },
+            { id: 's_mu7', verb: 'salim', tense: 'mudhari', arti: "مفرد مذكر", fiil: "تَفْعَلُ", gender: "male", count: 1, person: 2, group: "المخاطب (الطرف الثاني)" },
+            { id: 's_mu8', verb: 'salim', tense: 'mudhari', arti: "مثنى مذكر", fiil: "تَفْعَلَانِ", gender: "male", count: 2, person: 2, group: "المخاطب (الطرف الثاني)" },
+            { id: 's_mu9', verb: 'salim', tense: 'mudhari', arti: "جمع مذكر", fiil: "تَفْعَلُوْنَ", gender: "male", count: 3, person: 2, group: "المخاطب (الطرف الثاني)" },
+            { id: 's_mu10', verb: 'salim', tense: 'mudhari', arti: "مفرد مؤنث", fiil: "تَفْعَلِيْنَ", gender: "female", count: 1, person: 2, group: "المخاطبة (الطرف الثاني - مؤنث)" },
+            { id: 's_mu11', verb: 'salim', tense: 'mudhari', arti: "مثنى مؤنث", fiil: "تَفْعَلَانِ", gender: "female", count: 2, person: 2, group: "المخاطبة (الطرف الثاني - مؤنث)" },
+            { id: 's_mu12', verb: 'salim', tense: 'mudhari', arti: "جمع مؤنث", fiil: "تَفْعَلْنَ", gender: "female", count: 3, person: 2, group: "المخاطبة (الطرف الثاني - مؤنث)" },
+            { id: 's_mu13', verb: 'salim', tense: 'mudhari', arti: "مفرد (مذكر/مؤنث)", fiil: "أَفْعَلُ", gender: "mix", count: 1, person: 1, group: "المتكلم (الطرف الأول)" },
+            { id: 's_mu14', verb: 'salim', tense: 'mudhari', arti: "جمع/مثنى (مذكر/مؤنث)", fiil: "نَفْعَلُ", gender: "mix", count: 3, person: 1, group: "المتكلم (الطرف الأول)" },
             // Amr
-            { id: 's_a1', verb: 'salim', tense: 'amr', arti: "مفرد مذكر", fiil: "اُكْتُبْ", gender: "male", count: 1, person: 2, group: "المخاطب (الطرف الثاني)" },
-            { id: 's_a2', verb: 'salim', tense: 'amr', arti: "مثنى مذكر", fiil: "اُكْتُبَا", gender: "male", count: 2, person: 2, group: "المخاطب (الطرف الثاني)" },
-            { id: 's_a3', verb: 'salim', tense: 'amr', arti: "جمع مذكر", fiil: "اُكْتُبُوْا", gender: "male", count: 3, person: 2, group: "المخاطب (الطرف الثاني)" },
-            { id: 's_a4', verb: 'salim', tense: 'amr', arti: "مفرد مؤنث", fiil: "اُكْتُبِي", gender: "female", count: 1, person: 2, group: "المخاطبة (الطرف الثاني - مؤنث)" },
-            { id: 's_a5', verb: 'salim', tense: 'amr', arti: "مثنى مؤنث", fiil: "اُكْتُبَا", gender: "female", count: 2, person: 2, group: "المخاطبة (الطرف الثاني - مؤنث)" },
-            { id: 's_a6', verb: 'salim', tense: 'amr', arti: "جمع مؤنث", fiil: "اُكْتُبْنَ", gender: "female", count: 3, person: 2, group: "المخاطبة (الطرف الثاني - مؤنث)" },
+            { id: 's_a1', verb: 'salim', tense: 'amr', arti: "مفرد مذكر", fiil: "اِفْعَلْ", gender: "male", count: 1, person: 2, group: "المخاطب (الطرف الثاني)" },
+            { id: 's_a2', verb: 'salim', tense: 'amr', arti: "مثنى مذكر", fiil: "اِفْعَلَا", gender: "male", count: 2, person: 2, group: "المخاطب (الطرف الثاني)" },
+            { id: 's_a3', verb: 'salim', tense: 'amr', arti: "جمع مذكر", fiil: "اِفْعَلُوْا", gender: "male", count: 3, person: 2, group: "المخاطب (الطرف الثاني)" },
+            { id: 's_a4', verb: 'salim', tense: 'amr', arti: "مفرد مؤنث", fiil: "اِفْعَلِي", gender: "female", count: 1, person: 2, group: "المخاطبة (الطرف الثاني - مؤنث)" },
+            { id: 's_a5', verb: 'salim', tense: 'amr', arti: "مثنى مؤنث", fiil: "اِفْعَلَا", gender: "female", count: 2, person: 2, group: "المخاطبة (الطرف الثاني - مؤنث)" },
+            { id: 's_a6', verb: 'salim', tense: 'amr', arti: "جمع مؤنث", fiil: "اِفْعَلْنَ", gender: "female", count: 3, person: 2, group: "المخاطبة (الطرف الثاني - مؤنث)" },
 
             // --- MAHMUZ (أَكَلَ) ---
             // Madhi
@@ -349,7 +349,7 @@
             activeBtn.className = "verb-btn px-6 py-2 rounded-md font-bold transition-colors bg-teal-600 text-white shadow-inner";
             
             const titleEl = document.getElementById('materiTitle');
-            if (verb === 'salim') titleEl.innerText = "جدول التصريف اللغوي لفعل السالم (كَتَبَ)";
+            if (verb === 'salim') titleEl.innerText = "جدول التصريف اللغوي لفعل السالم (فَعَلَ - يَفْعَلُ)";
             if (verb === 'mahmuz') titleEl.innerText = "جدول التصريف اللغوي لفعل المهموز (أَكَلَ)";
             if (verb === 'mudhaaf') titleEl.innerText = "جدول التصريف اللغوي لفعل المضعف (مَدَّ)";
 
@@ -476,7 +476,7 @@
         }
 
         function getVerbLabelArabic(verb) {
-            if (verb === 'salim') return 'كَتَبَ';
+            if (verb === 'salim') return 'فَعَلَ - يَفْعَلُ';
             if (verb === 'mahmuz') return 'أَكَلَ';
             if (verb === 'mudhaaf') return 'مَدَّ';
             return verb;
