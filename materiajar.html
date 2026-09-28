@@ -113,57 +113,57 @@
         </section>
 
         <!-- BAGIAN GAME -->
-        <section id="gameSection" class="hidden fade-in max-w-2xl mx-auto">
-            <div class="bg-white rounded-3xl shadow-xl overflow-hidden border border-teal-200">
-                <!-- Game Header -->
-                <div class="bg-teal-500 text-white p-6 text-center relative">
-                    <h2 class="text-2xl font-bold">لعبة التخمين البصري</h2>
-                    <p class="text-teal-100 mt-1">اختر الفعل الصحيح الذي يطابق الصورة والشكل المطلوب!</p>
-                    <div class="absolute top-6 start-6 font-bold bg-teal-700 px-4 py-1 rounded-full flex items-center gap-2 shadow-inner">
-                        النتيجة: <span id="scoreDisplay">0</span>
+        <section id="gameSection" class="hidden fade-in max-w-7xl mx-auto">
+            <!-- Header Kartu Kontrol & Filter Game -->
+            <div class="bg-white p-6 md:p-8 rounded-3xl shadow-sm border border-teal-100 mb-8">
+                <div class="flex flex-col md:flex-row justify-between items-center gap-6 mb-6">
+                    <div class="text-center md:text-right">
+                        <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-teal-50 border border-teal-200 text-teal-700 text-xs font-bold uppercase tracking-wider mb-2">
+                            <i class="fas fa-gamepad text-teal-600"></i>
+                            <span>تمرين بصري تفاعلي (Latihan Tebak Tashrif)</span>
+                        </div>
+                        <h2 class="text-2xl md:text-3xl font-bold text-teal-800">لعبة تخمين تصريف الأفعال</h2>
+                        <p class="text-gray-500 text-sm mt-1">خمّن صيغة الفعل من خلال الصورة والشكل المطلوب (مثل مفرد مذكر، جمع مؤنث)، واضغط لإظهار الإجابة للتحقق.</p>
+                    </div>
+
+                    <!-- Tombol Aksi Utama -->
+                    <div class="flex flex-wrap items-center justify-center gap-3">
+                        <button onclick="toggleAllAnswers()" id="btnToggleAll" class="px-5 py-2.5 rounded-xl font-bold text-teal-700 bg-teal-50 hover:bg-teal-100 border border-teal-200 transition-all duration-300 flex items-center gap-2 text-sm shadow-sm">
+                            <i class="fas fa-eye" id="iconToggleAll"></i>
+                            <span id="textToggleAll">إظهار كل الإجابات</span>
+                        </button>
+                        <button onclick="refreshGameQuestions()" id="btnRefreshMain" class="px-6 py-2.5 rounded-xl font-bold text-white bg-gradient-to-r from-teal-500 to-teal-600 hover:from-teal-600 hover:to-teal-700 shadow-md shadow-teal-200 hover:shadow-lg transition-all duration-300 flex items-center gap-2 text-sm transform hover:-translate-y-0.5 active:translate-y-0">
+                            <i class="fas fa-arrows-rotate" id="refreshIcon"></i>
+                            <span>تحديث الأسئلة (Refresh)</span>
+                        </button>
                     </div>
                 </div>
 
-                <!-- Game Area -->
-                <div id="gamePlayArea" class="p-6 md:p-8">
-                    <div class="flex justify-between items-center mb-6 text-sm font-semibold text-teal-600">
-                        <span id="questionCount">السؤال ١ / ١٠</span>
-                        <div class="w-1/2 bg-teal-100 rounded-full h-2.5 rtl:rotate-180">
-                            <div id="progressBar" class="bg-teal-500 h-2.5 rounded-full shadow-sm" style="width: 10%"></div>
-                        </div>
-                    </div>
-                    
-                    <!-- Area Soal (Gambar & Keterangan) -->
-                    <div class="text-center mb-8 bg-teal-50 p-8 rounded-2xl border-2 border-dashed border-teal-200 flex flex-col items-center relative">
-                        <div id="questionTenseLabel" class="absolute top-3 end-3 text-xs font-bold px-3 py-1 bg-white text-teal-600 rounded-full border border-teal-200 shadow-sm"></div>
-                        
-                        <h3 class="text-lg md:text-xl font-bold text-gray-700 mb-4">اختر الفعل المناسب للصورة التالية:</h3>
-                        
-                        <div id="questionVisual" class="text-7xl flex justify-center items-center py-4 mb-4 drop-shadow-md">
-                            <!-- Icon disuntikkan disini -->
-                        </div>
-                        
-                        <!-- Keterangan Bentuk seperti Mufrad Mudzakkar -->
-                        <div id="questionForm" class="bg-teal-100 text-teal-800 px-6 py-2 rounded-full font-bold text-lg border border-teal-200 shadow-sm">
-                            <!-- Disuntikkan JS -->
-                        </div>
+                <!-- Filter Waktu & Jenis Fi'il -->
+                <div class="flex flex-col md:flex-row justify-between items-center gap-4 pt-4 border-t border-teal-50 text-sm">
+                    <!-- Filter Tense (Waktu) -->
+                    <div class="flex items-center gap-1.5 flex-wrap justify-center">
+                        <span class="text-xs font-bold text-gray-500 ml-1">الزمن:</span>
+                        <button onclick="setGameTenseFilter('all')" id="gameTenseBtn-all" class="game-tense-btn px-4 py-1.5 rounded-full font-bold bg-teal-600 text-white shadow-sm transition text-xs">الكل</button>
+                        <button onclick="setGameTenseFilter('madhi')" id="gameTenseBtn-madhi" class="game-tense-btn px-4 py-1.5 rounded-full font-bold text-teal-700 bg-teal-50 hover:bg-teal-100 transition text-xs">الماضي</button>
+                        <button onclick="setGameTenseFilter('mudhari')" id="gameTenseBtn-mudhari" class="game-tense-btn px-4 py-1.5 rounded-full font-bold text-teal-700 bg-teal-50 hover:bg-teal-100 transition text-xs">المضارع</button>
+                        <button onclick="setGameTenseFilter('amr')" id="gameTenseBtn-amr" class="game-tense-btn px-4 py-1.5 rounded-full font-bold text-teal-700 bg-teal-50 hover:bg-teal-100 transition text-xs">الأمر</button>
                     </div>
 
-                    <!-- Area Jawaban (Memanjang ke Bawah) -->
-                    <div id="optionsContainer" class="flex flex-col gap-4">
-                        <!-- Options injected by JS -->
+                    <!-- Filter Verb Type (Jenis Fi'il) -->
+                    <div class="flex items-center gap-1.5 flex-wrap justify-center">
+                        <span class="text-xs font-bold text-gray-500 ml-1">نوع الفعل:</span>
+                        <button onclick="setGameVerbFilter('all')" id="gameVerbBtn-all" class="game-verb-btn px-4 py-1.5 rounded-full font-bold bg-teal-600 text-white shadow-sm transition text-xs">كل الأفعال</button>
+                        <button onclick="setGameVerbFilter('salim')" id="gameVerbBtn-salim" class="game-verb-btn px-4 py-1.5 rounded-full font-bold text-teal-700 bg-teal-50 hover:bg-teal-100 transition text-xs">السالم (كَتَبَ)</button>
+                        <button onclick="setGameVerbFilter('mahmuz')" id="gameVerbBtn-mahmuz" class="game-verb-btn px-4 py-1.5 rounded-full font-bold text-teal-700 bg-teal-50 hover:bg-teal-100 transition text-xs">المهموز (أَكَلَ)</button>
+                        <button onclick="setGameVerbFilter('mudhaaf')" id="gameVerbBtn-mudhaaf" class="game-verb-btn px-4 py-1.5 rounded-full font-bold text-teal-700 bg-teal-50 hover:bg-teal-100 transition text-xs">المضعف (مَدَّ)</button>
                     </div>
                 </div>
-                
-                <!-- Game Start/End Screen -->
-                <div id="gameOverlay" class="p-12 text-center bg-white flex flex-col items-center justify-center hidden">
-                    <div id="overlayIcon" class="text-6xl text-teal-500 mb-4"><i class="fas fa-trophy"></i></div>
-                    <h3 id="overlayTitle" class="text-3xl font-bold text-gray-800 mb-2">انتهى!</h3>
-                    <p id="overlayDesc" class="text-lg text-gray-600 mb-8">نتيجتك النهائية: <span id="finalScore" class="font-bold text-teal-600 text-2xl">0</span>/100</p>
-                    <button onclick="startNewGame()" class="bg-teal-500 hover:bg-teal-600 text-white font-bold py-3 px-8 rounded-full text-lg shadow-lg transition-transform hover:scale-105 flex items-center gap-2">
-                        <i class="fas fa-redo"></i> العب مرة أخرى
-                    </button>
-                </div>
+            </div>
+
+            <!-- Grid Pertanyaan Game -->
+            <div id="gameQuestionsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Kartu pertanyaan akan di-render di sini oleh JavaScript -->
             </div>
         </section>
 
@@ -316,8 +316,8 @@
                 btnGame.className = "px-6 py-2 flex items-center gap-2 rounded-full font-semibold bg-teal-500 shadow text-white transition-all duration-300";
                 btnMateri.className = "px-6 py-2 flex items-center gap-2 rounded-full font-semibold text-teal-100 hover:text-white transition-all duration-300 bg-transparent";
                 
-                if (currentQuestionIndex === 0 && !isGameOver) {
-                    startNewGame();
+                if (activeGameQuestions.length === 0) {
+                    refreshGameQuestions();
                 }
             }
         }
@@ -431,11 +431,56 @@
             });
         }
 
-        let currentQuestions = [];
-        let currentQuestionIndex = 0;
-        let score = 0;
-        let isGameOver = true;
-        const totalQuestions = 10;
+        // --- GAME TEBAK TASHRIF INTERAKTIF ---
+        let currentGameTenseFilter = 'all';
+        let currentGameVerbFilter = 'all';
+        let activeGameQuestions = [];
+        let allAnswersRevealed = false;
+        const GAME_QUESTION_COUNT = 6;
+
+        function setGameTenseFilter(tense) {
+            currentGameTenseFilter = tense;
+            ['all', 'madhi', 'mudhari', 'amr'].forEach(t => {
+                const btn = document.getElementById(`gameTenseBtn-${t}`);
+                if (btn) {
+                    if (t === tense) {
+                        btn.className = "game-tense-btn px-4 py-1.5 rounded-full font-bold bg-teal-600 text-white shadow-sm transition text-xs";
+                    } else {
+                        btn.className = "game-tense-btn px-4 py-1.5 rounded-full font-bold text-teal-700 bg-teal-50 hover:bg-teal-100 transition text-xs";
+                    }
+                }
+            });
+            refreshGameQuestions();
+        }
+
+        function setGameVerbFilter(verb) {
+            currentGameVerbFilter = verb;
+            ['all', 'salim', 'mahmuz', 'mudhaaf'].forEach(v => {
+                const btn = document.getElementById(`gameVerbBtn-${v}`);
+                if (btn) {
+                    if (v === verb) {
+                        btn.className = "game-verb-btn px-4 py-1.5 rounded-full font-bold bg-teal-600 text-white shadow-sm transition text-xs";
+                    } else {
+                        btn.className = "game-verb-btn px-4 py-1.5 rounded-full font-bold text-teal-700 bg-teal-50 hover:bg-teal-100 transition text-xs";
+                    }
+                }
+            });
+            refreshGameQuestions();
+        }
+
+        function getTenseLabelArabic(tense) {
+            if (tense === 'madhi') return 'الماضي';
+            if (tense === 'mudhari') return 'المضارع';
+            if (tense === 'amr') return 'الأمر';
+            return tense;
+        }
+
+        function getVerbLabelArabic(verb) {
+            if (verb === 'salim') return 'كَتَبَ';
+            if (verb === 'mahmuz') return 'أَكَلَ';
+            if (verb === 'mudhaaf') return 'مَدَّ';
+            return verb;
+        }
 
         function shuffleArray(array) {
             let newArr = [...array];
@@ -446,147 +491,162 @@
             return newArr;
         }
 
-        function generateQuestions() {
-            let questions = [];
-            
-            for (let i = 0; i < totalQuestions; i++) {
-                const correctItem = tashrifData[Math.floor(Math.random() * tashrifData.length)];
-                
-                let questionObj = {
-                    correct: correctItem,
-                    options: []
-                };
+        function generateGamePool() {
+            return tashrifData.filter(item => {
+                const matchTense = currentGameTenseFilter === 'all' || item.tense === currentGameTenseFilter;
+                const matchVerb = currentGameVerbFilter === 'all' || item.verb === currentGameVerbFilter;
+                return matchTense && matchVerb;
+            });
+        }
 
-                let sameContextData = tashrifData.filter(item => 
-                    item.tense === correctItem.tense && 
-                    item.verb === correctItem.verb && 
-                    item.id !== correctItem.id
-                );
-                let distractors = shuffleArray(sameContextData).slice(0, 3);
-                
-                questionObj.options = [correctItem, ...distractors];
-                questionObj.options = shuffleArray(questionObj.options);
-                
-                questions.push(questionObj);
+        function refreshGameQuestions() {
+            const refreshIcon = document.getElementById('refreshIcon');
+            if (refreshIcon) {
+                refreshIcon.classList.add('fa-spin');
+                setTimeout(() => refreshIcon.classList.remove('fa-spin'), 600);
             }
-            return questions;
+
+            const pool = generateGamePool();
+            const shuffled = shuffleArray(pool);
+            const selected = shuffled.slice(0, Math.min(GAME_QUESTION_COUNT, pool.length));
+
+            activeGameQuestions = selected.map(item => ({
+                item: item,
+                revealed: false
+            }));
+
+            allAnswersRevealed = false;
+            updateToggleAllButtonUI();
+            renderGameQuestions();
         }
 
-        function startNewGame() {
-            currentQuestions = generateQuestions();
-            currentQuestionIndex = 0;
-            score = 0;
-            isGameOver = false;
-            
-            document.getElementById('scoreDisplay').innerText = score;
-            document.getElementById('gameOverlay').classList.add('hidden');
-            document.getElementById('gamePlayArea').classList.remove('hidden');
-            
-            loadQuestion();
-        }
+        function renderGameQuestions() {
+            const grid = document.getElementById('gameQuestionsGrid');
+            if (!grid) return;
 
-        function loadQuestion() {
-            const q = currentQuestions[currentQuestionIndex];
-            const qVisual = document.getElementById('questionVisual');
-            const qForm = document.getElementById('questionForm');
-            const qTenseLabel = document.getElementById('questionTenseLabel');
-            const optionsContainer = document.getElementById('optionsContainer');
-            
+            grid.innerHTML = '';
+
             const arabicNumerals = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
             const toArabicNumber = (num) => String(num).split('').map(d => arabicNumerals[d] || d).join('');
-            
-            document.getElementById('questionCount').innerText = `السؤال ${toArabicNumber(currentQuestionIndex + 1)} / ${toArabicNumber(totalQuestions)}`;
-            document.getElementById('progressBar').style.width = `${((currentQuestionIndex + 1) / totalQuestions) * 100}%`;
 
-            // Label Tense (Madhi/Mudhari/Amr) di sudut area soal
-            let tenseText = '';
-            if(q.correct.tense === 'madhi') tenseText = 'الماضي';
-            if(q.correct.tense === 'mudhari') tenseText = 'المضارع';
-            if(q.correct.tense === 'amr') tenseText = 'الأمر';
-            qTenseLabel.innerText = tenseText;
+            activeGameQuestions.forEach((qObj, index) => {
+                const item = qObj.item;
+                const card = document.createElement('div');
+                card.className = "bg-white rounded-3xl p-6 shadow-sm border border-teal-100 flex flex-col items-center text-center card-hover relative overflow-hidden fade-in";
+                
+                card.innerHTML = `
+                    <div class="absolute top-0 end-0 w-full h-1.5 bg-gradient-to-r from-teal-400 via-teal-500 to-teal-600"></div>
 
-            // Setup Visual dan Bentuk di Area Soal
-            qVisual.innerHTML = getVisualIllustration(q.correct);
-            qForm.innerText = q.correct.arti; // Misalnya: مفرد مذكر
+                    <!-- Header Kartu: Nomor & Keterangan Waktu/Fi'il -->
+                    <div class="w-full flex justify-between items-center mb-4">
+                        <span class="text-xs font-bold text-teal-700 bg-teal-50 px-3 py-1 rounded-full border border-teal-200">
+                            السؤال ${toArabicNumber(index + 1)}
+                        </span>
+                        <span class="text-xs font-semibold text-gray-600 bg-gray-100 px-3 py-1 rounded-full border border-gray-200">
+                            ${getTenseLabelArabic(item.tense)} (${getVerbLabelArabic(item.verb)})
+                        </span>
+                    </div>
 
-            // Hapus tombol pilihan ganda, ganti dengan tombol "Tampilkan Jawaban"
-            optionsContainer.innerHTML = '';
-            const revealBtn = document.createElement('button');
-            revealBtn.className = "w-full bg-teal-500 hover:bg-teal-600 text-white font-bold py-4 rounded-2xl shadow-md transition-all duration-200 text-xl flex items-center justify-center gap-2";
-            revealBtn.innerHTML = '<i class="fas fa-eye"></i> إظهار الإجابة';
-            revealBtn.onclick = () => revealAnswer();
-            optionsContainer.appendChild(revealBtn);
-        }
+                    <!-- Bentuk Fi'il (seperti مفرد مذكر) -->
+                    <div class="w-full flex justify-center mb-4">
+                        <span class="text-base font-bold text-teal-800 bg-teal-100/90 px-6 py-2 rounded-full inline-block border border-teal-200 shadow-sm">
+                            ${item.arti}
+                        </span>
+                    </div>
 
-        // Fungsi baru untuk menampilkan jawaban
-        function revealAnswer() {
-            const q = currentQuestions[currentQuestionIndex];
-            const optionsContainer = document.getElementById('optionsContainer');
+                    <!-- Area Gambar/Ikon Visual -->
+                    <div class="w-full h-36 bg-gray-50/80 rounded-2xl mb-3 flex items-center justify-center text-6xl border border-gray-100 shadow-inner">
+                        ${getVisualIllustration(item)}
+                    </div>
 
-            optionsContainer.innerHTML = `
-                <div class="bg-teal-50 border-2 border-teal-200 p-6 rounded-2xl flex flex-col items-center justify-center text-center mb-4 fade-in">
-                    <span class="text-sm text-teal-600 font-bold block mb-3">الإجابة الصحيحة:</span>
-                    <span class="arabic-text text-6xl text-teal-800 font-bold drop-shadow-sm leading-none py-2">${q.correct.fiil}</span>
-                </div>
-                <div class="flex flex-col md:flex-row gap-4 fade-in justify-center">
-                    <button onclick="handleSelfAssessment(true, this)" class="flex-1 bg-green-500 hover:bg-green-600 text-white font-bold py-3 rounded-xl shadow-sm flex items-center justify-center gap-2 transition-transform transform hover:scale-105">
-                        <i class="fas fa-check-circle text-xl"></i> أجبت بشكل صحيح
-                    </button>
-                    <button onclick="handleSelfAssessment(false, this)" class="flex-1 bg-red-500 hover:bg-red-600 text-white font-bold py-3 rounded-xl shadow-sm flex items-center justify-center gap-2 transition-transform transform hover:scale-105">
-                        <i class="fas fa-times-circle text-xl"></i> أخطأت
-                    </button>
-                </div>
-            `;
-        }
+                    <!-- Keterangan Sudut Pandang (Dhamir) -->
+                    <div class="text-xs font-medium text-gray-500 mb-6">
+                        ${item.group}
+                    </div>
 
-        function handleSelfAssessment(isCorrect, buttonElement) {
-            const buttons = document.getElementById('optionsContainer').querySelectorAll('button');
-            buttons.forEach(btn => {
-                btn.disabled = true;
-                btn.classList.remove('hover:scale-105', 'hover:bg-green-600', 'hover:bg-red-600');
+                    <!-- Area Jawaban & Tombol Interaktif -->
+                    <div class="w-full mt-auto">
+                        <div id="gameAnswer-${index}" class="${qObj.revealed ? '' : 'hidden'} mb-4 p-4 bg-teal-50 rounded-2xl border-2 border-dashed border-teal-200 fade-in text-center">
+                            <span class="text-xs text-teal-600 block mb-1 font-bold">الفعل الصحيح:</span>
+                            <span class="arabic-text text-5xl font-bold text-teal-800 leading-none py-1 inline-block drop-shadow-sm">${item.fiil}</span>
+                        </div>
+
+                        <div class="flex items-center gap-2">
+                            <button onclick="toggleSingleAnswer(${index})" id="btnAnswer-${index}" class="flex-1 ${qObj.revealed ? 'bg-teal-700 text-white' : 'bg-teal-500 hover:bg-teal-600 text-white'} font-bold py-2.5 px-4 rounded-xl shadow-sm transition-all duration-200 text-sm flex items-center justify-center gap-2">
+                                <i class="${qObj.revealed ? 'fas fa-eye-slash' : 'fas fa-eye'}"></i>
+                                <span>${qObj.revealed ? 'إخفاء الإجابة' : 'إظهار الإجابة'}</span>
+                            </button>
+                            <button onclick="refreshSingleCard(${index})" title="تبديل هذا السؤال بسؤال آخر" class="bg-teal-50 hover:bg-teal-100 text-teal-700 border border-teal-200 font-bold p-2.5 rounded-xl transition-all duration-200 text-sm flex items-center justify-center shadow-sm">
+                                <i class="fas fa-rotate"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+
+                grid.appendChild(card);
             });
-
-            if (isCorrect) {
-                score += 10;
-                document.getElementById('scoreDisplay').innerText = score;
-                buttonElement.classList.add('ring-4', 'ring-green-300');
-            } else {
-                buttonElement.classList.add('ring-4', 'ring-red-300');
-            }
-
-            setTimeout(() => {
-                currentQuestionIndex++;
-                if (currentQuestionIndex < totalQuestions) {
-                    loadQuestion();
-                } else {
-                    endGame();
-                }
-            }, 1000); // Transisi lebih cepat (1 detik) setelah menilai diri sendiri
         }
 
-        function endGame() {
-            isGameOver = true;
-            document.getElementById('gamePlayArea').classList.add('hidden');
-            const overlay = document.getElementById('gameOverlay');
-            overlay.classList.remove('hidden');
+        function toggleSingleAnswer(index) {
+            if (!activeGameQuestions[index]) return;
+            activeGameQuestions[index].revealed = !activeGameQuestions[index].revealed;
             
-            document.getElementById('finalScore').innerText = score;
-            
-            const title = document.getElementById('overlayTitle');
-            const icon = document.getElementById('overlayIcon');
-            
-            if (score === 100) {
-                title.innerText = "ممتاز!";
-                icon.innerHTML = '<i class="fas fa-crown text-yellow-400 drop-shadow"></i>';
-            } else if (score >= 70) {
-                title.innerText = "جيد جداً!";
-                icon.innerHTML = '<i class="fas fa-star text-teal-500 drop-shadow"></i>';
-            } else if (score >= 40) {
-                title.innerText = "استمر في التدريب!";
-                icon.innerHTML = '<i class="fas fa-thumbs-up text-blue-400 drop-shadow"></i>';
+            const isRev = activeGameQuestions[index].revealed;
+            const answerBox = document.getElementById(`gameAnswer-${index}`);
+            const btn = document.getElementById(`btnAnswer-${index}`);
+
+            if (answerBox && btn) {
+                if (isRev) {
+                    answerBox.classList.remove('hidden');
+                    btn.className = "flex-1 bg-teal-700 text-white font-bold py-2.5 px-4 rounded-xl shadow-sm transition-all duration-200 text-sm flex items-center justify-center gap-2";
+                    btn.innerHTML = '<i class="fas fa-eye-slash"></i> <span>إخفاء الإجابة</span>';
+                } else {
+                    answerBox.classList.add('hidden');
+                    btn.className = "flex-1 bg-teal-500 hover:bg-teal-600 text-white font-bold py-2.5 px-4 rounded-xl shadow-sm transition-all duration-200 text-sm flex items-center justify-center gap-2";
+                    btn.innerHTML = '<i class="fas fa-eye"></i> <span>إظهار الإجابة</span>';
+                }
+            }
+        }
+
+        function toggleAllAnswers() {
+            allAnswersRevealed = !allAnswersRevealed;
+            activeGameQuestions.forEach(q => q.revealed = allAnswersRevealed);
+            updateToggleAllButtonUI();
+            renderGameQuestions();
+        }
+
+        function updateToggleAllButtonUI() {
+            const icon = document.getElementById('iconToggleAll');
+            const text = document.getElementById('textToggleAll');
+            const btn = document.getElementById('btnToggleAll');
+            if (!icon || !text || !btn) return;
+
+            if (allAnswersRevealed) {
+                icon.className = "fas fa-eye-slash";
+                text.innerText = "إخفاء كل الإجابات";
+                btn.className = "px-5 py-2.5 rounded-xl font-bold text-white bg-teal-700 hover:bg-teal-800 border border-teal-700 transition-all duration-300 flex items-center gap-2 text-sm shadow-sm";
             } else {
-                title.innerText = "لا تستسلم، حاول مرة أخرى!";
-                icon.innerHTML = '<i class="fas fa-book-reader text-gray-400 drop-shadow"></i>';
+                icon.className = "fas fa-eye";
+                text.innerText = "إظهار كل الإجابات";
+                btn.className = "px-5 py-2.5 rounded-xl font-bold text-teal-700 bg-teal-50 hover:bg-teal-100 border border-teal-200 transition-all duration-300 flex items-center gap-2 text-sm shadow-sm";
+            }
+        }
+
+        function refreshSingleCard(index) {
+            const pool = generateGamePool();
+            const currentIds = activeGameQuestions.map(q => q.item.id);
+            const available = pool.filter(item => !currentIds.includes(item.id));
+
+            const candidate = available.length > 0 
+                ? available[Math.floor(Math.random() * available.length)]
+                : pool[Math.floor(Math.random() * pool.length)];
+
+            if (candidate) {
+                activeGameQuestions[index] = {
+                    item: candidate,
+                    revealed: false
+                };
+                renderGameQuestions();
             }
         }
 
