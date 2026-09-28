@@ -320,17 +320,17 @@
 
     <!-- MATERI AJAR -->
     <section id="materials" class="py-20 px-4 bg-white">
-        <div class="max-w-6xl mx-auto">
+        <div class="max-w-7xl mx-auto">
             <div class="text-center mb-12">
                 <span class="text-tosca-600 font-semibold tracking-wider uppercase text-xs">E-Learning</span>
                 <h2 class="text-3xl font-bold text-gray-900 mt-2">Materi Pembelajaran</h2>
             </div>
             
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 <!-- Materi 1: Tafsir Tarbawi -->
-                <div class="relative bg-white border border-gray-100 rounded-2xl p-8 shadow-lg hover:shadow-2xl transition duration-300 overflow-hidden group">
+                <div class="relative bg-white border border-gray-100 rounded-2xl p-8 shadow-lg hover:shadow-2xl transition duration-300 overflow-hidden group flex flex-col justify-between">
                     <div class="absolute top-0 right-0 w-32 h-32 bg-tosca-50 rounded-bl-full -mr-10 -mt-10 z-0"></div>
-                    <div class="relative z-10">
+                    <div class="relative z-10 flex flex-col h-full">
                         <div class="flex items-center gap-4 mb-6">
                             <div class="w-14 h-14 bg-tosca-100 text-tosca-600 rounded-xl flex items-center justify-center text-2xl group-hover:bg-tosca-600 group-hover:text-white transition-colors duration-300">
                                 <i class="fas fa-book-open"></i>
@@ -393,9 +393,9 @@
                 </div>
 
                 <!-- Materi 2: Self Development -->
-                <div class="relative bg-white border border-gray-100 rounded-2xl p-8 shadow-lg hover:shadow-2xl transition duration-300 overflow-hidden group">
+                <div class="relative bg-white border border-gray-100 rounded-2xl p-8 shadow-lg hover:shadow-2xl transition duration-300 overflow-hidden group flex flex-col justify-between">
                     <div class="absolute top-0 right-0 w-32 h-32 bg-orange-50 rounded-bl-full -mr-10 -mt-10 z-0"></div>
-                    <div class="relative z-10">
+                    <div class="relative z-10 flex flex-col h-full">
                         <div class="flex items-center gap-4 mb-6">
                             <div class="w-14 h-14 bg-orange-100 text-orange-600 rounded-xl flex items-center justify-center text-2xl group-hover:bg-orange-600 group-hover:text-white transition-colors duration-300">
                                 <i class="fas fa-lightbulb"></i>
@@ -428,7 +428,74 @@
                                 <i class="fas fa-file-pdf text-orange-400 group-hover/link:text-orange-600"></i>
                                 <span class="text-sm font-medium text-gray-700 group-hover/link:text-orange-800">Mengatasi Homesick dan Stress Akademik</span>
                             </a>
+                        </div>
+                    </div>
+                </div>
 
+                <!-- Materi 3: Bahasa Arab & Sharaf -->
+                <div class="relative bg-white border border-gray-100 rounded-2xl p-8 shadow-lg hover:shadow-2xl transition duration-300 overflow-hidden group flex flex-col justify-between md:col-span-2 lg:col-span-1">
+                    <div class="absolute top-0 right-0 w-32 h-32 bg-teal-50 rounded-bl-full -mr-10 -mt-10 z-0"></div>
+                    <div class="relative z-10 flex flex-col h-full">
+                        <div class="flex items-center gap-4 mb-6">
+                            <div class="w-14 h-14 bg-teal-100 text-teal-600 rounded-xl flex items-center justify-center text-2xl group-hover:bg-teal-600 group-hover:text-white transition-colors duration-300">
+                                <i class="fas fa-language"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-2xl font-bold text-gray-800">Ilmu Sharaf</h3>
+                                <p class="text-xs text-teal-600 font-medium">Modul Pembelajaran & Game Interaktif</p>
+                            </div>
+                        </div>
+                        
+                        <div class="space-y-2 mb-6 flex-grow">
+                            <a href="materiajar.html" target="_blank" class="flex items-start gap-3 p-3 rounded-lg hover:bg-teal-50 transition border border-transparent hover:border-teal-100 group/link">
+                                <i class="fas fa-laptop-code text-teal-500 mt-1 group-hover/link:text-teal-700"></i>
+                                <div>
+                                    <div class="flex items-center gap-2">
+                                        <h4 class="font-semibold text-gray-700 group-hover/link:text-teal-700">Modul Tashrif Interaktif</h4>
+                                        <span class="text-[9px] bg-teal-100 text-teal-800 font-bold px-1.5 py-0.5 rounded uppercase">Web App</span>
+                                    </div>
+                                    <p class="text-xs text-gray-500 mt-1">Konjugasi fi'il madhi, mudhari', dan amr berbasis web.</p>
+                                </div>
+                            </a>
+                            <a href="materiajar.html" target="_blank" class="flex items-start gap-3 p-3 rounded-lg hover:bg-teal-50 transition border border-transparent hover:border-teal-100 group/link">
+                                <i class="fas fa-table-list text-teal-400 mt-1 group-hover/link:text-teal-600"></i>
+                                <div>
+                                    <h4 class="font-semibold text-gray-700 group-hover/link:text-teal-700">Fi'il Salim (كَتَبَ)</h4>
+                                    <p class="text-xs text-gray-500 mt-1">Tashrif lughawi 14 dhamir tanpa huruf illat/hamzah.</p>
+                                </div>
+                            </a>
+                            <a href="materiajar.html" target="_blank" class="flex items-start gap-3 p-3 rounded-lg hover:bg-teal-50 transition border border-transparent hover:border-teal-100 group/link">
+                                <i class="fas fa-table-list text-teal-400 mt-1 group-hover/link:text-teal-600"></i>
+                                <div>
+                                    <h4 class="font-semibold text-gray-700 group-hover/link:text-teal-700">Fi'il Mahmuz (أَكَلَ)</h4>
+                                    <p class="text-xs text-gray-500 mt-1">Perubahan bentuk kata kerja yang memiliki huruf hamzah.</p>
+                                </div>
+                            </a>
+                            <a href="materiajar.html" target="_blank" class="flex items-start gap-3 p-3 rounded-lg hover:bg-teal-50 transition border border-transparent hover:border-teal-100 group/link">
+                                <i class="fas fa-table-list text-teal-400 mt-1 group-hover/link:text-teal-600"></i>
+                                <div>
+                                    <h4 class="font-semibold text-gray-700 group-hover/link:text-teal-700">Fi'il Mudha'af (مَدَّ)</h4>
+                                    <p class="text-xs text-gray-500 mt-1">Kaidah tasydid dan penguraian idgham pada fi'il.</p>
+                                </div>
+                            </a>
+                            <a href="materiajar.html#game" target="_blank" class="flex items-start gap-3 p-3 rounded-lg hover:bg-teal-50 transition border border-transparent hover:border-teal-100 group/link">
+                                <i class="fas fa-gamepad text-teal-500 mt-1 group-hover/link:text-teal-700"></i>
+                                <div>
+                                    <div class="flex items-center gap-2">
+                                        <h4 class="font-semibold text-gray-700 group-hover/link:text-teal-700">Game Tebak Tashrif</h4>
+                                        <span class="text-[9px] bg-amber-100 text-amber-800 font-bold px-1.5 py-0.5 rounded uppercase">Game</span>
+                                    </div>
+                                    <p class="text-xs text-gray-500 mt-1">Kuis visual interaktif dengan penilaian otomatis.</p>
+                                </div>
+                            </a>
+                        </div>
+
+                        <div class="mt-auto pt-4 border-t border-gray-100">
+                            <a href="materiajar.html" target="_blank" class="w-full inline-flex items-center justify-center gap-2 py-3 px-5 bg-teal-600 hover:bg-teal-700 text-white text-sm font-bold rounded-xl shadow-md shadow-teal-100 hover:shadow-lg transition-all duration-300">
+                                <i class="fas fa-chalkboard-teacher"></i>
+                                <span>Buka Modul Sharaf</span>
+                                <i class="fas fa-arrow-right text-xs ml-1"></i>
+                            </a>
                         </div>
                     </div>
                 </div>

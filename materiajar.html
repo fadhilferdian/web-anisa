@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تعلم الصرف - تصريف الأفعال</title>
+    
+    <!-- Memuat Tailwind CSS untuk styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Memuat Font Awesome untuk Icon/Gambar Ilustrasi -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Memuat Google Fonts (Amiri untuk teks Arab klasik, Cairo untuk teks antarmuka) -->
+    <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Cairo:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Cairo', sans-serif;
+            background-color: #f0fdfa; /* teal-50 */
+            background-image: radial-gradient(#99f6e4 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+        .arabic-text {
+            font-family: 'Amiri', serif;
+            line-height: 1.8;
+        }
+        
+        /* Animasi Transisi */
+        .fade-in {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .card-hover {
+            transition: all 0.3s ease;
+        }
+        .card-hover:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px -5px rgba(20, 184, 166, 0.4);
+        }
+
+        .tense-btn.active {
+            background-color: #0d9488; /* teal-600 */
+            color: white;
+            box-shadow: inset 0 2px 4px 0 rgb(0 0 0 / 0.1);
+        }
+    </style>
+</head>
+<body class="text-gray-800 min-h-screen flex flex-col">
+
+    <header class="bg-teal-600 text-white shadow-lg sticky top-0 z-50">
+        <div class="container mx-auto px-4 py-4 flex flex-col md:flex-row justify-between items-center">
+            <div class="flex items-center gap-3 mb-4 md:mb-0">
+                <i class="fas fa-book-open text-3xl"></i>
+                <div>
+                    <h1 class="text-2xl font-bold">علم الصرف</h1>
+                    <p class="text-teal-100 text-sm">تصريف الأفعال (الماضي، المضارع، الأمر)</p>
+                </div>
+            </div>
+            <div class="flex flex-wrap items-center gap-3">
+                <a href="index.html#materials" class="inline-flex items-center gap-2 bg-teal-700 hover:bg-teal-800 text-white px-4 py-2 rounded-full font-semibold text-sm transition-all duration-300 shadow-inner border border-teal-500/40">
+                    <i class="fas fa-arrow-right rtl:rotate-0"></i> <span>الرئيسية (Beranda)</span>
+                </a>
+                <nav class="flex bg-teal-700 p-1 rounded-full shadow-inner">
+                    <button id="btnMateri" onclick="switchTab('materi')" class="px-6 py-2 flex items-center gap-2 rounded-full font-semibold bg-teal-500 shadow text-white transition-all duration-300">
+                        <i class="fas fa-chalkboard-teacher"></i> المادة التعليمية
+                    </button>
+                    <button id="btnGame" onclick="switchTab('game')" class="px-6 py-2 flex items-center gap-2 rounded-full font-semibold text-teal-100 hover:text-white transition-all duration-300 bg-transparent">
+                        <i class="fas fa-gamepad"></i> لعبة التدريب
+                    </button>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-grow container mx-auto px-4 py-8">
+        
+        <!-- BAGIAN MATERI -->
+        <section id="materiSection" class="fade-in">
+            <div class="text-center mb-8 bg-white p-6 rounded-2xl shadow-sm border border-teal-100">
+                <h2 id="materiTitle" class="text-3xl font-bold text-teal-700 mb-4">جدول التصريف اللغوي لفعل السالم (كَتَبَ)</h2>
+                
+                <!-- Verb Type Selector (Jenis Fi'il) -->
+                <div class="flex justify-center flex-wrap gap-2 mb-4">
+                    <button onclick="switchVerb('salim')" id="btnSalim" class="verb-btn px-6 py-2 rounded-md font-bold transition-colors bg-teal-600 text-white shadow-inner">السالم (كَتَبَ)</button>
+                    <button onclick="switchVerb('mahmuz')" id="btnMahmuz" class="verb-btn px-6 py-2 rounded-md font-bold transition-colors text-teal-700 bg-white border border-teal-200 hover:bg-teal-50">المهموز (أَكَلَ)</button>
+                    <button onclick="switchVerb('mudhaaf')" id="btnMudhaaf" class="verb-btn px-6 py-2 rounded-md font-bold transition-colors text-teal-700 bg-white border border-teal-200 hover:bg-teal-50">المضعف (مَدَّ)</button>
+                </div>
+
+                <!-- Tense Selector (Waktu Fi'il) -->
+                <div class="flex justify-center flex-wrap gap-2 mb-6">
+                    <button onclick="switchTense('madhi')" id="btnMadhi" class="tense-btn active px-6 py-2 rounded-md font-bold transition-colors">الماضي</button>
+                    <button onclick="switchTense('mudhari')" id="btnMudhari" class="tense-btn px-6 py-2 rounded-md font-bold transition-colors text-teal-700 hover:bg-teal-100">المضارع</button>
+                    <button onclick="switchTense('amr')" id="btnAmr" class="tense-btn px-6 py-2 rounded-md font-bold transition-colors text-teal-700 hover:bg-teal-100">الأمر</button>
+                </div>
+
+                <!-- Petunjuk Ikon -->
+                <div class="flex justify-center flex-wrap gap-4 bg-teal-50 inline-flex p-2 rounded-lg border border-teal-200 text-sm">
+                    <span class="flex items-center gap-2 font-semibold"><i class="fas fa-eye-slash text-gray-400"></i> غائب (الطرف الثالث)</span>
+                    <span class="flex items-center gap-2 font-semibold"><i class="fas fa-hand-point-left text-teal-500"></i> مخاطب (الطرف الثاني)</span>
+                    <span class="flex items-center gap-2 font-semibold"><i class="fas fa-microphone text-blue-500"></i> متكلم (الطرف الأول)</span>
+                </div>
+            </div>
+
+            <!-- Tempat kartu materi akan dirender oleh JS -->
+            <div id="materiGrid" class="flex flex-wrap justify-center gap-6 max-w-7xl mx-auto">
+                <!-- Cards will be injected here -->
+            </div>
+        </section>
+
+        <!-- BAGIAN GAME -->
+        <section id="gameSection" class="hidden fade-in max-w-2xl mx-auto">
+            <div class="bg-white rounded-3xl shadow-xl overflow-hidden border border-teal-200">
+                <!-- Game Header -->
+                <div class="bg-teal-500 text-white p-6 text-center relative">
+                    <h2 class="text-2xl font-bold">لعبة التخمين البصري</h2>
+                    <p class="text-teal-100 mt-1">اختر الفعل الصحيح الذي يطابق الصورة والشكل المطلوب!</p>
+                    <div class="absolute top-6 start-6 font-bold bg-teal-700 px-4 py-1 rounded-full flex items-center gap-2 shadow-inner">
+                        النتيجة: <span id="scoreDisplay">0</span>
+                    </div>
+                </div>
+
+                <!-- Game Area -->
+                <div id="gamePlayArea" class="p-6 md:p-8">
+                    <div class="flex justify-between items-center mb-6 text-sm font-semibold text-teal-600">
+                        <span id="questionCount">السؤال ١ / ١٠</span>
+                        <div class="w-1/2 bg-teal-100 rounded-full h-2.5 rtl:rotate-180">
+                            <div id="progressBar" class="bg-teal-500 h-2.5 rounded-full shadow-sm" style="width: 10%"></div>
+                        </div>
+                    </div>
+                    
+                    <!-- Area Soal (Gambar & Keterangan) -->
+                    <div class="text-center mb-8 bg-teal-50 p-8 rounded-2xl border-2 border-dashed border-teal-200 flex flex-col items-center relative">
+                        <div id="questionTenseLabel" class="absolute top-3 end-3 text-xs font-bold px-3 py-1 bg-white text-teal-600 rounded-full border border-teal-200 shadow-sm"></div>
+                        
+                        <h3 class="text-lg md:text-xl font-bold text-gray-700 mb-4">اختر الفعل المناسب للصورة التالية:</h3>
+                        
+                        <div id="questionVisual" class="text-7xl flex justify-center items-center py-4 mb-4 drop-shadow-md">
+                            <!-- Icon disuntikkan disini -->
+                        </div>
+                        
+                        <!-- Keterangan Bentuk seperti Mufrad Mudzakkar -->
+                        <div id="questionForm" class="bg-teal-100 text-teal-800 px-6 py-2 rounded-full font-bold text-lg border border-teal-200 shadow-sm">
+                            <!-- Disuntikkan JS -->
+                        </div>
+                    </div>
+
+                    <!-- Area Jawaban (Memanjang ke Bawah) -->
+                    <div id="optionsContainer" class="flex flex-col gap-4">
+                        <!-- Options injected by JS -->
+                    </div>
+                </div>
+                
+                <!-- Game Start/End Screen -->
+                <div id="gameOverlay" class="p-12 text-center bg-white flex flex-col items-center justify-center hidden">
+                    <div id="overlayIcon" class="text-6xl text-teal-500 mb-4"><i class="fas fa-trophy"></i></div>
+                    <h3 id="overlayTitle" class="text-3xl font-bold text-gray-800 mb-2">انتهى!</h3>
+                    <p id="overlayDesc" class="text-lg text-gray-600 mb-8">نتيجتك النهائية: <span id="finalScore" class="font-bold text-teal-600 text-2xl">0</span>/100</p>
+                    <button onclick="startNewGame()" class="bg-teal-500 hover:bg-teal-600 text-white font-bold py-3 px-8 rounded-full text-lg shadow-lg transition-transform hover:scale-105 flex items-center gap-2">
+                        <i class="fas fa-redo"></i> العب مرة أخرى
+                    </button>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-teal-800 text-teal-100 text-center py-6 mt-auto">
+        <p>&copy; ٢٠٢٦ تطبيق تعلم الصرف التفاعلي. صنع بألوان التوسكا.</p>
+    </footer>
+
+    <script>
+        // Data lengkap untuk 3 Tense (Madhi, Mudhari', Amr) dan 3 Jenis Fi'il
+        const tashrifData = [
+            // --- SALIM (كَتَبَ) ---
+            // Madhi
+            { id: 's_m1', verb: 'salim', tense: 'madhi', arti: "مفرد مذكر", fiil: "كَتَبَ", gender: "male", count: 1, person: 3, group: "الغائب (الطرف الثالث)" },
+            { id: 's_m2', verb: 'salim', tense: 'madhi', arti: "مثنى مذكر", fiil: "كَتَبَا", gender: "male", count: 2, person: 3, group: "الغائب (الطرف الثالث)" },
+            { id: 's_m3', verb: 'salim', tense: 'madhi', arti: "جمع مذكر", fiil: "كَتَبُوْا", gender: "male", count: 3, person: 3, group: "الغائب (الطرف الثالث)" },
+            { id: 's_m4', verb: 'salim', tense: 'madhi', arti: "مفرد مؤنث", fiil: "كَتَبَتْ", gender: "female", count: 1, person: 3, group: "الغائبة (الطرف الثالث - مؤنث)" },
+            { id: 's_m5', verb: 'salim', tense: 'madhi', arti: "مثنى مؤنث", fiil: "كَتَبَتَا", gender: "female", count: 2, person: 3, group: "الغائبة (الطرف الثالث - مؤنث)" },
+            { id: 's_m6', verb: 'salim', tense: 'madhi', arti: "جمع مؤنث", fiil: "كَتَبْنَ", gender: "female", count: 3, person: 3, group: "الغائبة (الطرف الثالث - مؤنث)" },
+            { id: 's_m7', verb: 'salim', tense: 'madhi', arti: "مفرد مذكر", fiil: "كَتَبْتَ", gender: "male", count: 1, person: 2, group: "المخاطب (الطرف الثاني)" },
+            { id: 's_m8', verb: 'salim', tense: 'madhi', arti: "مثنى مذكر", fiil: "كَتَبْتُمَا", gender: "male", count: 2, person: 2, group: "المخاطب (الطرف الثاني)" },
+            { id: 's_m9', verb: 'salim', tense: 'madhi', arti: "جمع مذكر", fiil: "كَتَبْتُمْ", gender: "male", count: 3, person: 2, group: "المخاطب (الطرف الثاني)" },
+            { id: 's_m10', verb: 'salim', tense: 'madhi', arti: "مفرد مؤنث", fiil: "كَتَبْتِ", gender: "female", count: 1, person: 2, group: "المخاطبة (الطرف الثاني - مؤنث)" },
+            { id: 's_m11', verb: 'salim', tense: 'madhi', arti: "مثنى مؤنث", fiil: "كَتَبْتُمَا", gender: "female", count: 2, person: 2, group: "المخاطبة (الطرف الثاني - مؤنث)" },
+            { id: 's_m12', verb: 'salim', tense: 'madhi', arti: "جمع مؤنث", fiil: "كَتَبْتُنَّ", gender: "female", count: 3, person: 2, group: "المخاطبة (الطرف الثاني - مؤنث)" },
+            { id: 's_m13', verb: 'salim', tense: 'madhi', arti: "مفرد (مذكر/مؤنث)", fiil: "كَتَبْتُ", gender: "mix", count: 1, person: 1, group: "المتكلم (الطرف الأول)" },
+            { id: 's_m14', verb: 'salim', tense: 'madhi', arti: "جمع/مثنى (مذكر/مؤنث)", fiil: "كَتَبْنَا", gender: "mix", count: 3, person: 1, group: "المتكلم (الطرف الأول)" },
+            // Mudhari
+            { id: 's_mu1', verb: 'salim', tense: 'mudhari', arti: "مفرد مذكر", fiil: "يَكْتُبُ", gender: "male", count: 1, person: 3, group: "الغائب (الطرف الثالث)" },
+            { id: 's_mu2', verb: 'salim', tense: 'mudhari', arti: "مثنى مذكر", fiil: "يَكْتُبَانِ", gender: "male", count: 2, person: 3, group: "الغائب (الطرف الثالث)" },
+            { id: 's_mu3', verb: 'salim', tense: 'mudhari', arti: "جمع مذكر", fiil: "يَكْتُبُوْنَ", gender: "male", count: 3, person: 3, group: "الغائب (الطرف الثالث)" },
+            { id: 's_mu4', verb: 'salim', tense: 'mudhari', arti: "مفرد مؤنث", fiil: "تَكْتُبُ", gender: "female", count: 1, person: 3, group: "الغائبة (الطرف الثالث - مؤنث)" },
+            { id: 's_mu5', verb: 'salim', tense: 'mudhari', arti: "مثنى مؤنث", fiil: "تَكْتُبَانِ", gender: "female", count: 2, person: 3, group: "الغائبة (الطرف الثالث - مؤنث)" },
+            { id: 's_mu6', verb: 'salim', tense: 'mudhari', arti: "جمع مؤنث", fiil: "يَكْتُبْنَ", gender: "female", count: 3, person: 3, group: "الغائبة (الطرف الثالث - مؤنث)" },
+            { id: 's_mu7', verb: 'salim', tense: 'mudhari', arti: "مفرد مذكر", fiil: "تَكْتُبُ", gender: "male", count: 1, person: 2, group: "المخاطب (الطرف الثاني)" },
+            { id: 's_mu8', verb: 'salim', tense: 'mudhari', arti: "مثنى مذكر", fiil: "تَكْتُبَانِ", gender: "male", count: 2, person: 2, group: "المخاطب (الطرف الثاني)" },
+            { id: 's_mu9', verb: 'salim', tense: 'mudhari', arti: "جمع مذكر", fiil: "تَكْتُبُوْنَ", gender: "male", count: 3, person: 2, group: "المخاطب (الطرف الثاني)" },
+            { id: 's_mu10', verb: 'salim', tense: 'mudhari', arti: "مفرد مؤنث", fiil: "تَكْتُبِيْنَ", gender: "female", count: 1, person: 2, group: "المخاطبة (الطرف الثاني - مؤنث)" },
+            { id: 's_mu11', verb: 'salim', tense: 'mudhari', arti: "مثنى مؤنث", fiil: "تَكْتُبَانِ", gender: "female", count: 2, person: 2, group: "المخاطبة (الطرف الثاني - مؤنث)" },
+            { id: 's_mu12', verb: 'salim', tense: 'mudhari', arti: "جمع مؤنث", fiil: "تَكْتُبْنَ", gender: "female", count: 3, person: 2, group: "المخاطبة (الطرف الثاني - مؤنث)" },
+            { id: 's_mu13', verb: 'salim', tense: 'mudhari', arti: "مفرد (مذكر/مؤنث)", fiil: "أَكْتُبُ", gender: "mix", count: 1, person: 1, group: "المتكلم (الطرف الأول)" },
+            { id: 's_mu14', verb: 'salim', tense: 'mudhari', arti: "جمع/مثنى (مذكر/مؤنث)", fiil: "نَكْتُبُ", gender: "mix", count: 3, person: 1, group: "المتكلم (الطرف الأول)" },
+            // Amr
+            { id: 's_a1', verb: 'salim', tense: 'amr', arti: "مفرد مذكر", fiil: "اُكْتُبْ", gender: "male", count: 1, person: 2, group: "المخاطب (الطرف الثاني)" },
+            { id: 's_a2', verb: 'salim', tense: 'amr', arti: "مثنى مذكر", fiil: "اُكْتُبَا", gender: "male", count: 2, person: 2, group: "المخاطب (الطرف الثاني)" },
+            { id: 's_a3', verb: 'salim', tense: 'amr', arti: "جمع مذكر", fiil: "اُكْتُبُوْا", gender: "male", count: 3, person: 2, group: "المخاطب (الطرف الثاني)" },
+            { id: 's_a4', verb: 'salim', tense: 'amr', arti: "مفرد مؤنث", fiil: "اُكْتُبِي", gender: "female", count: 1, person: 2, group: "المخاطبة (الطرف الثاني - مؤنث)" },
+            { id: 's_a5', verb: 'salim', tense: 'amr', arti: "مثنى مؤنث", fiil: "اُكْتُبَا", gender: "female", count: 2, person: 2, group: "المخاطبة (الطرف الثاني - مؤنث)" },
+            { id: 's_a6', verb: 'salim', tense: 'amr', arti: "جمع مؤنث", fiil: "اُكْتُبْنَ", gender: "female", count: 3, person: 2, group: "المخاطبة (الطرف الثاني - مؤنث)" },
+
+            // --- MAHMUZ (أَكَلَ) ---
+            // Madhi
+            { id: 'h_m1', verb: 'mahmuz', tense: 'madhi', arti: "مفرد مذكر", fiil: "أَكَلَ", gender: "male", count: 1, person: 3, group: "الغائب (الطرف الثالث)" },
+            { id: 'h_m2', verb: 'mahmuz', tense: 'madhi', arti: "مثنى مذكر", fiil: "أَكَلَا", gender: "male", count: 2, person: 3, group: "الغائب (الطرف الثالث)" },
+            { id: 'h_m3', verb: 'mahmuz', tense: 'madhi', arti: "جمع مذكر", fiil: "أَكَلُوْا", gender: "male", count: 3, person: 3, group: "الغائب (الطرف الثالث)" },
+            { id: 'h_m4', verb: 'mahmuz', tense: 'madhi', arti: "مفرد مؤنث", fiil: "أَكَلَتْ", gender: "female", count: 1, person: 3, group: "الغائبة (الطرف الثالث - مؤنث)" },
+            { id: 'h_m5', verb: 'mahmuz', tense: 'madhi', arti: "مثنى مؤنث", fiil: "أَكَلَتَا", gender: "female", count: 2, person: 3, group: "الغائبة (الطرف الثالث - مؤنث)" },
+            { id: 'h_m6', verb: 'mahmuz', tense: 'madhi', arti: "جمع مؤنث", fiil: "أَكَلْنَ", gender: "female", count: 3, person: 3, group: "الغائبة (الطرف الثالث - مؤنث)" },
+            { id: 'h_m7', verb: 'mahmuz', tense: 'madhi', arti: "مفرد مذكر", fiil: "أَكَلْتَ", gender: "male", count: 1, person: 2, group: "المخاطب (الطرف الثاني)" },
+            { id: 'h_m8', verb: 'mahmuz', tense: 'madhi', arti: "مثنى مذكر", fiil: "أَكَلْتُمَا", gender: "male", count: 2, person: 2, group: "المخاطب (الطرف الثاني)" },
+            { id: 'h_m9', verb: 'mahmuz', tense: 'madhi', arti: "جمع مذكر", fiil: "أَكَلْتُمْ", gender: "male", count: 3, person: 2, group: "المخاطب (الطرف الثاني)" },
+            { id: 'h_m10', verb: 'mahmuz', tense: 'madhi', arti: "مفرد مؤنث", fiil: "أَكَلْتِ", gender: "female", count: 1, person: 2, group: "المخاطبة (الطرف الثاني - مؤنث)" },
+            { id: 'h_m11', verb: 'mahmuz', tense: 'madhi', arti: "مثنى مؤنث", fiil: "أَكَلْتُمَا", gender: "female", count: 2, person: 2, group: "المخاطبة (الطرف الثاني - مؤنث)" },
+            { id: 'h_m12', verb: 'mahmuz', tense: 'madhi', arti: "جمع مؤنث", fiil: "أَكَلْتُنَّ", gender: "female", count: 3, person: 2, group: "المخاطبة (الطرف الثاني - مؤنث)" },
+            { id: 'h_m13', verb: 'mahmuz', tense: 'madhi', arti: "مفرد (مذكر/مؤنث)", fiil: "أَكَلْتُ", gender: "mix", count: 1, person: 1, group: "المتكلم (الطرف الأول)" },
+            { id: 'h_m14', verb: 'mahmuz', tense: 'madhi', arti: "جمع/مثنى (مذكر/مؤنث)", fiil: "أَكَلْنَا", gender: "mix", count: 3, person: 1, group: "المتكلم (الطرف الأول)" },
+            // Mudhari
+            { id: 'h_mu1', verb: 'mahmuz', tense: 'mudhari', arti: "مفرد مذكر", fiil: "يَأْكُلُ", gender: "male", count: 1, person: 3, group: "الغائب (الطرف الثالث)" },
+            { id: 'h_mu2', verb: 'mahmuz', tense: 'mudhari', arti: "مثنى مذكر", fiil: "يَأْكُلَانِ", gender: "male", count: 2, person: 3, group: "الغائب (الطرف الثالث)" },
+            { id: 'h_mu3', verb: 'mahmuz', tense: 'mudhari', arti: "جمع مذكر", fiil: "يَأْكُلُوْنَ", gender: "male", count: 3, person: 3, group: "الغائب (الطرف الثالث)" },
+            { id: 'h_mu4', verb: 'mahmuz', tense: 'mudhari', arti: "مفرد مؤنث", fiil: "تَأْكُلُ", gender: "female", count: 1, person: 3, group: "الغائبة (الطرف الثالث - مؤنث)" },
+            { id: 'h_mu5', verb: 'mahmuz', tense: 'mudhari', arti: "مثنى مؤنث", fiil: "تَأْكُلَانِ", gender: "female", count: 2, person: 3, group: "الغائبة (الطرف الثالث - مؤنث)" },
+            { id: 'h_mu6', verb: 'mahmuz', tense: 'mudhari', arti: "جمع مؤنث", fiil: "يَأْكُلْنَ", gender: "female", count: 3, person: 3, group: "الغائبة (الطرف الثالث - مؤنث)" },
+            { id: 'h_mu7', verb: 'mahmuz', tense: 'mudhari', arti: "مفرد مذكر", fiil: "تَأْكُلُ", gender: "male", count: 1, person: 2, group: "المخاطب (الطرف الثاني)" },
+            { id: 'h_mu8', verb: 'mahmuz', tense: 'mudhari', arti: "مثنى مذكر", fiil: "تَأْكُلَانِ", gender: "male", count: 2, person: 2, group: "المخاطب (الطرف الثاني)" },
+            { id: 'h_mu9', verb: 'mahmuz', tense: 'mudhari', arti: "جمع مذكر", fiil: "تَأْكُلُوْنَ", gender: "male", count: 3, person: 2, group: "المخاطب (الطرف الثاني)" },
+            { id: 'h_mu10', verb: 'mahmuz', tense: 'mudhari', arti: "مفرد مؤنث", fiil: "تَأْكُلِيْنَ", gender: "female", count: 1, person: 2, group: "المخاطبة (الطرف الثاني - مؤنث)" },
+            { id: 'h_mu11', verb: 'mahmuz', tense: 'mudhari', arti: "مثنى مؤنث", fiil: "تَأْكُلَانِ", gender: "female", count: 2, person: 2, group: "المخاطبة (الطرف الثاني - مؤنث)" },
+            { id: 'h_mu12', verb: 'mahmuz', tense: 'mudhari', arti: "جمع مؤنث", fiil: "تَأْكُلْنَ", gender: "female", count: 3, person: 2, group: "المخاطبة (الطرف الثاني - مؤنث)" },
+            { id: 'h_mu13', verb: 'mahmuz', tense: 'mudhari', arti: "مفرد (مذكر/مؤنث)", fiil: "آكُلُ", gender: "mix", count: 1, person: 1, group: "المتكلم (الطرف الأول)" },
+            { id: 'h_mu14', verb: 'mahmuz', tense: 'mudhari', arti: "جمع/مثنى (مذكر/مؤنث)", fiil: "نَأْكُلُ", gender: "mix", count: 3, person: 1, group: "المتكلم (الطرف الأول)" },
+            // Amr
+            { id: 'h_a1', verb: 'mahmuz', tense: 'amr', arti: "مفرد مذكر", fiil: "كُلْ", gender: "male", count: 1, person: 2, group: "المخاطب (الطرف الثاني)" },
+            { id: 'h_a2', verb: 'mahmuz', tense: 'amr', arti: "مثنى مذكر", fiil: "كُلَا", gender: "male", count: 2, person: 2, group: "المخاطب (الطرف الثاني)" },
+            { id: 'h_a3', verb: 'mahmuz', tense: 'amr', arti: "جمع مذكر", fiil: "كُلُوْا", gender: "male", count: 3, person: 2, group: "المخاطب (الطرف الثاني)" },
+            { id: 'h_a4', verb: 'mahmuz', tense: 'amr', arti: "مفرد مؤنث", fiil: "كُلِي", gender: "female", count: 1, person: 2, group: "المخاطبة (الطرف الثاني - مؤنث)" },
+            { id: 'h_a5', verb: 'mahmuz', tense: 'amr', arti: "مثنى مؤنث", fiil: "كُلَا", gender: "female", count: 2, person: 2, group: "المخاطبة (الطرف الثاني - مؤنث)" },
+            { id: 'h_a6', verb: 'mahmuz', tense: 'amr', arti: "جمع مؤنث", fiil: "كُلْنَ", gender: "female", count: 3, person: 2, group: "المخاطبة (الطرف الثاني - مؤنث)" },
+
+            // --- MUDHA'AF (مَدَّ) ---
+            // Madhi
+            { id: 'md_m1', verb: 'mudhaaf', tense: 'madhi', arti: "مفرد مذكر", fiil: "مَدَّ", gender: "male", count: 1, person: 3, group: "الغائب (الطرف الثالث)" },
+            { id: 'md_m2', verb: 'mudhaaf', tense: 'madhi', arti: "مثنى مذكر", fiil: "مَدَّا", gender: "male", count: 2, person: 3, group: "الغائب (الطرف الثالث)" },
+            { id: 'md_m3', verb: 'mudhaaf', tense: 'madhi', arti: "جمع مذكر", fiil: "مَدُّوْا", gender: "male", count: 3, person: 3, group: "الغائب (الطرف الثالث)" },
+            { id: 'md_m4', verb: 'mudhaaf', tense: 'madhi', arti: "مفرد مؤنث", fiil: "مَدَّتْ", gender: "female", count: 1, person: 3, group: "الغائبة (الطرف الثالث - مؤنث)" },
+            { id: 'md_m5', verb: 'mudhaaf', tense: 'madhi', arti: "مثنى مؤنث", fiil: "مَدَّتَا", gender: "female", count: 2, person: 3, group: "الغائبة (الطرف الثالث - مؤنث)" },
+            { id: 'md_m6', verb: 'mudhaaf', tense: 'madhi', arti: "جمع مؤنث", fiil: "مَدَدْنَ", gender: "female", count: 3, person: 3, group: "الغائبة (الطرف الثالث - مؤنث)" },
+            { id: 'md_m7', verb: 'mudhaaf', tense: 'madhi', arti: "مفرد مذكر", fiil: "مَدَدْتَ", gender: "male", count: 1, person: 2, group: "المخاطب (الطرف الثاني)" },
+            { id: 'md_m8', verb: 'mudhaaf', tense: 'madhi', arti: "مثنى مذكر", fiil: "مَدَدْتُمَا", gender: "male", count: 2, person: 2, group: "المخاطب (الطرف الثاني)" },
+            { id: 'md_m9', verb: 'mudhaaf', tense: 'madhi', arti: "جمع مذكر", fiil: "مَدَدْتُمْ", gender: "male", count: 3, person: 2, group: "المخاطب (الطرف الثاني)" },
+            { id: 'md_m10', verb: 'mudhaaf', tense: 'madhi', arti: "مفرد مؤنث", fiil: "مَدَدْتِ", gender: "female", count: 1, person: 2, group: "المخاطبة (الطرف الثاني - مؤنث)" },
+            { id: 'md_m11', verb: 'mudhaaf', tense: 'madhi', arti: "مثنى مؤنث", fiil: "مَدَدْتُمَا", gender: "female", count: 2, person: 2, group: "المخاطبة (الطرف الثاني - مؤنث)" },
+            { id: 'md_m12', verb: 'mudhaaf', tense: 'madhi', arti: "جمع مؤنث", fiil: "مَدَدْتُنَّ", gender: "female", count: 3, person: 2, group: "المخاطبة (الطرف الثاني - مؤنث)" },
+            { id: 'md_m13', verb: 'mudhaaf', tense: 'madhi', arti: "مفرد (مذكر/مؤنث)", fiil: "مَدَدْتُ", gender: "mix", count: 1, person: 1, group: "المتكلم (الطرف الأول)" },
+            { id: 'md_m14', verb: 'mudhaaf', tense: 'madhi', arti: "جمع/مثنى (مذكر/مؤنث)", fiil: "مَدَدْنَا", gender: "mix", count: 3, person: 1, group: "المتكلم (الطرف الأول)" },
+            // Mudhari
+            { id: 'md_mu1', verb: 'mudhaaf', tense: 'mudhari', arti: "مفرد مذكر", fiil: "يَمُدُّ", gender: "male", count: 1, person: 3, group: "الغائب (الطرف الثالث)" },
+            { id: 'md_mu2', verb: 'mudhaaf', tense: 'mudhari', arti: "مثنى مذكر", fiil: "يَمُدَّانِ", gender: "male", count: 2, person: 3, group: "الغائب (الطرف الثالث)" },
+            { id: 'md_mu3', verb: 'mudhaaf', tense: 'mudhari', arti: "جمع مذكر", fiil: "يَمُدُّوْنَ", gender: "male", count: 3, person: 3, group: "الغائب (الطرف الثالث)" },
+            { id: 'md_mu4', verb: 'mudhaaf', tense: 'mudhari', arti: "مفرد مؤنث", fiil: "تَمُدُّ", gender: "female", count: 1, person: 3, group: "الغائبة (الطرف الثالث - مؤنث)" },
+            { id: 'md_mu5', verb: 'mudhaaf', tense: 'mudhari', arti: "مثنى مؤنث", fiil: "تَمُدَّانِ", gender: "female", count: 2, person: 3, group: "الغائبة (الطرف الثالث - مؤنث)" },
+            { id: 'md_mu6', verb: 'mudhaaf', tense: 'mudhari', arti: "جمع مؤنث", fiil: "يَمْدُدْنَ", gender: "female", count: 3, person: 3, group: "الغائبة (الطرف الثالث - مؤنث)" },
+            { id: 'md_mu7', verb: 'mudhaaf', tense: 'mudhari', arti: "مفرد مذكر", fiil: "تَمُدُّ", gender: "male", count: 1, person: 2, group: "المخاطب (الطرف الثاني)" },
+            { id: 'md_mu8', verb: 'mudhaaf', tense: 'mudhari', arti: "مثنى مذكر", fiil: "تَمُدَّانِ", gender: "male", count: 2, person: 2, group: "المخاطب (الطرف الثاني)" },
+            { id: 'md_mu9', verb: 'mudhaaf', tense: 'mudhari', arti: "جمع مذكر", fiil: "تَمُدُّوْنَ", gender: "male", count: 3, person: 2, group: "المخاطب (الطرف الثاني)" },
+            { id: 'md_mu10', verb: 'mudhaaf', tense: 'mudhari', arti: "مفرد مؤنث", fiil: "تَمُدِّيْنَ", gender: "female", count: 1, person: 2, group: "المخاطبة (الطرف الثاني - مؤنث)" },
+            { id: 'md_mu11', verb: 'mudhaaf', tense: 'mudhari', arti: "مثنى مؤنث", fiil: "تَمُدَّانِ", gender: "female", count: 2, person: 2, group: "المخاطبة (الطرف الثاني - مؤنث)" },
+            { id: 'md_mu12', verb: 'mudhaaf', tense: 'mudhari', arti: "جمع مؤنث", fiil: "تَمْدُدْنَ", gender: "female", count: 3, person: 2, group: "المخاطبة (الطرف الثاني - مؤنث)" },
+            { id: 'md_mu13', verb: 'mudhaaf', tense: 'mudhari', arti: "مفرد (مذكر/مؤنث)", fiil: "أَمُدُّ", gender: "mix", count: 1, person: 1, group: "المتكلم (الطرف الأول)" },
+            { id: 'md_mu14', verb: 'mudhaaf', tense: 'mudhari', arti: "جمع/مثنى (مذكر/مؤنث)", fiil: "نَمُدُّ", gender: "mix", count: 3, person: 1, group: "المتكلم (الطرف الأول)" },
+            // Amr
+            { id: 'md_a1', verb: 'mudhaaf', tense: 'amr', arti: "مفرد مذكر", fiil: "مُدَّ", gender: "male", count: 1, person: 2, group: "المخاطب (الطرف الثاني)" },
+            { id: 'md_a2', verb: 'mudhaaf', tense: 'amr', arti: "مثنى مذكر", fiil: "مُدَّا", gender: "male", count: 2, person: 2, group: "المخاطب (الطرف الثاني)" },
+            { id: 'md_a3', verb: 'mudhaaf', tense: 'amr', arti: "جمع مذكر", fiil: "مُدُّوْا", gender: "male", count: 3, person: 2, group: "المخاطب (الطرف الثاني)" },
+            { id: 'md_a4', verb: 'mudhaaf', tense: 'amr', arti: "مفرد مؤنث", fiil: "مُدِّي", gender: "female", count: 1, person: 2, group: "المخاطبة (الطرف الثاني - مؤنث)" },
+            { id: 'md_a5', verb: 'mudhaaf', tense: 'amr', arti: "مثنى مؤنث", fiil: "مُدَّا", gender: "female", count: 2, person: 2, group: "المخاطبة (الطرف الثاني - مؤنث)" },
+            { id: 'md_a6', verb: 'mudhaaf', tense: 'amr', arti: "جمع مؤنث", fiil: "اُمْدُدْنَ", gender: "female", count: 3, person: 2, group: "المخاطبة (الطرف الثاني - مؤنث)" }
+        ];
+
+        let currentTenseFilter = 'madhi';
+        let currentVerbFilter = 'salim';
+
+        function switchTab(tab) {
+            const materiSec = document.getElementById('materiSection');
+            const gameSec = document.getElementById('gameSection');
+            const btnMateri = document.getElementById('btnMateri');
+            const btnGame = document.getElementById('btnGame');
+
+            if (tab === 'materi') {
+                materiSec.classList.remove('hidden');
+                gameSec.classList.add('hidden');
+                
+                btnMateri.className = "px-6 py-2 flex items-center gap-2 rounded-full font-semibold bg-teal-500 shadow text-white transition-all duration-300";
+                btnGame.className = "px-6 py-2 flex items-center gap-2 rounded-full font-semibold text-teal-100 hover:text-white transition-all duration-300 bg-transparent";
+            } else {
+                materiSec.classList.add('hidden');
+                gameSec.classList.remove('hidden');
+                
+                btnGame.className = "px-6 py-2 flex items-center gap-2 rounded-full font-semibold bg-teal-500 shadow text-white transition-all duration-300";
+                btnMateri.className = "px-6 py-2 flex items-center gap-2 rounded-full font-semibold text-teal-100 hover:text-white transition-all duration-300 bg-transparent";
+                
+                if (currentQuestionIndex === 0 && !isGameOver) {
+                    startNewGame();
+                }
+            }
+        }
+
+        function switchTense(tense) {
+            currentTenseFilter = tense;
+            
+            ['Madhi', 'Mudhari', 'Amr'].forEach(t => {
+                const btn = document.getElementById(`btn${t}`);
+                btn.className = "tense-btn px-6 py-2 rounded-md font-bold transition-colors text-teal-700 hover:bg-teal-100";
+            });
+            
+            const activeBtn = document.getElementById(`btn${tense.charAt(0).toUpperCase() + tense.slice(1)}`);
+            activeBtn.className = "tense-btn active px-6 py-2 rounded-md font-bold transition-colors";
+            
+            renderMateriCards();
+        }
+
+        function switchVerb(verb) {
+            currentVerbFilter = verb;
+            
+            ['salim', 'mahmuz', 'mudhaaf'].forEach(v => {
+                const btnId = 'btn' + v.charAt(0).toUpperCase() + v.slice(1);
+                const btn = document.getElementById(btnId);
+                btn.className = "verb-btn px-6 py-2 rounded-md font-bold transition-colors text-teal-700 bg-white border border-teal-200 hover:bg-teal-50";
+            });
+            
+            const activeBtn = document.getElementById('btn' + verb.charAt(0).toUpperCase() + verb.slice(1));
+            activeBtn.className = "verb-btn px-6 py-2 rounded-md font-bold transition-colors bg-teal-600 text-white shadow-inner";
+            
+            const titleEl = document.getElementById('materiTitle');
+            if (verb === 'salim') titleEl.innerText = "جدول التصريف اللغوي لفعل السالم (كَتَبَ)";
+            if (verb === 'mahmuz') titleEl.innerText = "جدول التصريف اللغوي لفعل المهموز (أَكَلَ)";
+            if (verb === 'mudhaaf') titleEl.innerText = "جدول التصريف اللغوي لفعل المضعف (مَدَّ)";
+
+            renderMateriCards();
+        }
+
+        function getVisualIllustration(item) {
+            let iconClass = item.gender === 'female' ? 'fa-female' : 'fa-male';
+            if (item.gender === 'mix') iconClass = 'fa-user'; 
+            
+            let personIndicator = '';
+            let figureColor = '';
+            
+            if (item.person === 3) {
+                figureColor = 'text-gray-400';
+                personIndicator = '<i class="fas fa-eye-slash absolute -top-3 -start-3 text-xs bg-white border border-gray-200 rounded-full w-6 h-6 flex items-center justify-center shadow-sm text-gray-500"></i>';
+            } else if (item.person === 2) {
+                figureColor = 'text-teal-500';
+                personIndicator = '<i class="fas fa-hand-point-left absolute -top-3 -start-3 text-xs bg-white border border-teal-200 rounded-full w-6 h-6 flex items-center justify-center shadow-sm text-teal-600"></i>';
+            } else {
+                figureColor = 'text-blue-500';
+                personIndicator = '<i class="fas fa-microphone absolute -top-3 -start-3 text-xs bg-white border border-blue-200 rounded-full w-6 h-6 flex items-center justify-center shadow-sm text-blue-600"></i>';
+            }
+
+            const displayCount = item.count > 3 ? 3 : item.count; 
+            let figures = '';
+            for (let i = 0; i < displayCount; i++) {
+                figures += `<i class="fas ${iconClass} mx-1 ${figureColor}"></i>`;
+            }
+            
+            return `
+                <div class="relative inline-block px-2">
+                    <div class="flex items-center justify-center drop-shadow-md">
+                        ${figures}
+                    </div>
+                    ${personIndicator}
+                </div>
+            `;
+        }
+
+        function renderMateriCards() {
+            const container = document.getElementById('materiGrid');
+            container.innerHTML = '';
+            
+            let currentGroup = '';
+            const filteredData = tashrifData.filter(item => item.tense === currentTenseFilter && item.verb === currentVerbFilter);
+
+            filteredData.forEach((item) => {
+                if (item.group !== currentGroup) {
+                    currentGroup = item.group;
+                    const groupTitle = document.createElement('div');
+                    groupTitle.className = "w-full mt-6 mb-2 border-b-2 border-teal-200 pb-2 fade-in text-center";
+                    groupTitle.innerHTML = `<h3 class="text-xl font-bold text-teal-800 flex items-center justify-center gap-2"><i class="fas fa-layer-group"></i> ${currentGroup}</h3>`;
+                    container.appendChild(groupTitle);
+                }
+
+                const card = document.createElement('div');
+                card.className = "w-full sm:w-64 lg:w-72 bg-white rounded-2xl p-6 shadow-sm border border-teal-100 flex flex-col items-center justify-center text-center card-hover relative overflow-hidden fade-in";
+                
+                card.innerHTML = `
+                    <div class="absolute top-0 end-0 w-full h-1 bg-teal-400"></div>
+                    
+                    <!-- Keterangan bentuk (Mufrad/Mutsanna/Jamak) di bagian atas -->
+                    <div class="w-full flex justify-center mb-4 mt-2">
+                        <span class="text-sm font-bold text-teal-700 bg-teal-100 px-4 py-1.5 rounded-full inline-block border border-teal-200 shadow-sm">${item.arti}</span>
+                    </div>
+                    
+                    <!-- Area Gambar Visual -->
+                    <div class="w-full h-32 bg-gray-50 rounded-xl mb-4 flex items-center justify-center text-5xl border border-gray-100 shadow-inner">
+                        ${getVisualIllustration(item)}
+                    </div>
+                    
+                    <!-- Tulisan Fi'il berdiri sendiri di bawah -->
+                    <div class="w-full flex items-center justify-center p-4 bg-teal-500 rounded-xl text-white shadow-md">
+                        <div class="arabic-text text-5xl font-bold leading-none py-2">${item.fiil}</div>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        let currentQuestions = [];
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let isGameOver = true;
+        const totalQuestions = 10;
+
+        function shuffleArray(array) {
+            let newArr = [...array];
+            for (let i = newArr.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [newArr[i], newArr[j]] = [newArr[j], newArr[i]];
+            }
+            return newArr;
+        }
+
+        function generateQuestions() {
+            let questions = [];
+            
+            for (let i = 0; i < totalQuestions; i++) {
+                const correctItem = tashrifData[Math.floor(Math.random() * tashrifData.length)];
+                
+                let questionObj = {
+                    correct: correctItem,
+                    options: []
+                };
+
+                let sameContextData = tashrifData.filter(item => 
+                    item.tense === correctItem.tense && 
+                    item.verb === correctItem.verb && 
+                    item.id !== correctItem.id
+                );
+                let distractors = shuffleArray(sameContextData).slice(0, 3);
+                
+                questionObj.options = [correctItem, ...distractors];
+                questionObj.options = shuffleArray(questionObj.options);
+                
+                questions.push(questionObj);
+            }
+            return questions;
+        }
+
+        function startNewGame() {
+            currentQuestions = generateQuestions();
+            currentQuestionIndex = 0;
+            score = 0;
+            isGameOver = false;
+            
+            document.getElementById('scoreDisplay').innerText = score;
+            document.getElementById('gameOverlay').classList.add('hidden');
+            document.getElementById('gamePlayArea').classList.remove('hidden');
+            
+            loadQuestion();
+        }
+
+        function loadQuestion() {
+            const q = currentQuestions[currentQuestionIndex];
+            const qVisual = document.getElementById('questionVisual');
+            const qForm = document.getElementById('questionForm');
+            const qTenseLabel = document.getElementById('questionTenseLabel');
+            const optionsContainer = document.getElementById('optionsContainer');
+            
+            const arabicNumerals = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
+            const toArabicNumber = (num) => String(num).split('').map(d => arabicNumerals[d] || d).join('');
+            
+            document.getElementById('questionCount').innerText = `السؤال ${toArabicNumber(currentQuestionIndex + 1)} / ${toArabicNumber(totalQuestions)}`;
+            document.getElementById('progressBar').style.width = `${((currentQuestionIndex + 1) / totalQuestions) * 100}%`;
+
+            // Label Tense (Madhi/Mudhari/Amr) di sudut area soal
+            let tenseText = '';
+            if(q.correct.tense === 'madhi') tenseText = 'الماضي';
+            if(q.correct.tense === 'mudhari') tenseText = 'المضارع';
+            if(q.correct.tense === 'amr') tenseText = 'الأمر';
+            qTenseLabel.innerText = tenseText;
+
+            // Setup Visual dan Bentuk di Area Soal
+            qVisual.innerHTML = getVisualIllustration(q.correct);
+            qForm.innerText = q.correct.arti; // Misalnya: مفرد مذكر
+
+            // Hapus tombol pilihan ganda, ganti dengan tombol "Tampilkan Jawaban"
+            optionsContainer.innerHTML = '';
+            const revealBtn = document.createElement('button');
+            revealBtn.className = "w-full bg-teal-500 hover:bg-teal-600 text-white font-bold py-4 rounded-2xl shadow-md transition-all duration-200 text-xl flex items-center justify-center gap-2";
+            revealBtn.innerHTML = '<i class="fas fa-eye"></i> إظهار الإجابة';
+            revealBtn.onclick = () => revealAnswer();
+            optionsContainer.appendChild(revealBtn);
+        }
+
+        // Fungsi baru untuk menampilkan jawaban
+        function revealAnswer() {
+            const q = currentQuestions[currentQuestionIndex];
+            const optionsContainer = document.getElementById('optionsContainer');
+
+            optionsContainer.innerHTML = `
+                <div class="bg-teal-50 border-2 border-teal-200 p-6 rounded-2xl flex flex-col items-center justify-center text-center mb-4 fade-in">
+                    <span class="text-sm text-teal-600 font-bold block mb-3">الإجابة الصحيحة:</span>
+                    <span class="arabic-text text-6xl text-teal-800 font-bold drop-shadow-sm leading-none py-2">${q.correct.fiil}</span>
+                </div>
+                <div class="flex flex-col md:flex-row gap-4 fade-in justify-center">
+                    <button onclick="handleSelfAssessment(true, this)" class="flex-1 bg-green-500 hover:bg-green-600 text-white font-bold py-3 rounded-xl shadow-sm flex items-center justify-center gap-2 transition-transform transform hover:scale-105">
+                        <i class="fas fa-check-circle text-xl"></i> أجبت بشكل صحيح
+                    </button>
+                    <button onclick="handleSelfAssessment(false, this)" class="flex-1 bg-red-500 hover:bg-red-600 text-white font-bold py-3 rounded-xl shadow-sm flex items-center justify-center gap-2 transition-transform transform hover:scale-105">
+                        <i class="fas fa-times-circle text-xl"></i> أخطأت
+                    </button>
+                </div>
+            `;
+        }
+
+        function handleSelfAssessment(isCorrect, buttonElement) {
+            const buttons = document.getElementById('optionsContainer').querySelectorAll('button');
+            buttons.forEach(btn => {
+                btn.disabled = true;
+                btn.classList.remove('hover:scale-105', 'hover:bg-green-600', 'hover:bg-red-600');
+            });
+
+            if (isCorrect) {
+                score += 10;
+                document.getElementById('scoreDisplay').innerText = score;
+                buttonElement.classList.add('ring-4', 'ring-green-300');
+            } else {
+                buttonElement.classList.add('ring-4', 'ring-red-300');
+            }
+
+            setTimeout(() => {
+                currentQuestionIndex++;
+                if (currentQuestionIndex < totalQuestions) {
+                    loadQuestion();
+                } else {
+                    endGame();
+                }
+            }, 1000); // Transisi lebih cepat (1 detik) setelah menilai diri sendiri
+        }
+
+        function endGame() {
+            isGameOver = true;
+            document.getElementById('gamePlayArea').classList.add('hidden');
+            const overlay = document.getElementById('gameOverlay');
+            overlay.classList.remove('hidden');
+            
+            document.getElementById('finalScore').innerText = score;
+            
+            const title = document.getElementById('overlayTitle');
+            const icon = document.getElementById('overlayIcon');
+            
+            if (score === 100) {
+                title.innerText = "ممتاز!";
+                icon.innerHTML = '<i class="fas fa-crown text-yellow-400 drop-shadow"></i>';
+            } else if (score >= 70) {
+                title.innerText = "جيد جداً!";
+                icon.innerHTML = '<i class="fas fa-star text-teal-500 drop-shadow"></i>';
+            } else if (score >= 40) {
+                title.innerText = "استمر في التدريب!";
+                icon.innerHTML = '<i class="fas fa-thumbs-up text-blue-400 drop-shadow"></i>';
+            } else {
+                title.innerText = "لا تستسلم، حاول مرة أخرى!";
+                icon.innerHTML = '<i class="fas fa-book-reader text-gray-400 drop-shadow"></i>';
+            }
+        }
+
+        function checkHash() {
+            if (window.location.hash === '#game') {
+                switchTab('game');
+            } else {
+                switchTab('materi');
+            }
+        }
+
+        window.onload = () => {
+            renderMateriCards();
+            checkHash();
+        };
+
+        window.addEventListener('hashchange', checkHash);
+
+    </script>
+</body>
+</html>
